@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>실시간 통합 환전기 - 스마트 금액 변환</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap');
+
+        :root {
+            --bg-1: #fff5e9;
+            --bg-2: #ffe0b2;
+            --ink: #2b1e12;
+            --accent: #e65100;
+            --accent-2: #ff8f00;
+            --card: #fffdf9;
+            --shadow: rgba(43, 30, 18, 0.15);
+            --glass-border: rgba(230, 81, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 24px;
+            z-index: 2000;
+            border-bottom: 1px solid rgba(230, 81, 0, 0.1);
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar-menu a {
+            text-decoration: none;
+            color: var(--ink);
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .navbar-menu a:hover {
+            color: var(--accent);
+        }
+
+        .navbar-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .navbar-menu a:hover::after {
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Pretendard', "Nanum Gothic", sans-serif;
+            background:
+                radial-gradient(1200px 700px at 15% -10%, #fff9f2 0%, transparent 55%),
+                radial-gradient(900px 500px at 110% 20%, #ffd59a 0%, transparent 50%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            color: var(--ink);
+            min-height: 100vh;
+            padding: 100px 20px 60px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: clamp(24px, 5vw, 36px);
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            font-size: 16px;
+            color: #6b4b36;
+        }
+
+        /* Input Area */
+        /* Status & Rate Info Bar */
+        .rate-info-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .status-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(230, 81, 0, 0.1);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #8c7365;
+        }
+
+        .major-rates {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .rate-chip {
+            background: var(--card);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px var(--shadow);
+            border: 1px solid var(--glass-border);
+            color: var(--ink);
+        }
+
+        .rate-chip span {
+            color: var(--accent);
+            margin-left: 4px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        .main-input-card {
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            box-shadow: 0 15px 40px var(--shadow);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .input-group {
+            display: inline-block;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #6b4b36;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 18px 100px 18px 24px;
+            /* Increased right padding to prevent overlap */
+            font-size: 24px;
+            font-weight: 700;
+            border: 2px solid rgba(230, 81, 0, 0.1);
+            border-radius: 18px;
+            background: #fffefb;
+            transition: all 0.2s ease;
+            color: var(--ink);
+            box-shadow: inset 0 2px 6px rgba(43, 30, 18, 0.05);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 5px rgba(230, 81, 0, 0.12);
+        }
+
+        .unit {
+            position: absolute;
+            right: 15px;
+            /* Adjusted to sit nicely next to arrows */
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+            pointer-events: none;
+        }
+
+        /* Currency Grid */
+        .currency-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        }
+
+        .currency-card {
+            background: var(--card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 20px var(--shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .currency-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .flag {
+            font-size: 24px;
+        }
+
+        .currency-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .currency-code {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--accent);
+        }
+
+        .currency-name {
+            font-size: 12px;
+            color: #6b4b36;
+        }
+
+        .converted-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--ink);
+            word-break: break-all;
+        }
+
+        .rate-info {
+            font-size: 11px;
+            color: #a08c7d;
+            border-top: 1px solid rgba(230, 81, 0, 0.05);
+            padding-top: 8px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding-top: 80px;
+            }
+
+            .navbar-menu {
+                gap: 16px;
+            }
+
+            .navbar-menu a {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul class="navbar-menu">
+            <li><a href="index.html">Intro</a></li>
+            <li><a href="index.html#lotto-app">Lotto</a></li>
+            <li><a href="money.html">주식-코인물타기</a></li>
+            <li><a href="changemoney.html">실시간 환전기</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1>실시간 통합 환전기</h1>
+            <p>원화(KRW)를 입력하면 전 세계 주요 통화로 즉시 계산됩니다.</p>
+        </header>
+
+        <section class="rate-info-bar">
+            <div class="status-box" id="statusBox">
+                <span class="status-dot"></span>
+                <span id="updateTime">데이터 로딩 중...</span>
+            </div>
+            <div class="major-rates" id="majorRates">
+                <!-- 주요 환율 칩이 여기에 생성됩니다 -->
+            </div>
+        </section>
+
+        <section class="main-input-card">
+            <div class="input-group">
+                <label>변환할 금액 입력</label>
+                <div class="input-wrapper">
+                    <input type="text" id="krwInput" placeholder="0" autofocus>
+                    <span class="unit">원 (KRW)</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="currency-grid" id="currencyGrid">
+            <!-- Cards will be generated by JS -->
+        </div>
+    </div>
+
+    <script>
+        // 2026년 1월 25일 00:46 기준 최신 환율 정보 반영
+        let currencies = [
+            { code: 'USD', name: '미국 달러', symbol: '$', flag: '🇺🇸', rate: 0.0006821 }, // 1달러 ≈ 1,466원
+            { code: 'EUR', name: '유로', symbol: '€', flag: '🇪🇺', rate: 0.0005814 },   // 1유로 ≈ 1,720원
+            { code: 'JPY', name: '일본 엔', symbol: '¥', flag: '🇯🇵', rate: 0.1077 },    // 1원 ≈ 0.1077엔 (1엔 ≈ 9.28원)
+            { code: 'CNY', name: '중국 위안', symbol: '¥', flag: '🇨🇳', rate: 0.0049 },
+            { code: 'GBP', name: '영국 파운드', symbol: '£', flag: '🇬🇧', rate: 0.00054 },
+            { code: 'CAD', name: '캐나다 달러', symbol: 'C$', flag: '🇨🇦', rate: 0.00097 },
+            { code: 'AUD', name: '호주 달러', symbol: 'A$', flag: '🇦🇺', rate: 0.0010 },
+            { code: 'CHF', name: '스위스 프랑', symbol: 'Fr', flag: '🇨🇭', rate: 0.0006 },
+            { code: 'HKD', name: '홍콩 달러', symbol: 'HK$', flag: '🇭🇰', rate: 0.0053 },
+            { code: 'VND', name: '베트남 동', symbol: '₫', flag: '🇻🇳', rate: 17.5 },
+            { code: 'THB', name: '태국 바트', symbol: '฿', flag: '🇹🇭', rate: 0.025 }
+        ];
+
+        const krwInput = document.getElementById('krwInput');
+        const currencyGrid = document.getElementById('currencyGrid');
+        const updateTimeEl = document.getElementById('updateTime');
+        const majorRatesEl = document.getElementById('majorRates');
+
+        // 최신 환율 정보를 외부 API를 통해 실시간으로 가져오는 함수
+        async function fetchRealTimeRates() {
+            try {
+                const response = await fetch('https://open.er-api.com/v6/latest/KRW');
+                const data = await response.json();
+
+                const now = new Date();
+                const timeString = now.toLocaleString('ko-KR', {
+                    year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+
+                if (data && data.rates) {
+                    currencies = currencies.map(cur => ({
+                        ...cur,
+                        rate: data.rates[cur.code] || cur.rate
+                    }));
+                    updateTimeEl.textContent = `${timeString} 기준`;
+                    updateMajorRates();
+                    createCards();
+                    updateValues();
+                }
+            } catch (error) {
+                const now = new Date();
+                updateTimeEl.textContent = `${now.toLocaleDateString()} 기준 데이터 (오프라인)`;
+                updateMajorRates();
+                console.error("환율 정보를 가져오는 데 실패했습니다 (기본 데이터 사용):", error);
+            }
+        }
+
+        function updateMajorRates() {
+            const majorCodes = ['USD', 'EUR', 'JPY', 'CNY'];
+            majorRatesEl.innerHTML = '';
+
+            majorCodes.forEach(code => {
+                const cur = currencies.find(c => c.code === code);
+                if (cur) {
+                    const inverseRate = (1 / cur.rate).toLocaleString(undefined, { maximumFractionDigits: 2 });
+                    const chip = document.createElement('div');
+                    chip.className = 'rate-chip';
+
+                    // 엔화는 보통 100엔 기준으로 표시하므로 예외 처리
+                    if (code === 'JPY') {
+                        const jpy100 = (100 / cur.rate).toLocaleString(undefined, { maximumFractionDigits: 2 });
+                        chip.innerHTML = `100 JPY = <span>${jpy100} KRW</span>`;
+                    } else {
+                        chip.innerHTML = `1 ${code} = <span>${inverseRate} KRW</span>`;
+                    }
+                    majorRatesEl.appendChild(chip);
+                }
+            });
+        }
+
+        function createCards() {
+            currencyGrid.innerHTML = '';
+            currencies.forEach(cur => {
+                const card = document.createElement('div');
+                card.className = 'currency-card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="flag">${cur.flag}</span>
+                        <div class="currency-info">
+                            <span class="currency-code">${cur.code}</span>
+                            <span class="currency-name">${cur.name}</span>
+                        </div>
+                    </div>
+                    <div class="converted-value" id="val-${cur.code}">${cur.symbol} 0</div>
+                    <div class="rate-info">기준 환율: 1 KRW ≈ ${cur.rate} ${cur.code}</div>
+                `;
+                currencyGrid.appendChild(card);
+            });
+        }
+
+        function updateValues() {
+            // 콤마 제거 후 숫자만 추출
+            let rawValue = krwInput.value.replace(/,/g, '');
+
+            // 숫자 이외의 문자 제거
+            rawValue = rawValue.replace(/[^0-9]/g, '');
+
+            // 세 자리마다 콤마 추가하여 입력창 업데이트
+            if (rawValue) {
+                krwInput.value = Number(rawValue).toLocaleString();
+            } else {
+                krwInput.value = '';
+            }
+
+            const krwValue = parseFloat(rawValue) || 0;
+            currencies.forEach(cur => {
+                const converted = krwValue * cur.rate;
+                const displayVal = document.getElementById(`val-${cur.code}`);
+
+                let formatted;
+                if (cur.code === 'VND' || cur.code === 'JPY') {
+                    formatted = converted.toLocaleString(undefined, { maximumFractionDigits: 0 });
+                } else {
+                    formatted = converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+
+                displayVal.textContent = `${cur.symbol} ${formatted}`;
+            });
+        }
+
+        krwInput.addEventListener('input', updateValues);
+
+        // Initialize
+        createCards();
+        fetchRealTimeRates(); // 페이지 로드 시 실시간 환율 정보 가져오기
+    </script>
+</body>
+
+</html>

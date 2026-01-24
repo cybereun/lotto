@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>주식 물타기 계산기 - 스마트 평단가 계산</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap');
+
+        :root {
+            --bg-1: #fff5e9;
+            --bg-2: #ffe0b2;
+            --ink: #2b1e12;
+            --accent: #e65100;
+            --accent-2: #ff8f00;
+            --card: #fffdf9;
+            --shadow: rgba(43, 30, 18, 0.15);
+            --glass-border: rgba(230, 81, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px 24px;
+            z-index: 2000;
+            border-bottom: 1px solid rgba(37, 99, 235, 0.1);
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar-menu a {
+            text-decoration: none;
+            color: var(--ink);
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .navbar-menu a:hover {
+            color: var(--accent);
+        }
+
+        .navbar-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .navbar-menu a:hover::after {
+            width: 100%;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 20px 20px;
+            /* Increased top padding for navbar */
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            box-shadow: 0 18px 50px var(--shadow);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        header {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+
+        header p {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--ink);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 45px 14px 16px;
+            /* Increased right padding for unit and arrows */
+            font-size: 16px;
+            border: 1px solid rgba(230, 81, 0, 0.1);
+            border-radius: 14px;
+            background: #fffefb;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            box-shadow: inset 0 2px 4px rgba(43, 30, 18, 0.05);
+            color: var(--ink);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(230, 81, 0, 0.1);
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+        }
+
+        .unit {
+            position: absolute;
+            right: 12px;
+            font-size: 14px;
+            color: var(--ink);
+            font-weight: 700;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 32px 0;
+            position: relative;
+        }
+
+        .divider::after {
+            content: "추가 매수 정보";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            padding: 0 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .results {
+            margin-top: 32px;
+            padding: 24px;
+            background: #fff4e4;
+            border-radius: 20px;
+            border: 1px dashed rgba(230, 81, 0, 0.3);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .highlight {
+            color: var(--accent);
+        }
+
+        .decrease {
+            color: #d32f2f;
+            /* Darker red for stability */
+        }
+
+        .increase {
+            color: #2e7d32;
+            /* Green for profit/increase */
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-reset {
+            background: #fff4e4;
+            color: var(--ink);
+        }
+
+        .btn-reset:hover {
+            background: #ffe0b2;
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: white;
+            box-shadow: 0 10px 24px rgba(230, 81, 0, 0.35);
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(230, 81, 0, 0.45);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 24px;
+                border-radius: 24px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul class="navbar-menu">
+            <li><a href="index.html">Intro</a></li>
+            <li><a href="index.html">Lotto</a></li>
+            <li><a href="money.html">주식-코인물타기</a></li>
+            <li><a href="changemoney.html">실시간 환전기</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <header>
+            <h1>물타기 계산기</h1>
+            <p>보유 주식과 추가 매수 정보를 입력하세요</p>
+        </header>
+
+        <div class="input-group">
+            <label>현재 보유 평단가</label>
+            <div class="input-wrapper">
+                <input type="number" id="currentPrice" placeholder="0" step="any">
+                <span class="unit">원</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>현재 보유 수량</label>
+            <div class="input-wrapper">
+                <input type="number" id="currentQty" placeholder="0">
+                <span class="unit">주</span>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="input-group">
+            <label>추가 매수 가격</label>
+            <div class="input-wrapper">
+                <input type="number" id="buyPrice" placeholder="0" step="any">
+                <span class="unit">원</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>추가 매수 수량</label>
+            <div class="input-wrapper">
+                <input type="number" id="buyQty" placeholder="0">
+                <span class="unit">주</span>
+            </div>
+        </div>
+
+        <div class="results" id="resultsArea">
+            <div class="result-item">
+                <span class="result-label">최종 평균 단가</span>
+                <span class="result-value highlight" id="newAvgPrice">0 원</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">단가 절감액 (절감률)</span>
+                <span class="result-value decrease" id="priceDiff">0 원 (0%)</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">최종 총 수량</span>
+                <span class="result-value" id="totalQty">0 주</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">총 투자 금액</span>
+                <span class="result-value" id="totalCost">0 원</span>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="btn-reset" id="resetBtn">초기화</button>
+            <button class="btn-back" onclick="location.href='index.html'">메인으로</button>
+        </div>
+    </div>
+
+    <script>
+        const inputs = ['currentPrice', 'currentQty', 'buyPrice', 'buyQty'];
+        const elements = {};
+        inputs.forEach(id => elements[id] = document.getElementById(id));
+
+        const displayIds = ['newAvgPrice', 'priceDiff', 'totalQty', 'totalCost'];
+        const displays = {};
+        displayIds.forEach(id => displays[id] = document.getElementById(id));
+
+        const resetBtn = document.getElementById('resetBtn');
+
+        function calculate() {
+            const currentPrice = parseFloat(elements.currentPrice.value) || 0;
+            const currentQty = parseFloat(elements.currentQty.value) || 0;
+            const buyPrice = parseFloat(elements.buyPrice.value) || 0;
+            const buyQty = parseFloat(elements.buyQty.value) || 0;
+
+            if (currentQty === 0 && buyQty === 0) {
+                updateResults(0, 0, 0, 0, 0);
+                return;
+            }
+
+            const totalQty = currentQty + buyQty;
+            const totalCost = (currentPrice * currentQty) + (buyPrice * buyQty);
+            const newAvgPrice = totalCost / totalQty;
+
+            let priceDiff = 0;
+            let priceDiffPercent = 0;
+
+            if (currentPrice > 0) {
+                priceDiff = currentPrice - newAvgPrice;
+                priceDiffPercent = (priceDiff / currentPrice) * 100;
+            }
+
+            updateResults(newAvgPrice, priceDiff, priceDiffPercent, totalQty, totalCost);
+        }
+
+        function updateResults(avg, diff, percent, qty, cost) {
+            displays.newAvgPrice.textContent = `${avg.toLocaleString(undefined, { maximumFractionDigits: 2 })} 원`;
+            displays.priceDiff.textContent = `${diff.toLocaleString(undefined, { maximumFractionDigits: 2 })} 원 (${percent.toFixed(2)}%)`;
+            displays.totalQty.textContent = `${qty.toLocaleString()} 주`;
+            displays.totalCost.textContent = `${cost.toLocaleString()} 원`;
+
+            // Visual feedback for price decrease/increase
+            if (diff > 0) {
+                displays.priceDiff.style.color = '#d32f2f'; // Red if original price was higher (average lowered)
+            } else if (diff < 0) {
+                displays.priceDiff.style.color = '#2e7d32'; // Green if original price was lower (average increased)
+            } else {
+                displays.priceDiff.style.color = 'var(--ink)';
+            }
+        }
+
+        inputs.forEach(id => {
+            elements[id].addEventListener('input', calculate);
+        });
+
+        resetBtn.addEventListener('click', () => {
+            inputs.forEach(id => elements[id].value = '');
+            calculate();
+        });
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+
+</html>
