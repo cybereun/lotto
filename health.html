@@ -586,7 +586,7 @@
                 <li><a href="index.html"
                         style="text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.9rem;">Intro</a>
                 </li>
-                <li><a href="index.html#lotto-app"
+                <li><a href="lotto.html"
                         style="text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.9rem;">Lotto</a>
                 </li>
                 <li><a href="money.html"
@@ -623,7 +623,7 @@
         <aside class="sidebar">
             <h2>Physical Basics</h2>
             <div class="menu-list">
-                <a href="#bmi" class="menu-link active" onclick="showCalc('bmi')">
+                <a href="#bmi" class="menu-link active" onclick="showCalc('bmi', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path d="M3 3v18h18" />
@@ -633,7 +633,7 @@
                     </svg>
                     BMI 계산기
                 </a>
-                <a href="#bodyfat" class="menu-link" onclick="showCalc('bodyfat')">
+                <a href="#bodyfat" class="menu-link" onclick="showCalc('bodyfat', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path
@@ -641,7 +641,7 @@
                     </svg>
                     체지방률
                 </a>
-                <a href="#idealweight" class="menu-link" onclick="showCalc('idealweight')">
+                <a href="#idealweight" class="menu-link" onclick="showCalc('idealweight', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <rect x="3" y="11" width="18" height="2" rx="1" />
@@ -653,14 +653,14 @@
 
             <h2>Metabolism & Nutrition</h2>
             <div class="menu-list">
-                <a href="#bmr" class="menu-link" onclick="showCalc('bmr')">
+                <a href="#bmr" class="menu-link" onclick="showCalc('bmr', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                     </svg>
                     기초대사량 (BMR)
                 </a>
-                <a href="#tdee" class="menu-link" onclick="showCalc('tdee')">
+                <a href="#tdee" class="menu-link" onclick="showCalc('tdee', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path
@@ -668,7 +668,7 @@
                     </svg>
                     활동 대사량 (TDEE)
                 </a>
-                <a href="#targetcal" class="menu-link" onclick="showCalc('targetcal')">
+                <a href="#targetcal" class="menu-link" onclick="showCalc('targetcal', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
@@ -679,7 +679,7 @@
                     </svg>
                     권장 섭취량
                 </a>
-                <a href="#protein" class="menu-link" onclick="showCalc('protein')">
+                <a href="#protein" class="menu-link" onclick="showCalc('protein', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path d="M12 2a10 10 0 1 0 10 10H12V2z" />
@@ -687,7 +687,7 @@
                     </svg>
                     단백질 필요량
                 </a>
-                <a href="#water" class="menu-link" onclick="showCalc('water')">
+                <a href="#water" class="menu-link" onclick="showCalc('water', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
@@ -698,7 +698,7 @@
 
             <h2>Lifestyle</h2>
             <div class="menu-list">
-                <a href="#exercise" class="menu-link" onclick="showCalc('exercise')">
+                <a href="#exercise" class="menu-link" onclick="showCalc('exercise', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
@@ -709,14 +709,14 @@
                     </svg>
                     운동 소모 칼로리
                 </a>
-                <a href="#sleep" class="menu-link" onclick="showCalc('sleep')">
+                <a href="#sleep" class="menu-link" onclick="showCalc('sleep', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                     </svg>
                     수면 시간
                 </a>
-                <a href="#pregnancy" class="menu-link" onclick="showCalc('pregnancy')">
+                <a href="#pregnancy" class="menu-link" onclick="showCalc('pregnancy', event)">
                     <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2">
                         <circle cx="12" cy="12" r="10" />
@@ -1151,7 +1151,8 @@
         }
 
         // View Switching
-        function showCalc(id) {
+        function showCalc(id, event) {
+            if (event) event.preventDefault();
             document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
             const activeLink = document.querySelector(`[href="#${id}"]`);
             if (activeLink) activeLink.classList.add('active');
@@ -1160,7 +1161,7 @@
             const activeView = document.getElementById(id);
             if (activeView) activeView.classList.add('active');
 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo(0, 0);
         }
 
         // --- Core Logic ---

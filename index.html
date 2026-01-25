@@ -1,404 +1,383 @@
-﻿<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>로또 번호 생성기</title>
-  <style>
-    :root {
-      --bg-1: #fff5e9;
-      --bg-2: #ffe0b2;
-      --ink: #2b1e12;
-      --accent: #e65100;
-      --accent-2: #ff8f00;
-      --card: #fffdf9;
-      --shadow: rgba(43, 30, 18, 0.15);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>올인원 계산기 (All-in-One Calc) - 삶의 모든 숫자</title>
+    <meta name="description" content="금융, 건강, 로또, 환율까지. 복잡한 계산을 한 곳에서 해결하는 올인원 계산기 솔루션.">
+    <!-- Font -->
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --bg-dark: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-    * {
-      box-sizing: border-box;
-      scroll-behavior: smooth;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', sans-serif;
+        }
 
-    /* Navbar Styles */
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 16px 24px;
-      z-index: 2000;
-      border-bottom: 1px solid rgba(230, 81, 0, 0.1);
-    }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
 
-    .navbar-menu {
-      display: flex;
-      gap: 32px;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(124, 58, 237, 0.15) 0%, transparent 40%);
+        }
 
-    .navbar-menu a {
-      text-decoration: none;
-      color: var(--ink);
-      font-weight: 700;
-      font-size: 15px;
-      transition: all 0.2s ease;
-      position: relative;
-    }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to bottom right, #fff 30%, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-    .navbar-menu a:hover {
-      color: var(--accent);
-    }
+        .hero p {
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            color: var(--text-muted);
+            max-width: 800px;
+            margin-bottom: 3rem;
+        }
 
-    .navbar-menu a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--accent);
-      transition: width 0.3s ease;
-    }
+        .cta-button {
+            display: inline-block;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            background: var(--gradient);
+            border-radius: 100px;
+            box-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.5);
+            transition: var(--transition);
+        }
 
-    .navbar-menu a:hover::after {
-      width: 100%;
-    }
+        .cta-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px -15px rgba(79, 70, 229, 0.6);
+        }
 
-    body {
-      margin: 0;
-      font-family: "Nanum Gothic", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(1200px 700px at 15% -10%, #fff9f2 0%, transparent 55%),
-        radial-gradient(900px 500px at 110% 20%, #ffd59a 0%, transparent 50%),
-        linear-gradient(135deg, var(--bg-1), var(--bg-2));
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 80px 16px 32px;
-      /* Increased top padding for navbar */
-    }
+        /* Why Us Section */
+        .why-us {
+            padding: 8rem 2rem;
+            text-align: center;
+        }
 
-    .wrap {
-      width: min(960px, 100%);
-      display: grid;
-      gap: 24px;
-    }
+        .why-us blockquote {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 600;
+            max-width: 1000px;
+            margin: 0 auto;
+            color: #e2e8f0;
+        }
 
-    header {
-      display: grid;
-      gap: 8px;
-    }
+        .why-us span {
+            display: block;
+            margin-top: 2rem;
+            color: var(--primary-light);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
 
-    h1 {
-      font-size: clamp(28px, 4vw, 44px);
-      margin: 0;
-      letter-spacing: -0.02em;
-    }
+        /* Features Section */
+        .features {
+            padding: 4rem 2rem 8rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-    p {
-      margin: 0;
-      font-size: 16px;
-      color: #4a3222;
-    }
+        .feature-category {
+            margin-bottom: 6rem;
+        }
 
-    .panel {
-      background: var(--card);
-      border-radius: 22px;
-      padding: 24px;
-      box-shadow: 0 18px 50px var(--shadow);
-      border: 1px solid rgba(230, 81, 0, 0.08);
-    }
+        .category-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-    .controls {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: 1fr auto auto auto;
-      align-items: center;
-    }
+        .category-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
 
-    label {
-      font-weight: 700;
-      font-size: 14px;
-    }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
 
-    select,
-    button {
-      border: none;
-      border-radius: 999px;
-      padding: 12px 18px;
-      font-size: 14px;
-      font-weight: 700;
-    }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            text-decoration: none;
+            color: inherit;
+        }
 
-    select {
-      background: #fff4e4;
-      color: var(--ink);
-    }
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary-light);
+            transform: translateY(-10px);
+        }
 
-    button {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: white;
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 10px 24px rgba(230, 81, 0, 0.35);
-    }
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
 
-    button:hover {
-      transform: translateY(-2px);
-    }
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
 
-    button:active {
-      transform: translateY(1px);
-    }
+        .card p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
 
-    .toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: #fff4e4;
-      font-size: 13px;
-      font-weight: 700;
-      color: #4a3222;
-    }
+        /* How it works */
+        .how-it-works {
+            padding: 8rem 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            text-align: center;
+        }
 
-    .toggle input {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
+        .how-it-works h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 4rem;
+        }
 
-    .grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      margin-top: 18px;
-    }
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            flex-wrap: wrap;
+        }
 
-    .ticket {
-      border-radius: 18px;
-      padding: 16px;
-      background: #fff7ed;
-      border: 1px dashed rgba(230, 81, 0, 0.3);
-      display: grid;
-      gap: 10px;
-      opacity: 0;
-      transform: translateY(8px) scale(0.98);
-      animation: ticket-in 0.35s ease forwards;
-      animation-delay: var(--ticket-delay, 0s);
-    }
+        .step {
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+        }
 
-    .numbers {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+        .step-num {
+            font-family: 'Outfit', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
 
-    .ball {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      color: #2a1c10;
-      background: radial-gradient(circle at 30% 30%, #fff8ed 0%, #ffd180 60%, #ffab40 100%);
-      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6), 0 6px 12px rgba(0, 0, 0, 0.12);
-      animation: pop 0.45s ease;
-      animation-delay: var(--delay, 0s);
-    }
+        .step h4 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
 
-    .meta {
-      font-size: 12px;
-      color: #6b4b36;
-    }
+        /* Footer */
+        footer {
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
 
-    @keyframes pop {
-      0% {
-        transform: scale(0.6);
-        opacity: 0;
-      }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
+        .disclaimer {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 1.5rem 0;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-    @keyframes ticket-in {
-      0% {
-        opacity: 0;
-        transform: translateY(10px) scale(0.96);
-      }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
 
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
 
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #6b4b36;
-    }
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
 
-    @media (max-width: 640px) {
-      .controls {
-        grid-template-columns: 1fr;
-      }
+            .steps {
+                gap: 2rem;
+            }
 
-      button,
-      select {
-        width: 100%;
-      }
-
-      .toggle {
-        justify-content: center;
-      }
-    }
-  </style>
+            .why-us blockquote {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <nav class="navbar">
-    <ul class="navbar-menu">
-      <li><a href="#intro">Intro</a></li>
-      <li><a href="#lotto-app">Lotto</a></li>
-      <li><a href="money.html">주식-코인물타기</a></li>
-      <li><a href="changemoney.html">실시간 환전기</a></li>
-      <li><a href="health.html">건강 계산기</a></li>
-      <li><a href="finance.html">금융 계산기</a></li>
-    </ul>
-  </nav>
 
-  <main class="wrap">
-    <header id="intro">
-      <h1>간단한 로또 번호 생성기</h1>
-      <p>원하는 매수를 선택하고 버튼을 눌러 1~45 사이의 중복 없는 번호를 뽑아보세요.</p>
-    </header>
-
-    <section class="panel" id="lotto-app">
-      <div class="controls">
-        <label for="count">생성 매수</label>
-        <select id="count">
-          <option value="1">1장</option>
-          <option value="3">3장</option>
-          <option value="5">5장</option>
-          <option value="10">10장</option>
-        </select>
-        <button id="generate">번호 생성</button>
-        <button id="again" type="button">다시 섞기</button>
-        <label class="toggle" for="sound">
-          <input type="checkbox" id="sound" checked />
-          사운드
-        </label>
-      </div>
-      <div class="grid" id="tickets"></div>
+    <section class="hero">
+        <h1 class="pop">삶의 모든 숫자,<br>여기서 한 번에 계산하세요.</h1>
+        <p>복잡한 재테크 계산부터 건강 관리, 오늘의 행운까지. 여러 앱을 켤 필요 없이 '올인원 계산기' 하나로 해결됩니다.</p>
+        <a href="#features" class="cta-button">지금 바로 계산 시작하기</a>
     </section>
 
-    <section class="footer">오늘의 행운을 응원합니다!</section>
-  </main>
+    <section class="why-us">
+        <blockquote>"수익률 계산하러 계산기 켜고, 환율 보러 검색창 띄우고..."</blockquote>
+        <span>아직도 필요한 도구를 찾아 헤매시나요? 이제 즐겨찾기 하나면 충분합니다.</span>
+    </section>
 
-  <script>
-    const ticketsEl = document.getElementById('tickets');
-    const countEl = document.getElementById('count');
-    const generateBtn = document.getElementById('generate');
-    const againBtn = document.getElementById('again');
-    const soundToggle = document.getElementById('sound');
-    let audioCtx;
+    <section class="features" id="features">
+        <div class="feature-category">
+            <h2 class="category-title">A. 자산 관리 (Investment & Finance)</h2>
+            <div class="grid">
+                <a href="money.html" class="card">
+                    <div class="card-icon">📈</div>
+                    <h3>주식·코인 물타기 계산기</h3>
+                    <p>실수 없는 추가 매수 타이밍! 평단가를 예측하고 전략적으로 투자하세요.</p>
+                </a>
+                <a href="finance.html" class="card">
+                    <div class="card-icon">💰</div>
+                    <h3>금융 계산기</h3>
+                    <p>예적금 이자부터 대출 상환까지, 복잡한 금융 계획을 명쾌하게 정리해 드립니다.</p>
+                </a>
+                <a href="changemoney.html" class="card">
+                    <div class="card-icon">💱</div>
+                    <h3>실시간 환전기</h3>
+                    <p>해외 직구, 여행 전 필수 체크. 실시간 환율 정보를 가장 빠르게 확인하세요.</p>
+                </a>
+            </div>
+        </div>
 
-    function getAudioContext() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      return audioCtx;
-    }
+        <div class="feature-category">
+            <h2 class="category-title">B. 라이프 밸런스 (Life Balance)</h2>
+            <div class="grid">
+                <a href="health.html" class="card">
+                    <div class="card-icon">💪</div>
+                    <h3>건강 계산기</h3>
+                    <p>나의 신체 질량 지수(BMI)와 기초 대사량을 체크하여 건강한 삶의 기준을 잡으세요.</p>
+                </a>
+                <a href="lotto.html" class="card">
+                    <div class="card-icon">🍀</div>
+                    <h3>로또 번호 생성기</h3>
+                    <p>이번 주의 주인공은 바로 당신. 데이터 기반의 랜덤 번호로 행운을 시험해보세요.</p>
+                </a>
+            </div>
+        </div>
+    </section>
 
-    function playPopSound(index) {
-      if (!soundToggle.checked) return;
-      const ctx = getAudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const base = 540;
-      osc.frequency.value = base + index * 35;
-      osc.type = 'triangle';
-      gain.gain.value = 0.0001;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      const now = ctx.currentTime;
-      gain.gain.exponentialRampToValueAtTime(0.08, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
-      osc.start(now);
-      osc.stop(now + 0.2);
-    }
+    <section class="how-it-works">
+        <h2>How it works</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">01</div>
+                <h4>Select</h4>
+                <p>원하는 계산기를 선택하세요.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">02</div>
+                <h4>Input</h4>
+                <p>간단한 숫자만 입력하세요.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">03</div>
+                <h4>Result</h4>
+                <p>즉시 결과를 확인하고 공유하세요.</p>
+            </div>
+        </div>
+    </section>
 
-    function drawNumbers() {
-      const pool = Array.from({ length: 45 }, (_, i) => i + 1);
-      for (let i = pool.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
-      return pool.slice(0, 6).sort((a, b) => a - b);
-    }
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 All-in-One Calc. All rights reserved.</p>
+            <p class="disclaimer">본 사이트의 투자 및 로또 관련 정보는 참고용이며, 최종 투자의 책임은 사용자에게 있습니다.</p>
+            <div class="footer-links">
+                <a href="#">이용약관</a>
+                <a href="#">개인정보처리방침</a>
+            </div>
+        </div>
+    </footer>
 
-    function buildTicket(numbers, index) {
-      const ticket = document.createElement('article');
-      ticket.className = 'ticket';
-      ticket.style.setProperty('--ticket-delay', `${index * 0.08}s`);
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      const now = new Date();
-      meta.textContent = `${index + 1}번째 티켓 · ${now.toLocaleString('ko-KR')}`;
-      const numbersWrap = document.createElement('div');
-      numbersWrap.className = 'numbers';
-      numbers.forEach((n, i) => {
-        const ball = document.createElement('div');
-        ball.className = 'ball';
-        ball.textContent = n;
-        ball.style.setProperty('--delay', `${i * 0.08}s`);
-        numbersWrap.appendChild(ball);
-        setTimeout(() => playPopSound(i), i * 80);
-      });
-      ticket.appendChild(meta);
-      ticket.appendChild(numbersWrap);
-      return ticket;
-    }
+    <script>
+        // Smooth scroll for nav
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
 
-    function renderTickets() {
-      ticketsEl.innerHTML = '';
-      const count = Number(countEl.value);
-      for (let i = 0; i < count; i += 1) {
-        const numbers = drawNumbers();
-        ticketsEl.appendChild(buildTicket(numbers, i));
-      }
-    }
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
 
-    function handleGenerate() {
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      renderTickets();
-    }
-
-    generateBtn.addEventListener('click', handleGenerate);
-    againBtn.addEventListener('click', handleGenerate);
-
-    renderTickets();
-  </script>
+        document.querySelectorAll('.card, .step, h1, blockquote').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.8s ease-out';
+            observer.observe(el);
+        });
+    </script>
 </body>
 
 </html>

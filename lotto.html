@@ -1,0 +1,404 @@
+﻿<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>올인원 계산기 (All-in-One Calc)</title>
+  <style>
+    :root {
+      --bg-1: #fff5e9;
+      --bg-2: #ffe0b2;
+      --ink: #2b1e12;
+      --accent: #e65100;
+      --accent-2: #ff8f00;
+      --card: #fffdf9;
+      --shadow: rgba(43, 30, 18, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px 24px;
+      z-index: 2000;
+      border-bottom: 1px solid rgba(230, 81, 0, 0.1);
+    }
+
+    .navbar-menu {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar-menu a {
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .navbar-menu a:hover {
+      color: var(--accent);
+    }
+
+    .navbar-menu a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .navbar-menu a:hover::after {
+      width: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Nanum Gothic", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 700px at 15% -10%, #fff9f2 0%, transparent 55%),
+        radial-gradient(900px 500px at 110% 20%, #ffd59a 0%, transparent 50%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 80px 16px 32px;
+      /* Increased top padding for navbar */
+    }
+
+    .wrap {
+      width: min(960px, 100%);
+      display: grid;
+      gap: 24px;
+    }
+
+    header {
+      display: grid;
+      gap: 8px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4vw, 44px);
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0;
+      font-size: 16px;
+      color: #4a3222;
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 18px 50px var(--shadow);
+      border: 1px solid rgba(230, 81, 0, 0.08);
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr auto auto auto;
+      align-items: center;
+    }
+
+    label {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    select,
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    select {
+      background: #fff4e4;
+      color: var(--ink);
+    }
+
+    button {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 10px 24px rgba(230, 81, 0, 0.35);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #fff4e4;
+      font-size: 13px;
+      font-weight: 700;
+      color: #4a3222;
+    }
+
+    .toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin-top: 18px;
+    }
+
+    .ticket {
+      border-radius: 18px;
+      padding: 16px;
+      background: #fff7ed;
+      border: 1px dashed rgba(230, 81, 0, 0.3);
+      display: grid;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+      animation: ticket-in 0.35s ease forwards;
+      animation-delay: var(--ticket-delay, 0s);
+    }
+
+    .numbers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ball {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: #2a1c10;
+      background: radial-gradient(circle at 30% 30%, #fff8ed 0%, #ffd180 60%, #ffab40 100%);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6), 0 6px 12px rgba(0, 0, 0, 0.12);
+      animation: pop 0.45s ease;
+      animation-delay: var(--delay, 0s);
+    }
+
+    .meta {
+      font-size: 12px;
+      color: #6b4b36;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.6);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes ticket-in {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.96);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #6b4b36;
+    }
+
+    @media (max-width: 640px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      button,
+      select {
+        width: 100%;
+      }
+
+      .toggle {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar">
+    <ul class="navbar-menu">
+      <li><a href="index.html">Intro</a></li>
+      <li><a href="lotto.html">Lotto</a></li>
+      <li><a href="money.html">주식-코인물타기</a></li>
+      <li><a href="changemoney.html">실시간 환전기</a></li>
+      <li><a href="health.html">건강 계산기</a></li>
+      <li><a href="finance.html">금융 계산기</a></li>
+    </ul>
+  </nav>
+
+  <main class="wrap">
+    <header id="intro">
+      <h1>간단한 로또 번호 생성기</h1>
+      <p>원하는 매수를 선택하고 버튼을 눌러 1~45 사이의 중복 없는 번호를 뽑아보세요.</p>
+    </header>
+
+    <section class="panel" id="lotto-app">
+      <div class="controls">
+        <label for="count">생성 매수</label>
+        <select id="count">
+          <option value="1">1장</option>
+          <option value="3">3장</option>
+          <option value="5">5장</option>
+          <option value="10">10장</option>
+        </select>
+        <button id="generate">번호 생성</button>
+        <button id="again" type="button">다시 섞기</button>
+        <label class="toggle" for="sound">
+          <input type="checkbox" id="sound" checked />
+          사운드
+        </label>
+      </div>
+      <div class="grid" id="tickets"></div>
+    </section>
+
+    <section class="footer">오늘의 행운을 응원합니다!</section>
+  </main>
+
+  <script>
+    const ticketsEl = document.getElementById('tickets');
+    const countEl = document.getElementById('count');
+    const generateBtn = document.getElementById('generate');
+    const againBtn = document.getElementById('again');
+    const soundToggle = document.getElementById('sound');
+    let audioCtx;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioCtx;
+    }
+
+    function playPopSound(index) {
+      if (!soundToggle.checked) return;
+      const ctx = getAudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const base = 540;
+      osc.frequency.value = base + index * 35;
+      osc.type = 'triangle';
+      gain.gain.value = 0.0001;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const now = ctx.currentTime;
+      gain.gain.exponentialRampToValueAtTime(0.08, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    }
+
+    function drawNumbers() {
+      const pool = Array.from({ length: 45 }, (_, i) => i + 1);
+      for (let i = pool.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      return pool.slice(0, 6).sort((a, b) => a - b);
+    }
+
+    function buildTicket(numbers, index) {
+      const ticket = document.createElement('article');
+      ticket.className = 'ticket';
+      ticket.style.setProperty('--ticket-delay', `${index * 0.08}s`);
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const now = new Date();
+      meta.textContent = `${index + 1}번째 티켓 · ${now.toLocaleString('ko-KR')}`;
+      const numbersWrap = document.createElement('div');
+      numbersWrap.className = 'numbers';
+      numbers.forEach((n, i) => {
+        const ball = document.createElement('div');
+        ball.className = 'ball';
+        ball.textContent = n;
+        ball.style.setProperty('--delay', `${i * 0.08}s`);
+        numbersWrap.appendChild(ball);
+        setTimeout(() => playPopSound(i), i * 80);
+      });
+      ticket.appendChild(meta);
+      ticket.appendChild(numbersWrap);
+      return ticket;
+    }
+
+    function renderTickets() {
+      ticketsEl.innerHTML = '';
+      const count = Number(countEl.value);
+      for (let i = 0; i < count; i += 1) {
+        const numbers = drawNumbers();
+        ticketsEl.appendChild(buildTicket(numbers, i));
+      }
+    }
+
+    function handleGenerate() {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      renderTickets();
+    }
+
+    generateBtn.addEventListener('click', handleGenerate);
+    againBtn.addEventListener('click', handleGenerate);
+
+    renderTickets();
+  </script>
+</body>
+
+</html>
