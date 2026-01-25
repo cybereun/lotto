@@ -1481,29 +1481,61 @@
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">퇴직 전 3개월 임금 정보</h3>
             <div class="form-group"><label>직전 3개월 월 기본급(평균)</label>
               <div class="input-wrapper"><input type="number" id="sev-salary" value="3000000"><span
                   class="unit">원</span></div>
             </div>
+            <div class="form-group"><label>1일 통상임금 (선택사항, 비교용)</label>
+              <div class="input-wrapper"><input type="number" id="sev-ordinary" placeholder="모르면 비워두세요"><span
+                  class="unit">원</span></div>
+            </div>
+
+            <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">추가 수당 정보</h3>
             <div class="form-group"><label>연간 상여금 총액</label>
               <div class="input-wrapper"><input type="number" id="sev-bonus" value="0"><span class="unit">원</span></div>
             </div>
-            <div class="form-group"><label>연차 수당</label>
+            <div class="form-group"><label>연차 수당 (연간 지급액)</label>
               <div class="input-wrapper"><input type="number" id="sev-leave" value="0"><span class="unit">원</span></div>
             </div>
+
+            <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">근무 기간 확인</h3>
             <div class="form-group"><label>근무 일수 (재직일수)</label>
               <div class="input-wrapper"><input type="number" id="sev-days" value="730"><span class="unit">일</span>
               </div>
             </div>
-            <button class="btn-calc" onclick="calcSeverance()">퇴직금 계산</button>
+            <button class="btn-calc" onclick="calcSeverance()">상세 퇴직금 계산</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 퇴직금 산정 공식 및 핵심 체크포인트</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. 퇴직금 산정 공식 (Formula)</strong><br>
+                $$ \text{퇴직금} = \text{1일 평균임금} \times 30일 \times \frac{\text{재직일수}}{365} $$<br><br>
+                <strong>2. 계산을 위한 핵심 변수와 절차</strong><br>
+                <strong>Step 1. 자격 요건 확인:</strong><br>
+                1년 이상 계속 근로 & 주 15시간 이상 근무.<br><br>
+                <strong>Step 2. '1일 평균임금' 산출:</strong><br>
+                (3개월 임금 총액 + 연간 상여금×3/12 + 연차수당×3/12) ÷ 3개월 일수<br><br>
+                <strong style="color:var(--primary);">💡 중요 체크포인트 (통상임금 vs 평균임금)</strong><br>
+                계산된 평균임금이 통상임금보다 적을 경우, <strong>통상임금</strong>을 기준으로 계산합니다. (근로자 유리 원칙)<br><br>
+                <strong>Step 3. 세금(퇴직소득세) 공제:</strong><br>
+                결과값은 '세전'이며, 실수령 시 근속연수 공제 등을 적용한 소득세가 차감됩니다.
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">예상 퇴직금</div>
+            <div class="result-label">예상 퇴직금 (세전)</div>
             <div class="result-value-main" id="sev-res">0</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
             <div class="result-row"><span>1일 평균임금</span><span id="sev-res-day">0</span></div>
+            <div class="result-row"><span>적용 기준</span><span id="sev-res-type" style="color:var(--accent)">평균임금</span>
+            </div>
+
             <p style="font-size:0.8rem; color:var(--text-muted); margin-top:10px;">
-              * 실제 퇴직금은 회사 내규 및 정확한 입퇴사일에 따라 달라질 수 있습니다.<br>
-              * 계산식: 1일 평균임금 × 30일 × (재직일수 / 365)
+              * 실제 지급액은 퇴직소득세 공제 후 금액입니다.<br>
+              * 정확한 계산을 위해 급여명세서를 참고하세요.
             </p>
           </div>
         </div>
@@ -2120,6 +2152,7 @@
       const bonus = parseFloat(document.getElementById('sev-bonus').value) || 0;
       const leave = parseFloat(document.getElementById('sev-leave').value) || 0;
       const days = parseFloat(document.getElementById('sev-days').value) || 0;
+      const ordinaryManual = parseFloat(document.getElementById('sev-ordinary').value) || 0;
 
       // Average Daily Wage
       // 1. 3 months total salary
@@ -2130,14 +2163,23 @@
       let leavePortion = leave * (3 / 12);
 
       let totalBase = threeMonthSalary + bonusPortion + leavePortion;
-      // Days in 3 months (approx 90-92, let's use 91)
+      // Days in 3 months (approx 90-92, let's use 91 for standard calc)
       let avgDaily = totalBase / 91;
+
+      let calcType = "평균임금";
+
+      // Check Point: Ordinary Wage
+      if (ordinaryManual > 0 && ordinaryManual > avgDaily) {
+        avgDaily = ordinaryManual;
+        calcType = "통상임금(근로자 유리)";
+      }
 
       // Severance: AvgDaily * 30 * (ServiceDays / 365)
       let severance = avgDaily * 30 * (days / 365);
 
       document.getElementById('sev-res').innerText = formatNum(severance) + '원';
       document.getElementById('sev-res-day').innerText = formatNum(avgDaily) + '원';
+      document.getElementById('sev-res-type').innerText = calcType;
     }
 
     function calcEarnedTax() {
