@@ -368,6 +368,45 @@
             }
         }
 
+        @media (max-width: 480px) {
+            .calc-card {
+                padding: 1.5rem;
+                gap: 2rem;
+            }
+
+            .main-content {
+                padding: 2rem 1rem;
+            }
+        }
+
+        .multi-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .multi-input {
+                flex-direction: column;
+            }
+        }
+
+        .input-mini {
+            flex: 1;
+            padding: 14px;
+            border-radius: 16px;
+            border: 2px solid var(--border);
+            background: var(--bg-body);
+            color: var(--text-main);
+            font-size: 1.05rem;
+            transition: var(--transition);
+        }
+
+        .input-mini:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.15);
+        }
+
         /* Inputs */
         .form-group {
             margin-bottom: 1.75rem;
@@ -905,13 +944,10 @@
                         </div>
                         <div class="form-group">
                             <label>나이 / 체중 (kg) / 신장 (cm)</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="number" id="bmr-age" placeholder="나이"
-                                    style="flex:1; padding:12px; border-radius:12px; border:2px solid var(--border); background:var(--bg-body); color:var(--text-main);">
-                                <input type="number" id="bmr-weight" placeholder="kg"
-                                    style="flex:1; padding:12px; border-radius:12px; border:2px solid var(--border); background:var(--bg-body); color:var(--text-main);">
-                                <input type="number" id="bmr-height" placeholder="cm"
-                                    style="flex:1; padding:12px; border-radius:12px; border:2px solid var(--border); background:var(--bg-body); color:var(--text-main);">
+                            <div class="multi-input">
+                                <input type="number" id="bmr-age" placeholder="나이" class="input-mini">
+                                <input type="number" id="bmr-weight" placeholder="kg" class="input-mini">
+                                <input type="number" id="bmr-height" placeholder="cm" class="input-mini">
                             </div>
                         </div>
                         <button class="btn-calc" onclick="calcBMR()">BMR 계산하기</button>
@@ -1016,11 +1052,9 @@
                     <div class="calc-inputs">
                         <div class="form-group">
                             <label>체중 (kg) / 운동 시간 (분)</label>
-                            <div style="display:flex; gap:10px;">
-                                <input type="number" id="ex-weight" placeholder="kg"
-                                    style="flex:1; padding:14px; border-radius:16px; border:2px solid var(--border); background:var(--bg-body); color:var(--text-main);">
-                                <input type="number" id="ex-time" placeholder="분"
-                                    style="flex:1; padding:14px; border-radius:16px; border:2px solid var(--border); background:var(--bg-body); color:var(--text-main);">
+                            <div class="multi-input">
+                                <input type="number" id="ex-weight" placeholder="kg" class="input-mini">
+                                <input type="number" id="ex-time" placeholder="분" class="input-mini">
                             </div>
                         </div>
                         <div class="form-group">
