@@ -971,18 +971,32 @@
         <div class="calc-card">
           <div class="calc-inputs">
             <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">주가 및 배당 정보</h3>
+
+            <!-- Currency Toggle -->
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+              <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                <input type="radio" name="div-currency" value="KRW" checked onclick="setDivCurrency('KRW')">
+                <span>원화 (KRW)</span>
+              </label>
+              <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                <input type="radio" name="div-currency" value="USD" onclick="setDivCurrency('USD')">
+                <span>달러 (USD)</span>
+              </label>
+            </div>
+
             <div class="form-group"><label>현재 주가 (Current Price)</label>
-              <div class="input-wrapper"><input type="number" id="div-price-cur" value="70000"><span
-                  class="unit">원/$</span></div>
+              <div class="input-wrapper"><input type="number" id="div-price-cur" value="70000"><span class="unit"
+                  id="unit-p-cur">원</span></div>
             </div>
             <div class="form-group"><label>나의 매수 단가 (My Average Price)</label>
-              <div class="input-wrapper"><input type="number" id="div-p" value="50000"><span class="unit">원/$</span>
+              <div class="input-wrapper"><input type="number" id="div-p" value="50000"><span class="unit"
+                  id="unit-p-my">원</span>
               </div>
             </div>
 
             <div class="form-group"><label>주당 연간 배당금 (Annual DPS)</label>
               <div class="input-wrapper"><input type="number" id="div-d" value="2500" placeholder="예상 배당금"><span
-                  class="unit">원/$</span></div>
+                  class="unit" id="unit-d">원</span></div>
             </div>
             <div class="form-group"><label>보유 주식 수 (Shares)</label>
               <div class="input-wrapper"><input type="number" id="div-n" value="100"><span class="unit">주</span></div>
@@ -2020,6 +2034,23 @@
     }
 
     // 8. Dividend & YOC
+    let divCurrency = 'KRW';
+
+    function setDivCurrency(curr) {
+      divCurrency = curr;
+      const unit = curr === 'KRW' ? '원' : '$';
+      document.getElementById('unit-p-cur').innerText = unit;
+      document.getElementById('unit-p-my').innerText = unit;
+      document.getElementById('unit-d').innerText = unit;
+
+      // Auto adjust tax rate for convenience
+      const taxSelect = document.getElementById('div-tax');
+      if (curr === 'USD') taxSelect.value = "15.0";
+      else if (curr === 'KRW') taxSelect.value = "15.4";
+
+      calcDividend(); // Recalculate immediately
+    }
+
     function calcDividend() {
       const priceCur = v('div-price-cur');
       const priceMy = v('div-p');
@@ -2040,15 +2071,24 @@
       const netTotal = grossTotal - taxAmount;
       const netMonthly = netTotal / 12;
 
+      // Formatting
+      let unit = '원';
+      let formatFunc = (n) => fmt.format(Math.round(n)); // Default KRW
+
+      if (divCurrency === 'USD') {
+        unit = '$';
+        formatFunc = (n) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
       // Display
-      set('div-res-t', fmt.format(Math.round(netTotal)) + '원'); // Or currency unit aware? simplified to Won for now
-      set('div-res-m', fmt.format(Math.round(netMonthly)) + '원');
+      set('div-res-t', formatFunc(netTotal) + unit);
+      set('div-res-m', formatFunc(netMonthly) + unit);
 
       set('div-res-yield-cur', yieldCur.toFixed(2) + '%');
       set('div-res-yoc', yieldYoc.toFixed(2) + '%');
 
-      set('div-res-gross', fmt.format(Math.round(grossTotal)) + '원');
-      set('div-res-tax', '-' + fmt.format(Math.round(taxAmount)) + '원');
+      set('div-res-gross', formatFunc(grossTotal) + unit);
+      set('div-res-tax', '-' + formatFunc(taxAmount) + unit);
     }
 
     // 9. ROI CAGR
