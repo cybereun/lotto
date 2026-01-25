@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생활 계산기 - 할인율, 퍼센트, 팁 계산</title>
+    <meta name="description" content="편리한 할인율 계산기, 퍼센트 계산기, 팁 계산기로 일상 생활의 계산을 스마트하게 해결하세요.">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
+
+        :root {
+            --primary: #FF9F1C;
+            /* Golden/Orange */
+            --primary-hover: #ffb54d;
+            --secondary: #7c3aed;
+            --bg-body: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --sidebar-bg: #ffffff;
+            --input-bg: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Dark Mode (Default inspired by Image) */
+        [data-theme='dark'] {
+            --bg-body: #13131F;
+            --card-bg: #1E1E2E;
+            --sidebar-bg: #1E1E2E;
+            --text-main: #FFFFFF;
+            --text-muted: #A0A0B0;
+            --border: #2E2E3E;
+            --input-bg: #27273A;
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 72px;
+            background: rgba(var(--card-bg), 0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+            transition: background 0.3s;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+            overflow-x: auto;
+        }
+
+        .nav-links::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            max-width: 1440px;
+            margin: 72px auto 0;
+            min-height: calc(100vh - 72px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            padding: 2rem 1rem;
+            position: sticky;
+            top: 72px;
+            height: calc(100vh - 72px);
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin: 0 0 1rem 1rem;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.8rem 1rem;
+            text-decoration: none;
+            color: var(--text-main);
+            border-radius: 12px;
+            transition: var(--transition);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-link:hover {
+            background-color: var(--border);
+        }
+
+        .menu-link.active {
+            background-color: rgba(255, 159, 28, 0.15);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .menu-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 3rem;
+            max-width: 900px;
+        }
+
+        .header-section {
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .header-section h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-section p {
+            color: var(--text-muted);
+        }
+
+        /* Calculator Cards */
+        .calculator-view {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .calculator-view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .calc-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .input-box {
+            width: 100%;
+            background: var(--input-bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-box:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .select-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .select-btn:hover {
+            background: var(--border);
+        }
+
+        .select-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Orange Result Box */
+        .result-box {
+            background: var(--primary);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            color: white;
+            margin: 2rem 0;
+            box-shadow: 0 10px 20px rgba(255, 159, 28, 0.3);
+        }
+
+        .result-title {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .result-sub {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+        }
+
+        /* Detail List */
+        .detail-list {
+            background: var(--input-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border);
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .detail-val {
+            font-weight: 600;
+        }
+
+        /* Slider */
+        .slider-container {
+            margin: 1.5rem 0;
+        }
+
+        .range-slider {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Count Control */
+        .count-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .circle-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .circle-btn:hover {
+            background: var(--border);
+        }
+
+        .count-display {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            width: 60px;
+            text-align: center;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                display: flex;
+                overflow-x: auto;
+                padding: 1rem;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .menu-link {
+                white-space: nowrap;
+                margin-bottom: 0;
+            }
+
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .header-section h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <span>ProLife</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">Intro</a></li>
+            <li><a href="calc.html">계산기</a></li>
+            <li><a href="lotto.html">Lotto</a></li>
+            <li><a href="money.html">주식-물타기</a></li>
+            <li><a href="changemoney.html">환전기</a></li>
+            <li><a href="health.html">건강</a></li>
+            <li><a href="life.html" class="active" style="color:var(--primary)">생활</a></li>
+            <li><a href="finance.html">금융</a></li>
+            <li><a href="tools.html">도구함</a></li>
+        </ul>
+        <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+            <svg class="menu-icon" id="sun-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5" />
+                <path
+                    d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M17.66 6.34l1.42-1.42" />
+            </svg>
+            <svg class="menu-icon" id="moon-icon" style="display:none" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+        </button>
+    </nav>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <h2>Category</h2>
+            <a href="#" class="menu-link active" onclick="switchTab('discount', event)">
+                <span>🏷️</span> 할인율 계산기
+            </a>
+            <a href="#" class="menu-link" onclick="switchTab('percent', event)">
+                <span>📊</span> 퍼센트 계산기
+            </a>
+            <a href="#" class="menu-link" onclick="switchTab('tip', event)">
+                <span>🍽️</span> 팁 계산기
+            </a>
+        </aside>
+
+        <main class="main-content">
+            <!-- Discount Calculator -->
+            <div id="discount" class="calculator-view active">
+                <div class="header-section">
+                    <h1>할인율 계산기</h1>
+                    <p>할인된 가격과 절약 금액을 스마트하게 계산합니다</p>
+                </div>
+
+                <div class="calc-card">
+                    <div class="input-group">
+                        <label class="input-label">원래 가격</label>
+                        <input type="number" id="disc-price" class="input-box" placeholder="예: 50000"
+                            oninput="calcDiscount()">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" style="display:flex; justify-content:space-between;">
+                            <span>할인율</span>
+                            <span style="color:var(--primary); font-weight:700;" id="disc-rate-val">20%</span>
+                        </label>
+                        <div class="slider-container">
+                            <input type="range" class="range-slider" min="0" max="90" step="5" value="20"
+                                id="disc-slider" oninput="updateDiscSlider(this.value)">
+                        </div>
+                        <div class="btn-group">
+                            <button class="select-btn" onclick="setDiscRate(10)">10%</button>
+                            <button class="select-btn active" onclick="setDiscRate(20)" id="btn-20">20%</button>
+                            <button class="select-btn" onclick="setDiscRate(30)">30%</button>
+                            <button class="select-btn" onclick="setDiscRate(50)">50%</button>
+                            <button class="select-btn" onclick="setDiscRate(70)">70%</button>
+                        </div>
+                    </div>
+
+                    <div class="result-box">
+                        <div class="result-title">할인된 가격</div>
+                        <div class="result-value" id="disc-final">0원</div>
+                        <div class="result-sub" id="disc-save">0원 절약!</div>
+                    </div>
+
+                    <div class="detail-list">
+                        <div class="detail-row">
+                            <span>원래 가격</span>
+                            <span class="detail-val" id="disc-original-disp">0원</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>할인 금액</span>
+                            <span class="detail-val" style="color:#ef4444;" id="disc-amt-disp">-0원</span>
+                        </div>
+                        <div class="detail-row" id="extra-disc-row" style="display:none">
+                            <span>추가 할인</span>
+                            <span class="detail-val" style="color:#ef4444;" id="disc-extra-disp">-0원</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>최종 가격</span>
+                            <span id="disc-final-disp">0원</span>
+                        </div>
+                    </div>
+
+                    <!-- Extra Discount Section -->
+                    <div class="calc-card"
+                        style="background:var(--input-bg); margin-top:1.5rem; padding:1.5rem; border:none;">
+                        <h3 style="font-size:1rem; margin-bottom:1rem;">🎁 추가 할인 (쿠폰, 포인트 등)</h3>
+                        <div class="input-group" style="margin-bottom:1rem;">
+                            <label class="input-label">추가 할인 금액</label>
+                            <input type="number" id="disc-extra-amt" class="input-box" placeholder="예: 3000"
+                                oninput="calcDiscount()">
+                        </div>
+                        <div class="input-group" style="margin-bottom:0;">
+                            <label class="input-label">추가 할인율 (%)</label>
+                            <input type="number" id="disc-extra-rate" class="input-box" placeholder="예: 5"
+                                oninput="calcDiscount()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Multiple Items Calculator -->
+                <div class="calc-card">
+                    <div class="header-section" style="text-align:left; margin-bottom:1.5rem;">
+                        <h2 style="font-size:1.5rem; margin-bottom:0.5rem;">📦 다중 상품 할인</h2>
+                        <p style="font-size:0.9rem;">여러 개 구매 시 총 할인액을 확인하세요</p>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">상품 개수</label>
+                        <div class="count-control">
+                            <button class="circle-btn" onclick="changeItemCount(-1)">-</button>
+                            <div class="count-display" id="item-count-disp">1</div>
+                            <button class="circle-btn" onclick="changeItemCount(1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="detail-list">
+                        <div class="detail-row">
+                            <span>개당 원가</span>
+                            <span class="detail-val" id="multi-unit-original">0원</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>개당 할인가</span>
+                            <span class="detail-val" style="color:var(--primary);" id="multi-unit-final">0원</span>
+                        </div>
+                        <div style="margin: 1rem 0; border-bottom:1px dashed var(--border);"></div>
+                        <div class="detail-row">
+                            <span>총 원가</span>
+                            <span class="detail-val" id="multi-total-original">0원</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>총 할인가 (최종 결제액)</span>
+                            <span class="detail-val" style="color:var(--primary); font-size:1.1rem;"
+                                id="multi-total-final">0원</span>
+                        </div>
+                        <div class="detail-row" style="color:#10b981;">
+                            <span>총 절약액</span>
+                            <span class="detail-val" id="multi-total-save">0원</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Percent Calculator -->
+            <div id="percent" class="calculator-view">
+                <div class="header-section">
+                    <h1>퍼센트 계산기</h1>
+                    <p>다양한 퍼센트 계산을 쉽고 빠르게</p>
+                </div>
+
+                <!-- 1. Basic Percent -->
+                <div class="calc-card">
+                    <label class="input-label">🔢 기본 퍼센트 계산</label>
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <input type="number" id="p1-total" class="input-box" placeholder="전체값 (예: 100)"
+                            oninput="calcP1()">
+                        <span>의</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <input type="number" id="p1-rate" class="input-box" placeholder="비율 (예: 20)" oninput="calcP1()">
+                        <span>%는?</span>
+                    </div>
+                    <div class="result-box" style="padding:1.5rem; margin:1rem 0;">
+                        <div class="result-value" id="p1-result">0%</div>
+                    </div>
+                </div>
+
+                <!-- 2. What Percent is X of Y -->
+                <div class="calc-card">
+                    <label class="input-label">📊 퍼센트 비율 계산</label>
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <input type="number" id="p2-part" class="input-box" placeholder="일부분 (예: 25)"
+                            oninput="calcP2()">
+                        <span>는</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <input type="number" id="p2-total" class="input-box" placeholder="전체값 (예: 100)"
+                            oninput="calcP2()">
+                        <span>의 몇 %?</span>
+                    </div>
+                    <div class="result-box" style="padding:1.5rem; margin:1rem 0;">
+                        <div class="result-value" id="p2-result">0%</div>
+                    </div>
+                </div>
+
+                <!-- 3. Change Rate -->
+                <div class="calc-card">
+                    <label class="input-label">📈 증감율 계산</label>
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <input type="number" id="p3-from" class="input-box" placeholder="기존값 (예: 100)"
+                            oninput="calcP3()">
+                        <span>에서</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <input type="number" id="p3-to" class="input-box" placeholder="변경값 (예: 120)" oninput="calcP3()">
+                        <span>로 변하면?</span>
+                    </div>
+                    <div class="result-box" style="padding:1.5rem; margin:1rem 0;">
+                        <div class="result-value" id="p3-result">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tip Calculator -->
+            <div id="tip" class="calculator-view">
+                <div class="header-section">
+                    <h1>팁 계산기</h1>
+                    <p>레스토랑, 카페에서 팁을 쉽게 계산하세요</p>
+                </div>
+
+                <div class="calc-card">
+                    <div class="input-group">
+                        <label class="input-label">계산서 금액</label>
+                        <input type="number" id="tip-base" class="input-box" placeholder="금액 입력" oninput="calcTip()">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">팁 비율</label>
+                        <div class="btn-group">
+                            <button class="select-btn tip-btn" onclick="setTip(5)">5%</button>
+                            <button class="select-btn tip-btn" onclick="setTip(10)">10%</button>
+                            <button class="select-btn tip-btn active" onclick="setTip(15)">15%</button>
+                            <button class="select-btn tip-btn" onclick="setTip(20)">20%</button>
+                            <button class="select-btn tip-btn" onclick="setTip(25)">25%</button>
+                        </div>
+                        <input type="number" id="tip-custom" class="input-box" style="margin-top:10px; display:none;"
+                            placeholder="직접 입력 (%)" oninput="calcTip()">
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label" style="text-align:center;">인원수</label>
+                        <div class="count-control">
+                            <button class="circle-btn" onclick="changePeople(-1)">-</button>
+                            <div class="count-display" id="people-disp">1</div>
+                            <button class="circle-btn" onclick="changePeople(1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="result-box" style="display:flex; justify-content:space-around; align-items:center;">
+                        <div>
+                            <div class="result-title">팁 금액</div>
+                            <div class="result-value" style="font-size:1.8rem;" id="tip-amt">0</div>
+                        </div>
+                        <div style="width:1px; height:50px; background:rgba(255,255,255,0.3);"></div>
+                        <div>
+                            <div class="result-title">총 합계</div>
+                            <div class="result-value" style="font-size:1.8rem;" id="tip-total">0</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-list">
+                        <div class="detail-row">
+                            <span>인당 지불액</span>
+                            <span class="detail-val" style="color:var(--primary); font-size:1.2rem;"
+                                id="tip-per-person">0원</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>(음식값 1/N)</span>
+                            <span id="tip-base-per">0원</span>
+                        </div>
+                        <div class="detail-row">
+                            <span>(팁 1/N)</span>
+                            <span id="tip-val-per">0원</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calc-card" style="background:rgba(255,255,255,0.05); border:none;">
+                    <h3 style="margin-bottom:1rem; font-size:1rem;">💡 팁 문화 가이드</h3>
+                    <ul style="color:var(--text-muted); font-size:0.9rem; list-style-position:inside; line-height:1.8;">
+                        <li>🇺🇸 미국/캐나다: 15~20% (필수)</li>
+                        <li>🇪🇺 유럽: 5~10% (서비스료 포함 시 불필요)</li>
+                        <li>🇯🇵 일본: 팁 문화 없음 (거절될 수 있음)</li>
+                        <li>🇰🇷 한국: 팁 문화 없음</li>
+                    </ul>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // State
+        let currentDiscount = 20;
+        let currentTip = 15;
+        let people = 1;
+        let itemCount = 1;
+
+        // Theme Logic
+        function toggleTheme() {
+            const body = document.body;
+            const theme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', theme);
+            document.getElementById('sun-icon').style.display = theme === 'light' ? 'block' : 'none';
+            document.getElementById('moon-icon').style.display = theme === 'dark' ? 'block' : 'none';
+        }
+
+        // Tab Logic
+        function switchTab(id, e) {
+            if (e) e.preventDefault();
+            // Update nav
+            document.querySelectorAll('.sidebar .menu-link').forEach(l => l.classList.remove('active'));
+            e.target.closest('.menu-link').classList.add('active');
+
+            // Update View
+            document.querySelectorAll('.calculator-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // --- Discount Calc ---
+        function setDiscRate(rate) {
+            currentDiscount = rate;
+            document.getElementById('disc-slider').value = rate;
+            updateDiscSliderUI();
+            calcDiscount();
+        }
+
+        function updateDiscSlider(val) {
+            currentDiscount = parseInt(val);
+            updateDiscSliderUI();
+            calcDiscount();
+        }
+
+        function updateDiscSliderUI() {
+            document.getElementById('disc-rate-val').innerText = currentDiscount + '%';
+            // Update toggle buttons
+            document.querySelectorAll('.select-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.innerText === currentDiscount + '%') btn.classList.add('active');
+            });
+        }
+
+        function calcDiscount() {
+            const price = parseFloat(document.getElementById('disc-price').value) || 0;
+
+            // 1. Basic Discount
+            let discountAmount = price * (currentDiscount / 100);
+            let tempPrice = price - discountAmount;
+
+            // 2. Extra Discount (Amount)
+            const extraAmt = parseFloat(document.getElementById('disc-extra-amt').value) || 0;
+            const extraRate = parseFloat(document.getElementById('disc-extra-rate').value) || 0;
+
+            let extraDiscountTotal = extraAmt;
+
+            // 3. Extra Discount (Rate) - applied after basic discount & extra amount? 
+            // Usually extra % is applied on the discounted price or original? 
+            // Let's assume extra % is applied on the current temp price for compound discount effect, 
+            // or simply additive. Let's go with compound for 'additional discount' feel on the reduced price.
+            // Actually, standard is usually: Price -> Disc% -> Result -> Coupon Amt -> Result -> Point...
+            // Let's Apply: (Price - BasicDisc) - Amt - ((Price-BasicDisc-Amt) * Extra%)
+
+            let priceAfterBasic = price - discountAmount;
+            let priceAfterAmt = priceAfterBasic - extraAmt;
+
+            // Prevent negative
+            if (priceAfterAmt < 0) priceAfterAmt = 0;
+
+            let extraRateAmount = priceAfterAmt * (extraRate / 100);
+            let finalPrice = priceAfterAmt - extraRateAmount;
+
+            if (finalPrice < 0) finalPrice = 0;
+
+            let totalSave = price - finalPrice;
+            let totalExtraSave = extraAmt + extraRateAmount;
+
+
+            document.getElementById('disc-final').innerText = formatNum(finalPrice) + '원';
+            document.getElementById('disc-save').innerText = formatNum(totalSave) + '원 절약!!';
+
+            document.getElementById('disc-original-disp').innerText = formatNum(price) + '원';
+            document.getElementById('disc-amt-disp').innerText = '-' + formatNum(discountAmount) + '원';
+
+            // Show extra row if exists
+            if (totalExtraSave > 0) {
+                document.getElementById('extra-disc-row').style.display = 'flex';
+                document.getElementById('disc-extra-disp').innerText = '-' + formatNum(totalExtraSave) + '원';
+            } else {
+                document.getElementById('extra-disc-row').style.display = 'none';
+            }
+
+            document.getElementById('disc-final-disp').innerText = formatNum(finalPrice) + '원';
+
+            // Update Multi Item Calc
+            updateMultiItem(price, finalPrice, totalSave);
+        }
+
+        function changeItemCount(delta) {
+            itemCount += delta;
+            if (itemCount < 1) itemCount = 1;
+            document.getElementById('item-count-disp').innerText = itemCount;
+            calcDiscount(); // Recalculate totals
+        }
+
+        function updateMultiItem(unitOriginal, unitFinal, unitSave) {
+            document.getElementById('multi-unit-original').innerText = formatNum(unitOriginal) + '원';
+            document.getElementById('multi-unit-final').innerText = formatNum(unitFinal) + '원';
+
+            const totalOriginal = unitOriginal * itemCount;
+            const totalFinal = unitFinal * itemCount;
+            const totalSave = unitSave * itemCount;
+
+            document.getElementById('multi-total-original').innerText = formatNum(totalOriginal) + '원';
+            document.getElementById('multi-total-final').innerText = formatNum(totalFinal) + '원';
+            document.getElementById('multi-total-save').innerText = formatNum(totalSave) + '원';
+        }
+
+        // --- Percent Calc ---
+        function calcP1() { // A의 B%는?
+            const total = parseFloat(document.getElementById('p1-total').value) || 0;
+            const rate = parseFloat(document.getElementById('p1-rate').value) || 0;
+            document.getElementById('p1-result').innerText = formatNum(total * (rate / 100)) + '%';
+        }
+
+        function calcP2() { // A는 B의 몇 %?
+            const part = parseFloat(document.getElementById('p2-part').value) || 0;
+            const total = parseFloat(document.getElementById('p2-total').value) || 0;
+            if (total === 0) { document.getElementById('p2-result').innerText = '0%'; return; }
+            const res = (part / total) * 100;
+            document.getElementById('p2-result').innerText = res.toFixed(2) + '%';
+        }
+
+        function calcP3() { // 증감율
+            const from = parseFloat(document.getElementById('p3-from').value) || 0;
+            const to = parseFloat(document.getElementById('p3-to').value) || 0;
+            if (from === 0) { document.getElementById('p3-result').innerText = '0%'; return; }
+            const diff = to - from;
+            const rate = (diff / from) * 100;
+            const sign = rate > 0 ? '+' : '';
+            document.getElementById('p3-result').innerText = sign + rate.toFixed(2) + '%';
+        }
+
+        // --- Tip Calc ---
+        function setTip(rate) {
+            currentTip = rate;
+            document.querySelectorAll('.tip-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            calcTip();
+        }
+
+        function changePeople(delta) {
+            people += delta;
+            if (people < 1) people = 1;
+            document.getElementById('people-disp').innerText = people;
+            calcTip();
+        }
+
+        function calcTip() {
+            const base = parseFloat(document.getElementById('tip-base').value) || 0;
+            const tipAmt = base * (currentTip / 100);
+            const total = base + tipAmt;
+
+            document.getElementById('tip-amt').innerText = formatNum(tipAmt);
+            document.getElementById('tip-total').innerText = formatNum(total);
+
+            // Per person
+            const perTotal = total / people;
+            const perBase = base / people;
+            const perTip = tipAmt / people;
+
+            document.getElementById('tip-per-person').innerText = formatNum(perTotal) + '원';
+            document.getElementById('tip-base-per').innerText = formatNum(perBase) + '원';
+            document.getElementById('tip-val-per').innerText = formatNum(perTip) + '원';
+        }
+
+        // Helper
+        function formatNum(n) {
+            return Math.round(n).toLocaleString();
+        }
+    </script>
+</body>
+
+</html>

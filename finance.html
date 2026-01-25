@@ -472,6 +472,7 @@
       <li><a href="money.html">주식-코인물타기</a></li>
       <li><a href="changemoney.html">실시간 환전기</a></li>
       <li><a href="health.html">건강 계산기</a></li>
+      <li><a href="life.html">생활 계산기</a></li>
       <li><a href="finance.html">금융 계산기</a></li>
       <li><a href="tools.html">도구함</a></li>
     </ul>
@@ -594,6 +595,46 @@
         </a>
       </div>
 
+      <h2>소득 & 급여</h2>
+      <div class="menu-list">
+        <a href="#inc-salary" class="menu-link" onclick="showCalc('inc-salary', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          연봉 계산기
+        </a>
+        <a href="#inc-net" class="menu-link" onclick="showCalc('inc-net', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          실수령액(4대보험)
+        </a>
+        <a href="#inc-severance" class="menu-link" onclick="showCalc('inc-severance', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+          퇴직금 계산기
+        </a>
+        <a href="#inc-tax" class="menu-link" onclick="showCalc('inc-tax', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          근로소득세 계산
+        </a>
+      </div>
+
       <h2>은퇴 & 세금</h2>
       <div class="menu-list">
         <a href="#ret-fund" class="menu-link" onclick="showCalc('ret-fund', event)">
@@ -631,6 +672,31 @@
             <line x1="8.12" y1="8.12" x2="12" y2="12" />
           </svg>
           절세 효과
+        </a>
+        <a href="#tax-global" class="menu-link" onclick="showCalc('tax-global', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+            <line x1="8" y1="21" x2="16" y2="21" />
+            <line x1="12" y1="17" x2="12" y2="21" />
+          </svg>
+          종합소득세
+        </a>
+        <a href="#tax-vat" class="menu-link" onclick="showCalc('tax-vat', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+            <path d="M22 12A10 10 0 0 0 12 2v10z" />
+          </svg>
+          부가가치세(VAT)
+        </a>
+        <a href="#tax-stock" class="menu-link" onclick="showCalc('tax-stock', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+            <polyline points="16 7 22 7 22 13" />
+          </svg>
+          주식 수익률/세금
         </a>
       </div>
 
@@ -1337,6 +1403,240 @@
         </div>
       </div>
 
+      <!-- 16. Salary Calculator -->
+      <div id="inc-salary" class="calculator-view">
+        <div class="header-section">
+          <h1>연봉 계산기</h1>
+          <p>내 연봉의 실수령액과 공제항목을 한눈에 확인하세요.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>연봉 (세전)</label>
+              <div class="input-wrapper"><input type="number" id="sal-amount" value="50000000"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>비과세액 (월 식대 등)</label>
+              <div class="input-wrapper"><input type="number" id="sal-nontax" value="200000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>부양가족 수 (본인포함)</label>
+              <div class="input-wrapper"><input type="number" id="sal-fam" value="1"><span class="unit">명</span></div>
+            </div>
+            <div class="form-group"><label>20세 이하 자녀 수</label>
+              <div class="input-wrapper"><input type="number" id="sal-child" value="0"><span class="unit">명</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcSalary()">계산하기</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">월 예상 실수령액</div>
+            <div class="result-value-main" id="sal-res-net">0</div>
+            <div class="result-row"><span>국민연금 (4.5%)</span><span id="sal-res-np">0</span></div>
+            <div class="result-row"><span>건강보험 (3.545%)</span><span id="sal-res-hi">0</span></div>
+            <div class="result-row"><span>요양보험 (12.95%)</span><span id="sal-res-ci">0</span></div>
+            <div class="result-row"><span>고용보험 (0.9%)</span><span id="sal-res-ei">0</span></div>
+            <div class="result-row"><span>근로소득세(간이세액)</span><span id="sal-res-tax">0</span></div>
+            <div class="result-row"
+              style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px; font-weight:700;"><span>총
+                공제액</span><span id="sal-res-deduct" style="color:#ef4444">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 17. Net Pay / 4 Major Insurances -->
+      <div id="inc-net" class="calculator-view">
+        <div class="header-section">
+          <h1>실수령액 & 4대보험 계산기</h1>
+          <p>월급 기준으로 4대보험료와 소득세를 정밀하게 계산합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>월 급여 (세전)</label>
+              <div class="input-wrapper"><input type="number" id="net-salary" value="3000000"><span
+                  class="unit">원</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcNetPay()">계산하기</button>
+            <div <div
+              style="margin-top:20px; font-size:0.9rem; color:var(--text-muted); background:rgba(0,0,0,0.03); padding:15px; border-radius:12px;">
+              <strong>💡 2026년 4대보험 요율 적용</strong><br>
+              - 국민연금: 4.5% (기준소득월액 상한액 상향 반영)<br>
+              - 건강보험: 3.545% (동결 가정)<br>
+              - 장기요양: 건보료의 12.95%<br>
+              - 고용보험: 0.9%
+            </div>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">실수령액</div>
+            <div class="result-value-main" id="net-res-final">0</div>
+            <div class="result-row"><span>4대보험 합계</span><span id="net-res-ins">0</span></div>
+            <div class="result-row"><span>소득세(지방세포함)</span><span id="net-res-tax">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 18. Severance Pay -->
+      <div id="inc-severance" class="calculator-view">
+        <div class="header-section">
+          <h1>퇴직금 계산기</h1>
+          <p>근로기준법에 따른 예상 퇴직금을 계산합니다. (1년 이상 근무 시)</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>직전 3개월 월 기본급(평균)</label>
+              <div class="input-wrapper"><input type="number" id="sev-salary" value="3000000"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>연간 상여금 총액</label>
+              <div class="input-wrapper"><input type="number" id="sev-bonus" value="0"><span class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>연차 수당</label>
+              <div class="input-wrapper"><input type="number" id="sev-leave" value="0"><span class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>근무 일수 (재직일수)</label>
+              <div class="input-wrapper"><input type="number" id="sev-days" value="730"><span class="unit">일</span>
+              </div>
+            </div>
+            <button class="btn-calc" onclick="calcSeverance()">퇴직금 계산</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">예상 퇴직금</div>
+            <div class="result-value-main" id="sev-res">0</div>
+            <div class="result-row"><span>1일 평균임금</span><span id="sev-res-day">0</span></div>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:10px;">
+              * 실제 퇴직금은 회사 내규 및 정확한 입퇴사일에 따라 달라질 수 있습니다.<br>
+              * 계산식: 1일 평균임금 × 30일 × (재직일수 / 365)
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 19. Earned Income Tax -->
+      <div id="inc-tax" class="calculator-view">
+        <div class="header-section">
+          <h1>근로소득세 계산기 (연말정산용)</h1>
+          <p>연간 총 급여액에 따른 과세표준과 예상 세액을 산출합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>연간 총 급여액</label>
+              <div class="input-wrapper"><input type="number" id="eit-salary" value="45000000"><span
+                  class="unit">원</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcEarnedTax()">세금 계산</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">예상 산출세액</div>
+            <div class="result-value-main" id="eit-res">0</div>
+            <div class="result-row"><span>근로소득공제</span><span id="eit-res-deduct">0</span></div>
+            <div class="result-row"><span>과세표준</span><span id="eit-res-std">0</span></div>
+            <div class="result-row"><span>적용 세율</span><span id="eit-res-rate">0%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 20. Global Income Tax -->
+      <div id="tax-global" class="calculator-view">
+        <div class="header-section">
+          <h1>종합소득세 계산기</h1>
+          <p>사업소득, 기타소득 등 종합소득에 대한 세금을 계산합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>연간 총 수입금액 (매출)</label>
+              <div class="input-wrapper"><input type="number" id="git-revenue" value="80000000"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>필요 경비</label>
+              <div class="input-wrapper"><input type="number" id="git-expense" value="30000000"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>소득공제 (기본공제 등)</label>
+              <div class="input-wrapper"><input type="number" id="git-deduct" value="1500000"><span
+                  class="unit">원</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcGlobalTax()">종합소득세 계산</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">납부할 세액 (지방세 포함)</div>
+            <div class="result-value-main" id="git-res-final">0</div>
+            <div class="result-row"><span>종합소득금액</span><span id="git-res-inc">0</span></div>
+            <div class="result-row"><span>과세표준</span><span id="git-res-std">0</span></div>
+            <div class="result-row"><span>산출세액</span><span id="git-res-tax">0</span></div>
+            <div class="result-row"><span>지방소득세(10%)</span><span id="git-res-local">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 21. VAT -->
+      <div id="tax-vat" class="calculator-view">
+        <div class="header-section">
+          <h1>부가가치세 (VAT) 계산기</h1>
+          <p>공급가액 또는 합계금액을 기준으로 부가세를 계산합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>기준 금액</label>
+              <div class="input-wrapper"><input type="number" id="vat-amt" value="110000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>계산 기준</label>
+              <div class="input-wrapper"><select id="vat-type">
+                  <option value="total">합계금액(부가세포함)에서 분리</option>
+                  <option value="supply">공급가액에 부가세 더하기</option>
+                </select></div>
+            </div>
+            <button class="btn-calc" onclick="calcVAT()">VAT 계산</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">부가가치세</div>
+            <div class="result-value-main" id="vat-res-tax">0</div>
+            <div class="result-row"><span>공급가액</span><span id="vat-res-supply">0</span></div>
+            <div class="result-row"><span>합계금액</span><span id="vat-res-total">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 22. Stock Yield & Tax -->
+      <div id="tax-stock" class="calculator-view">
+        <div class="header-section">
+          <h1>주식 수익률 & 세금 계산기</h1>
+          <p>매매차익과 증권거래세, 양도소득세(해외/대주주)를 포함한 실질 수익률을 계산합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>매수 단가</label>
+              <div class="input-wrapper"><input type="number" id="stk-buy" value="10000"><span class="unit">원/$</span>
+              </div>
+            </div>
+            <div class="form-group"><label>매도 단가</label>
+              <div class="input-wrapper"><input type="number" id="stk-sell" value="15000"><span class="unit">원/$</span>
+              </div>
+            </div>
+            <div class="form-group"><label>수량</label>
+              <div class="input-wrapper"><input type="number" id="stk-qty" value="100"><span class="unit">주</span></div>
+            </div>
+            <div class="form-group"><label>증권사 수수료율 (편도)</label>
+              <div class="input-wrapper"><input type="number" id="stk-fee-rate" value="0.015"><span
+                  class="unit">%</span></div>
+            </div>
+            <div class="form-group"><label>세금 유형</label>
+              <div class="input-wrapper"><select id="stk-tax-type">
+                  <option value="kor">국내주식 (거래세 0.15% - 2025/26 인하분)</option>
+                  <option value="usa">해외주식/대주주 (양도세 22%)</option>
+                </select></div>
+            </div>
+            <button class="btn-calc" onclick="calcStockTax()">수익률 계산</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">실현 수익금 (세후)</div>
+            <div class="result-value-main" id="stk-res-net">0</div>
+            <div class="result-row"><span>수익률</span><span id="stk-res-yield"
+                style="color:var(--primary); font-weight:700;">0%</span></div>
+            <div class="result-row"><span>총 수수료</span><span id="stk-res-fee">0</span></div>
+            <div class="result-row"><span>총 세금(거래세/양도세)</span><span id="stk-res-tax">0</span></div>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -1692,6 +1992,261 @@
       const exclusive = m2 * 0.75; // Approx 75% efficiency
       set('ra-res-supply', fmt.format(supply.toFixed(1)) + '㎡');
       set('ra-res-exclusive', fmt.format(exclusive.toFixed(1)) + '㎡');
+    }
+    // --- Income & Salary Logic ---
+    function calcSalary() {
+      const salary = parseFloat(document.getElementById('sal-amount').value) || 0;
+      const nontax = parseFloat(document.getElementById('sal-nontax').value) || 0;
+      // Simple approximation for Monthly Net
+      // 1. Monthly Taxable
+      let monthlyTotal = salary / 12;
+      let monthlyTaxable = monthlyTotal - nontax;
+      if (monthlyTaxable < 0) monthlyTaxable = 0;
+
+      // 2. Insurances
+      // National Pension (4.5%, 2026 estimated cap around 6.4m monthly income)
+      // Cap base monthly: 6,400,000 (Estimate for 2026)
+      let npBase = monthlyTaxable;
+      if (npBase > 6400000) npBase = 6400000;
+      let np = npBase * 0.045;
+
+      // Health (3.545% maintained usually)
+      let hi = monthlyTaxable * 0.03545;
+
+      // Care (12.95% of Health)
+      let ci = hi * 0.1295;
+
+      // Employment (0.9%)
+      let ei = monthlyTaxable * 0.009;
+
+      // 3. Tax (Simplified using simple bracket on monthly taxable * 12)
+      // This is a rough estimation. Accurate requires 'Gani start table'
+      // Let's use annual tax bracket on (annual taxable) and divide by 12 for rough check
+      let annualTaxable = (monthlyTaxable - np - hi - ci - ei) * 12;
+      // Standard Deduction for Earned Income (approx)
+      // <= 5mil: 70%
+      // <= 15mil: 40%
+      // <= 45mil: 15%
+      // <= 100mil: 5%
+      // > 100 mil: 2%
+      // Actually simplified: take tax from calcEarnedTaxLogic and divide by 12
+      let annualTax = getEarnedIncomeTax(salary); // Reuse logic
+      let monthlyTax = annualTax / 12;
+
+      // Final
+      let totalDeduct = np + hi + ci + ei + monthlyTax;
+      let net = monthlyTotal - totalDeduct;
+
+      document.getElementById('sal-res-net').innerText = formatNum(net) + '원';
+      document.getElementById('sal-res-np').innerText = '-' + formatNum(np) + '원';
+      document.getElementById('sal-res-hi').innerText = '-' + formatNum(hi) + '원';
+      document.getElementById('sal-res-ci').innerText = '-' + formatNum(ci) + '원';
+      document.getElementById('sal-res-ei').innerText = '-' + formatNum(ei) + '원';
+      document.getElementById('sal-res-tax').innerText = '-' + formatNum(monthlyTax) + '원';
+      document.getElementById('sal-res-deduct').innerText = '-' + formatNum(totalDeduct) + '원';
+    }
+
+    function calcNetPay() {
+      const monthly = parseFloat(document.getElementById('net-salary').value) || 0;
+      // Similar to calcSalary but input is monthly
+      let npBase = monthly;
+      if (npBase > 6400000) npBase = 6400000;
+      let np = npBase * 0.045;
+      let hi = monthly * 0.03545;
+      let ci = hi * 0.1295;
+      let ei = monthly * 0.009;
+
+      // Simple tax estimation (3% roughly for simple calc or reuse annual)
+      // Let's try to be a bit more dynamic:
+      let annualEst = monthly * 12;
+      let annualTax = getEarnedIncomeTax(annualEst);
+      let monthlyTax = annualTax / 12;
+      let localTax = monthlyTax * 0.1; // Local income tax
+
+      let totalIns = np + hi + ci + ei;
+      let totalTax = monthlyTax + localTax;
+      let final = monthly - totalIns - totalTax;
+
+      document.getElementById('net-res-final').innerText = formatNum(final) + '원';
+      document.getElementById('net-res-ins').innerText = formatNum(totalIns) + '원';
+      document.getElementById('net-res-tax').innerText = formatNum(totalTax) + '원';
+    }
+
+    function calcSeverance() {
+      const salary = parseFloat(document.getElementById('sev-salary').value) || 0;
+      const bonus = parseFloat(document.getElementById('sev-bonus').value) || 0;
+      const leave = parseFloat(document.getElementById('sev-leave').value) || 0;
+      const days = parseFloat(document.getElementById('sev-days').value) || 0;
+
+      // Average Daily Wage
+      // 1. 3 months total salary
+      let threeMonthSalary = salary * 3;
+      // 2. Bonus portion (3/12 of annual)
+      let bonusPortion = bonus * (3 / 12);
+      // 3. Leave allowance portion (3/12)
+      let leavePortion = leave * (3 / 12);
+
+      let totalBase = threeMonthSalary + bonusPortion + leavePortion;
+      // Days in 3 months (approx 90-92, let's use 91)
+      let avgDaily = totalBase / 91;
+
+      // Severance: AvgDaily * 30 * (ServiceDays / 365)
+      let severance = avgDaily * 30 * (days / 365);
+
+      document.getElementById('sev-res').innerText = formatNum(severance) + '원';
+      document.getElementById('sev-res-day').innerText = formatNum(avgDaily) + '원';
+    }
+
+    function calcEarnedTax() {
+      const salary = parseFloat(document.getElementById('eit-salary').value) || 0;
+
+      // 1. Earned Income Deduction
+      let deduction = 0;
+      if (salary <= 5000000) deduction = salary * 0.7;
+      else if (salary <= 15000000) deduction = 3500000 + (salary - 5000000) * 0.4;
+      else if (salary <= 45000000) deduction = 7500000 + (salary - 15000000) * 0.15;
+      else if (salary <= 100000000) deduction = 12000000 + (salary - 45000000) * 0.05;
+      else deduction = 14750000 + (salary - 100000000) * 0.02;
+
+      let incomeAmount = salary - deduction; // 근로소득금액
+
+      // 2. Personal Deduction (Basic) - assume 1 person 1.5m
+      let personalDed = 1500000;
+
+      let stdBase = incomeAmount - personalDed;
+      if (stdBase < 0) stdBase = 0;
+
+      // 3. Tax Rates (2026 Base - Assuming Brackets maintained or slightly adjusted, keeping current std)
+      // 14m: 6%
+      // 50m: 15% - 1.26m
+      // 88m: 24% - 5.76m
+      // 150m: 35% - 15.44m
+      // 300m: 38% - 19.94m
+      // 500m: 40% - 25.94m
+      // 1000m: 42% - 35.94m
+      // >1000m: 45% - 65.94m
+
+      let tax = calcTaxFromBase(stdBase);
+
+      document.getElementById('eit-res').innerText = formatNum(tax) + '원';
+      document.getElementById('eit-res-deduct').innerText = '-' + formatNum(deduction) + '원';
+      document.getElementById('eit-res-std').innerText = formatNum(stdBase) + '원';
+
+      // Effective Rate
+      let rate = 0;
+      if (stdBase > 0) rate = (tax / stdBase) * 100;
+      document.getElementById('eit-res-rate').innerText = rate.toFixed(1) + '% (실효세율 아님, 구간별 적용)';
+    }
+
+    // Reuse logic helper
+    function getEarnedIncomeTax(annualSalary) {
+      // Simplified version of calcEarnedTax for internal use
+      let deduction = 0;
+      if (annualSalary <= 5000000) deduction = annualSalary * 0.7;
+      else if (annualSalary <= 15000000) deduction = 3500000 + (annualSalary - 5000000) * 0.4;
+      else if (annualSalary <= 45000000) deduction = 7500000 + (annualSalary - 15000000) * 0.15;
+      else if (annualSalary <= 100000000) deduction = 12000000 + (annualSalary - 45000000) * 0.05;
+      else deduction = 14750000 + (annualSalary - 100000000) * 0.02;
+      let base = annualSalary - deduction - 1500000; // minus personal
+      if (base < 0) base = 0;
+      return calcTaxFromBase(base);
+    }
+
+    function calcTaxFromBase(base) {
+      if (base <= 14000000) return base * 0.06;
+      if (base <= 50000000) return base * 0.15 - 1260000;
+      if (base <= 88000000) return base * 0.24 - 5760000;
+      if (base <= 150000000) return base * 0.35 - 15440000;
+      if (base <= 300000000) return base * 0.38 - 19940000;
+      if (base <= 500000000) return base * 0.40 - 25940000;
+      if (base <= 1000000000) return base * 0.42 - 35940000;
+      return base * 0.45 - 65940000;
+    }
+
+    // --- Retirement & Tax Logic ---
+    function calcGlobalTax() {
+      const rev = parseFloat(document.getElementById('git-revenue').value) || 0;
+      const exp = parseFloat(document.getElementById('git-expense').value) || 0;
+      const ded = parseFloat(document.getElementById('git-deduct').value) || 0;
+
+      let income = rev - exp;
+      let stdBase = income - ded;
+      if (stdBase < 0) stdBase = 0;
+
+      let tax = calcTaxFromBase(stdBase);
+      let local = tax * 0.1;
+
+      document.getElementById('git-res-final').innerText = formatNum(tax + local) + '원';
+      document.getElementById('git-res-inc').innerText = formatNum(income) + '원';
+      document.getElementById('git-res-std').innerText = formatNum(stdBase) + '원';
+      document.getElementById('git-res-tax').innerText = formatNum(tax) + '원';
+      document.getElementById('git-res-local').innerText = formatNum(local) + '원';
+    }
+
+    function calcVAT() {
+      const amt = parseFloat(document.getElementById('vat-amt').value) || 0;
+      const type = document.getElementById('vat-type').value;
+
+      let supply = 0;
+      let vat = 0;
+      let total = 0;
+
+      if (type === 'total') {
+        // Amount is Total (Supply + VAT)
+        // Supply = Total / 1.1
+        supply = Math.round(amt / 1.1);
+        vat = amt - supply;
+        total = amt;
+      } else {
+        // Amount is Supply
+        supply = amt;
+        vat = Math.round(amt * 0.1);
+        total = supply + vat;
+      }
+
+      document.getElementById('vat-res-tax').innerText = formatNum(vat) + '원';
+      document.getElementById('vat-res-supply').innerText = formatNum(supply) + '원';
+      document.getElementById('vat-res-total').innerText = formatNum(total) + '원';
+    }
+
+    function calcStockTax() {
+      const buy = parseFloat(document.getElementById('stk-buy').value) || 0;
+      const sell = parseFloat(document.getElementById('stk-sell').value) || 0;
+      const qty = parseFloat(document.getElementById('stk-qty').value) || 0;
+      const feeRate = parseFloat(document.getElementById('stk-fee-rate').value) || 0;
+      const type = document.getElementById('stk-tax-type').value;
+
+      let totalBuy = buy * qty;
+      let totalSell = sell * qty;
+
+      // Fee (Buy + Sell)
+      let f1 = totalBuy * (feeRate / 100);
+      let f2 = totalSell * (feeRate / 100);
+      let totalFee = f1 + f2;
+
+      let grossProfit = totalSell - totalBuy - totalFee;
+      let tax = 0;
+
+      if (type === 'kor') {
+        // Securities Transaction Tax (Target 0.15% for 2025+)
+        tax = totalSell * 0.0015;
+      } else {
+        // Overseas: 22% on profit > 2.5m deduction
+        // Assume no deduction used elsewhere for simplicity, or show raw tax
+        // Let's apply basic deduction 2.5m logic
+        let taxableProfit = grossProfit - 2500000;
+        if (taxableProfit < 0) taxableProfit = 0;
+        tax = taxableProfit * 0.22;
+      }
+
+      let netProfit = grossProfit - tax;
+      let yield = 0;
+      if (totalBuy > 0) yield = (netProfit / totalBuy) * 100;
+
+      document.getElementById('stk-res-net').innerText = formatNum(netProfit) + (type === 'usa' ? '$ (환율미고려)' : '원');
+      document.getElementById('stk-res-yield').innerText = yield.toFixed(2) + '%';
+      document.getElementById('stk-res-fee').innerText = formatNum(totalFee) + '원';
+      document.getElementById('stk-res-tax').innerText = formatNum(tax) + '원';
     }
   </script>
 </body>
