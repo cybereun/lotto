@@ -85,13 +85,36 @@
       align-items: center;
       gap: 10px;
       text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .logo span {
+      display: inline;
+    }
+
+    @media (max-width: 600px) {
+      .logo span {
+        display: none;
+      }
+
+      .navbar {
+        padding: 0 1rem;
+      }
     }
 
     .nav-links {
       display: flex;
       gap: 1.5rem;
       list-style: none;
-      margin: 0 2rem;
+      margin: 0 1rem;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .nav-links::-webkit-scrollbar {
+      display: none;
     }
 
     .nav-links a {
@@ -211,10 +234,21 @@
         position: static;
         display: flex;
         overflow-x: auto;
-        padding: 1rem;
+        -webkit-overflow-scrolling: touch;
+        padding: 0.75rem 1rem;
         gap: 10px;
-        border: none;
+        border-right: none;
         border-bottom: 1px solid var(--border);
+        scrollbar-width: thin;
+      }
+
+      .sidebar::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 10px;
       }
 
       .sidebar h2 {
@@ -229,10 +263,6 @@
       .main-content {
         width: 100%;
         padding: 2rem 1.5rem;
-      }
-
-      .nav-links {
-        display: none;
       }
     }
 
@@ -427,7 +457,7 @@
         <path d="M12 2v20M2 12h20" />
         <path d="m19 16-7 7-7-7" />
       </svg>
-      ProFinance
+      <span>ProFinance</span>
     </a>
     <ul class="nav-links">
       <li><a href="index.html">Intro</a></li>

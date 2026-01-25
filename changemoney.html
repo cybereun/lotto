@@ -65,6 +65,16 @@
             transition: background 0.3s;
         }
 
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 0 1rem;
+            }
+
+            .nav-left span {
+                display: none;
+            }
+        }
+
         .nav-left,
         .nav-right {
             flex: 1;
@@ -80,14 +90,22 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .nav-center::-webkit-scrollbar {
+            display: none;
         }
 
         .navbar-menu {
             display: flex;
-            gap: 32px;
+            gap: 1.5rem;
             list-style: none;
             margin: 0;
             padding: 0;
+            white-space: nowrap;
         }
 
         .navbar-menu a {
@@ -379,7 +397,13 @@
     <nav class="navbar">
         <div class="nav-left">
             <a href="index.html"
-                style="text-decoration:none; font-family:'Pretendard',sans-serif; font-weight:800; color:var(--accent); font-size:1.4rem;">ProExchange</a>
+                style="text-decoration:none; font-family:'Outfit',sans-serif; font-weight:800; color:var(--accent); font-size:1.4rem; display: flex; align-items: center; gap: 8px;">
+                <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M2 12h20" />
+                    <path d="m19 16-7 7-7-7" />
+                </svg>
+                <span>ProFinance</span></a>
         </div>
         <div class="nav-center">
             <ul class="navbar-menu">

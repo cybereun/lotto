@@ -93,15 +93,54 @@
             align-items: center;
         }
 
-        .logo {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--primary);
+        .logo span {
+            display: inline;
+        }
+
+        @media (max-width: 600px) {
+            .logo span {
+                display: none;
+            }
+
+            .navbar {
+                padding: 0 1rem;
+            }
+        }
+
+        .nav-center {
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .nav-center::-webkit-scrollbar {
+            display: none;
+            /* Safari and Chrome */
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            white-space: nowrap;
+        }
+
+        .navbar-menu a {
             text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .navbar-menu a:hover {
+            color: var(--primary);
         }
 
         .theme-toggle {
@@ -217,10 +256,21 @@
                 position: static;
                 display: flex;
                 overflow-x: auto;
-                padding: 1rem;
+                -webkit-overflow-scrolling: touch;
+                padding: 0.75rem 1rem;
                 gap: 10px;
                 border-right: none;
                 border-bottom: 1px solid var(--border);
+                scrollbar-width: thin;
+            }
+
+            .sidebar::-webkit-scrollbar {
+                height: 4px;
+            }
+
+            .sidebar::-webkit-scrollbar-thumb {
+                background: var(--border);
+                border-radius: 10px;
             }
 
             .sidebar h2 {
@@ -581,29 +631,17 @@
                     <path d="M12 2v20M2 12h20" />
                     <path d="m19 16-7 7-7-7" />
                 </svg>
-                ProHealth
+                <span>ProHealth</span>
             </a>
         </div>
         <div class="nav-center">
-            <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-                <li><a href="index.html"
-                        style="text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.9rem;">Intro</a>
-                </li>
-                <li><a href="lotto.html"
-                        style="text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.9rem;">Lotto</a>
-                </li>
-                <li><a href="money.html"
-                        style="text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.9rem;">주식-코인물타기</a>
-                </li>
-                <li><a href="changemoney.html"
-                        style="text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.9rem;">실시간
-                        환전기</a></li>
-                <li><a href="health.html"
-                        style="text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.9rem;">건강
-                        계산기</a></li>
-                <li><a href="finance.html"
-                        style="text-decoration: none; color: var(--text-main); font-weight: 600; font-size: 0.9rem;">금융
-                        계산기</a></li>
+            <ul class="navbar-menu">
+                <li><a href="index.html">Intro</a></li>
+                <li><a href="lotto.html">Lotto</a></li>
+                <li><a href="money.html">주식-물타기</a></li>
+                <li><a href="changemoney.html">환전기</a></li>
+                <li><a href="health.html">건강</a></li>
+                <li><a href="finance.html">금융</a></li>
             </ul>
         </div>
         <div class="nav-right">
