@@ -1068,26 +1068,67 @@
         </div>
       </div>
 
-      <!-- 10. Real Return (Inflation) -->
+      <!-- 10. Real Rate of Return -->
       <div id="inv-real" class="calculator-view">
         <div class="header-section">
           <h1>실질 수익률 계산기</h1>
-          <p>명목 수익률에서 인플레이션을 제외한 실제 자산가치 상승률을 확인합니다.</p>
+          <p>세금과 물가상승률을 고려하여 내 돈의 진짜 구매력 변화를 계산합니다.</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
-            <div class="form-group"><label>명목 수익률 (%)</label>
-              <div class="input-wrapper"><input type="number" id="real-n" value="6"><span class="unit">%</span></div>
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">수익 및 비용 정보</h3>
+            <div class="form-group"><label>명목 수익률 (Nominal Rate)</label>
+              <div class="input-wrapper"><input type="number" id="real-n" value="3.5" step="0.1"><span
+                  class="unit">%</span></div>
             </div>
-            <div class="form-group"><label>물가 상승률 (%)</label>
-              <div class="input-wrapper"><input type="number" id="real-inf" value="3.5"><span class="unit">%</span>
+            <div class="form-group"><label>이자/배당 소득세율</label>
+              <div class="input-wrapper"><select id="real-tax-rate">
+                  <option value="0">비과세 (0%)</option>
+                  <option value="1.4">새마을금고 등 (1.4%)</option>
+                  <option value="9.5">세금우대 (9.5%)</option>
+                  <option value="15.4" selected>일반과세 (15.4%)</option>
+                  <option value="other">직접 입력</option>
+                </select></div>
+            </div>
+            <div class="form-group" id="real-tax-manual-grp" style="display:none;"><label>직접 입력 세율</label>
+              <div class="input-wrapper"><input type="number" id="real-tax-manual" value="22" placeholder="예: 22"><span
+                  class="unit">%</span></div>
+            </div>
+
+            <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">경제 상황 가정</h3>
+            <div class="form-group"><label>예상 물가 상승률 (Inflation)</label>
+              <div class="input-wrapper"><input type="number" id="real-inf" value="2.5" step="0.1"><span
+                  class="unit">%</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcRealReturn()">구매력 변화 분석</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 진짜 수익률(구매력) 계산의 비밀</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. 왜 단순 뺄셈으로는 부족할까요?</strong><br>
+                단순히 (수익률 - 물가)로 계산하면 오차가 발생합니다. 물가가 오르면 원금의 가치도 함께 떨어지기 때문에 '나눗셈' 기반의 공식이 필요합니다.<br><br>
+                <strong>2. 정밀 계산 알고리즘 (피셔 방정식)</strong><br>
+                $$ 1 + R_{real} = \frac{1 + R_{after\_tax}}{1 + \text{Inflation}} $$<br>
+                <strong>단계 1:</strong> 세후 수익률 구하기 (세금이 먼저 빠져나갑니다)<br>
+                <strong>단계 2:</strong> 물가상승분으로 나누어 구매력 산출<br><br>
+                <strong>3. 예시 (금리 4%, 물가 3%, 세금 15.4%)</strong><br>
+                단순 계산: 4% - 3% = 1% 이득?<br>
+                정밀 계산: 0.37% 이득 (실제 구매력은 거의 제자리)
               </div>
-            </div>
-            <button class="btn-calc" onclick="calcRealReturn()">실질 수익 측정</button>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">실질 수익률</div>
+            <div class="result-label">실질 수익률 (구매력 증감)</div>
             <div class="result-value-main" id="real-res">0%</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <div class="result-row"><span>세후 명목 수익률</span><span id="real-res-after">0%</span></div>
+            <div class="result-row"><span>물가 상승률 효과</span><span id="real-res-inf" style="color:#ef4444">-0%</span></div>
+
+            <p id="real-desc"
+              style="font-size:0.9rem; color:var(--text-main); margin-top:15px; font-weight:600; text-align:center;">
+            </p>
           </div>
         </div>
       </div>
@@ -2035,10 +2076,50 @@
     }
 
     // 10. Real Return
+    // Handle Tax Input Toggle
+    document.getElementById('real-tax-rate').addEventListener('change', function () {
+      if (this.value === 'other') document.getElementById('real-tax-manual-grp').style.display = 'block';
+      else document.getElementById('real-tax-manual-grp').style.display = 'none';
+    });
+
     function calcRealReturn() {
-      const n = v('real-n') / 100, i = v('real-inf') / 100;
-      const real = ((1 + n) / (1 + i) - 1) * 100;
-      set('real-res', real.toFixed(2) + '%');
+      const nominal = v('real-n') / 100;
+      const inflation = v('real-inf') / 100;
+
+      // Get Tax Rate
+      let taxRate = 0;
+      const taxSelect = document.getElementById('real-tax-rate').value;
+      if (taxSelect === 'other') {
+        taxRate = v('real-tax-manual') / 100;
+      } else {
+        taxRate = parseFloat(taxSelect) / 100;
+      }
+
+      // Step 1: After Tax Return
+      const afterTax = nominal * (1 - taxRate);
+
+      // Step 2: Fisher Equation (1 + real) = (1 + nominal_after_tax) / (1 + inflation)
+      // Real = [ (1 + afterTax) / (1 + inflation) ] - 1
+      const real = ((1 + afterTax) / (1 + inflation)) - 1;
+      const realPercent = real * 100;
+
+      const afterTaxPercent = afterTax * 100;
+
+      set('real-res', realPercent.toFixed(2) + '%');
+      document.getElementById('real-res-after').innerText = afterTaxPercent.toFixed(2) + '%';
+      document.getElementById('real-res-inf').innerText = '-' + (v('real-inf')) + '%';
+
+      const descEl = document.getElementById('real-desc');
+      if (realPercent > 0) {
+        descEl.innerText = `🎉 축하합니다! 내 돈의 가치가 ${realPercent.toFixed(2)}% 증가했습니다.`;
+        descEl.style.color = '#10b981';
+      } else if (realPercent < 0) {
+        descEl.innerText = `⚠️ 주의! 겉으로는 벌었지만 실제 구매력은 ${Math.abs(realPercent).toFixed(2)}% 감소했습니다.`;
+        descEl.style.color = '#ef4444';
+      } else {
+        descEl.innerText = `내 돈의 가치가 그대로 유지되었습니다. (방어 성공)`;
+        descEl.style.color = 'var(--text-muted)';
+      }
     }
 
     // 11. Retirement Fund
