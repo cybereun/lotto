@@ -8,6 +8,7 @@
     <meta name="google-adsense-account" content="ca-pub-5655610048474795">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5655610048474795"
         crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/solarlunar/lib/solarlunar.js"></script>
     <meta name="description" content="D-day, 만 나이, 글자수 계산기, 단위 변환기 등 일상에 꼭 필요한 도구들을 한 곳에서 편리하게 이용하세요.">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
@@ -728,15 +729,35 @@
             document.getElementById('age-label').innerText = `${birthStr}생 (${zodiac}띠)`;
         }
 
-        // Lunar Placeholder
+        // Lunar/Solar Conversion
         function convertLunar() {
-            const date = document.getElementById('lunar-date').value;
-            if (!date) return;
-            // Real conversion requires massive table or API. We'll provide a mock logic that hints it works or use a very basic approximation
-            document.getElementById('lunar-val').innerText = "데이터 계산 중...";
-            setTimeout(() => {
-                document.getElementById('lunar-val').innerText = "변환 완료 (오차 가능)";
-            }, 500);
+            const dateStr = document.getElementById('lunar-date').value;
+            const mode = document.getElementById('lunar-mode').value;
+            const resultVal = document.getElementById('lunar-val');
+
+            if (!dateStr) return;
+
+            const date = new Date(dateStr);
+            const y = date.getFullYear();
+            const m = date.getMonth() + 1;
+            const d = date.getDate();
+
+            try {
+                let result;
+                if (mode === 's2l') {
+                    // Solar to Lunar
+                    result = solarLunar.solar2lunar(y, m, d);
+                    resultVal.style.fontSize = "1.8rem";
+                    resultVal.innerText = `${result.lYear}년 ${result.lMonth}월 ${result.lDay}일 (${result.isLeap ? '윤달' : '평달'})`;
+                } else {
+                    // Lunar to Solar
+                    result = solarLunar.lunar2solar(y, m, d);
+                    resultVal.style.fontSize = "1.8rem";
+                    resultVal.innerText = `${result.cYear}년 ${result.cMonth}월 ${result.cDay}일`;
+                }
+            } catch (error) {
+                resultVal.innerText = "변환 실패 (지원 범위 초과)";
+            }
         }
 
         // Word Count
