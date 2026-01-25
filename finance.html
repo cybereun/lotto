@@ -1445,273 +1445,300 @@
       <!-- 17. Net Pay / 4 Major Insurances -->
       <div id="inc-net" class="calculator-view">
         <div class="header-section">
-          <h1>실수령액 & 4대보험 계산기</h1>
-          <p>월급 기준으로 4대보험료와 소득세를 정밀하게 계산합니다. (2026년 요율)</p>
+          <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">급여 정보 입력</h3>
+          <div class="form-group"><label>월 급여 (세전)</label>
+            <div class="input-wrapper"><input type="number" id="net-salary" value="3000000"><span class="unit">원</span>
+            </div>
+          </div>
+          <div class="form-group"><label>비과세액 (식대 등)</label>
+            <div class="input-wrapper"><input type="number" id="net-nontax" value="200000"><span class="unit">원</span>
+            </div>
+          </div>
+          <div class="form-group"><label>부양가족 수</label>
+            <div class="input-wrapper"><input type="number" id="net-fam" value="1"><span class="unit">명</span></div>
+          </div>
+
+          <button class="btn-calc" onclick="calcNetPay()">실수령액 상세 계산</button>
+
+          <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+            <summary style="cursor:pointer; font-weight:700;">💡 실수령액 산출 공식 및 공제 항목</summary>
+            <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+              <strong>1. 실수령액 산출 공식 (The Logic)</strong><br>
+              순서: 비과세 제외 → 4대보험 계산 → 세금(간이세액) 계산<br>
+              $$ \text{실수령액} = \text{월 급여} - (\text{4대보험} + \text{세금}) $$<br><br>
+              <strong>2. 4대보험 공제율 (2026년 추정 기준)</strong><br>
+              - <strong>국민연금 (4.5%):</strong> 소득 상한액(약 640만원) 적용<br>
+              - <strong>건강보험 (3.545%):</strong> 매년 변동 가능성 있음<br>
+              - <strong>장기요양 (건보의 12.95%):</strong> 건강보험료 기준<br>
+              - <strong>고용보험 (0.9%):</strong> 실업급여 재원, 산재보험은 0원(회사부담)<br><br>
+              <strong>3. 세금 (Tax)</strong><br>
+              - <strong>근로소득세:</strong> 국세청 [근로소득 간이세액표] 기준<br>
+              - <strong>지방소득세:</strong> 소득세의 10%
+            </div>
+          </details>
         </div>
-        <div class="calc-card">
-          <div class="calc-inputs">
-            <div class="form-group"><label>월 급여 (세전)</label>
-              <div class="input-wrapper"><input type="number" id="net-salary" value="3000000"><span
-                  class="unit">원</span></div>
-            </div>
-            <button class="btn-calc" onclick="calcNetPay()">계산하기</button>
-            <div
-              style="margin-top:20px; font-size:0.9rem; color:var(--text-muted); background:rgba(0,0,0,0.03); padding:15px; border-radius:12px;">
-              <strong>💡 2026년 4대보험 요율 적용</strong><br>
-              - 국민연금: 4.5% (기준소득월액 상한액 상향 반영)<br>
-              - 건강보험: 3.545% (동결 가정)<br>
-              - 장기요양: 건보료의 12.95%<br>
-              - 고용보험: 0.9%
-            </div>
-          </div>
-          <div class="result-panel">
-            <div class="result-label">실수령액</div>
-            <div class="result-value-main" id="net-res-final">0</div>
-            <div class="result-row"><span>4대보험 합계</span><span id="net-res-ins">0</span></div>
-            <div class="result-row"><span>소득세(지방세포함)</span><span id="net-res-tax">0</span></div>
-          </div>
-        </div>
-      </div>
+        <div class="result-panel">
+          <div class="result-label">월 예상 실수령액</div>
+          <div class="result-value-main" id="net-res-final">0</div>
 
-      <!-- 18. Severance Pay -->
-      <div id="inc-severance" class="calculator-view">
-        <div class="header-section">
-          <h1>퇴직금 계산기</h1>
-          <p>근로기준법에 따른 예상 퇴직금을 계산합니다. (2026년 통상임금 기준)</p>
-        </div>
-        <div class="calc-card">
-          <div class="calc-inputs">
-            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">퇴직 전 3개월 임금 정보</h3>
-            <div class="form-group"><label>직전 3개월 월 기본급(평균)</label>
-              <div class="input-wrapper"><input type="number" id="sev-salary" value="3000000"><span
-                  class="unit">원</span></div>
-            </div>
-            <div class="form-group"><label>1일 통상임금 (선택사항, 비교용)</label>
-              <div class="input-wrapper"><input type="number" id="sev-ordinary" placeholder="모르면 비워두세요"><span
-                  class="unit">원</span></div>
-            </div>
+          <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
 
-            <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">추가 수당 정보</h3>
-            <div class="form-group"><label>연간 상여금 총액</label>
-              <div class="input-wrapper"><input type="number" id="sev-bonus" value="0"><span class="unit">원</span></div>
-            </div>
-            <div class="form-group"><label>연차 수당 (연간 지급액)</label>
-              <div class="input-wrapper"><input type="number" id="sev-leave" value="0"><span class="unit">원</span></div>
-            </div>
+          <h4 style="margin:10px 0; color:var(--text-main);">4대보험 상세 (본인부담금)</h4>
+          <div class="result-row"><span>국민연금 (4.5%)</span><span id="net-res-np">0</span></div>
+          <div class="result-row"><span>건강보험 (3.545%)</span><span id="net-res-hi">0</span></div>
+          <div class="result-row"><span>장기요양 (건보의 12.95%)</span><span id="net-res-ci">0</span></div>
+          <div class="result-row"><span>고용보험 (0.9%)</span><span id="net-res-ei">0</span></div>
+          <div class="result-row" style="font-weight:700; color:var(--text-muted)"><span>보험 합계</span><span
+              id="net-res-ins">0</span></div>
 
-            <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">근무 기간 확인</h3>
-            <div class="form-group"><label>근무 일수 (재직일수)</label>
-              <div class="input-wrapper"><input type="number" id="sev-days" value="730"><span class="unit">일</span>
-              </div>
-            </div>
-            <button class="btn-calc" onclick="calcSeverance()">상세 퇴직금 계산</button>
-
-            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
-              <summary style="cursor:pointer; font-weight:700;">💡 퇴직금 산정 공식 및 핵심 체크포인트</summary>
-              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
-                <strong>1. 퇴직금 산정 공식 (Formula)</strong><br>
-                $$ \text{퇴직금} = \text{1일 평균임금} \times 30일 \times \frac{\text{재직일수}}{365} $$<br><br>
-                <strong>2. 계산을 위한 핵심 변수와 절차</strong><br>
-                <strong>Step 1. 자격 요건 확인:</strong><br>
-                1년 이상 계속 근로 & 주 15시간 이상 근무.<br><br>
-                <strong>Step 2. '1일 평균임금' 산출:</strong><br>
-                (3개월 임금 총액 + 연간 상여금×3/12 + 연차수당×3/12) ÷ 3개월 일수<br><br>
-                <strong style="color:var(--primary);">💡 중요 체크포인트 (통상임금 vs 평균임금)</strong><br>
-                계산된 평균임금이 통상임금보다 적을 경우, <strong>통상임금</strong>을 기준으로 계산합니다. (근로자 유리 원칙)<br><br>
-                <strong>Step 3. 세금(퇴직소득세) 공제:</strong><br>
-                결과값은 '세전'이며, 실수령 시 근속연수 공제 등을 적용한 소득세가 차감됩니다.
-              </div>
-            </details>
-          </div>
-          <div class="result-panel">
-            <div class="result-label">예상 퇴직금 (세전)</div>
-            <div class="result-value-main" id="sev-res">0</div>
-
-            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
-
-            <div class="result-row"><span>1일 평균임금</span><span id="sev-res-day">0</span></div>
-            <div class="result-row"><span>적용 기준</span><span id="sev-res-type" style="color:var(--accent)">평균임금</span>
-            </div>
-
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:10px;">
-              * 실제 지급액은 퇴직소득세 공제 후 금액입니다.<br>
-              * 정확한 계산을 위해 급여명세서를 참고하세요.
-            </p>
-          </div>
+          <h4 style="margin:15px 0 10px 0; color:var(--text-main);">세금 상세 (간이세액)</h4>
+          <div class="result-row"><span>소득세</span><span id="net-res-tax-main">0</span></div>
+          <div class="result-row"><span>지방소득세 (10%)</span><span id="net-res-tax-local">0</span></div>
+          <div class="result-row" style="font-weight:700; color:var(--text-muted)"><span>세금 합계</span><span
+              id="net-res-tax">0</span></div>
         </div>
       </div>
+  </div>
 
-      <!-- 19. Earned Income Tax -->
-      <div id="inc-tax" class="calculator-view">
-        <div class="header-section">
-          <h1>근로소득세 계산기 (연말정산용)</h1>
-          <p>연간 총 급여액에 따른 과세표준과 예상 세액을 산출합니다. (2026년 세법)</p>
+  <!-- 18. Severance Pay -->
+  <div id="inc-severance" class="calculator-view">
+    <div class="header-section">
+      <h1>퇴직금 계산기</h1>
+      <p>근로기준법에 따른 예상 퇴직금을 계산합니다. (2026년 통상임금 기준)</p>
+    </div>
+    <div class="calc-card">
+      <div class="calc-inputs">
+        <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">퇴직 전 3개월 임금 정보</h3>
+        <div class="form-group"><label>직전 3개월 월 기본급(평균)</label>
+          <div class="input-wrapper"><input type="number" id="sev-salary" value="3000000"><span class="unit">원</span>
+          </div>
         </div>
-        <div class="calc-card">
-          <div class="calc-inputs">
-            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">1. 사용자 입력 데이터 (Input Data)</h3>
-            <div class="form-group"><label>총 급여액 (연봉, 세전)</label>
-              <div class="input-wrapper"><input type="number" id="eit-salary" value="50000000"><span
-                  class="unit">원</span></div>
-            </div>
-            <div class="form-group"><label>비과세 소득 (연간 합계)</label>
-              <div class="input-wrapper"><input type="number" id="eit-nontax" value="2400000" placeholder="월 식대 등"><span
-                  class="unit">원</span></div>
-            </div>
-            <div class="form-group"><label>부양가족 수 (본인 포함)</label>
-              <div class="input-wrapper"><input type="number" id="eit-fam" value="1"><span class="unit">명</span></div>
-            </div>
-            <div class="form-group"><label>20세 이하 자녀 수</label>
-              <div class="input-wrapper"><input type="number" id="eit-child" value="0"><span class="unit">명</span></div>
-            </div>
+        <div class="form-group"><label>1일 통상임금 (선택사항, 비교용)</label>
+          <div class="input-wrapper"><input type="number" id="sev-ordinary" placeholder="모르면 비워두세요"><span
+              class="unit">원</span></div>
+        </div>
 
-            <button class="btn-calc" onclick="calcEarnedTax()">상세 세금 계산</button>
+        <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">추가 수당 정보</h3>
+        <div class="form-group"><label>연간 상여금 총액</label>
+          <div class="input-wrapper"><input type="number" id="sev-bonus" value="0"><span class="unit">원</span></div>
+        </div>
+        <div class="form-group"><label>연차 수당 (연간 지급액)</label>
+          <div class="input-wrapper"><input type="number" id="sev-leave" value="0"><span class="unit">원</span></div>
+        </div>
 
-            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
-              <summary style="cursor:pointer; font-weight:700;">💡 계산 로직 및 요율 정보 (System Data)</summary>
-              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
-                <strong>2. 세법 및 요율 데이터 (System Data)</strong><br>
-                - <strong>근로소득공제:</strong> 급여 구간별 차등 공제 (최대 2,000만원)<br>
-                - <strong>인적공제:</strong> 1인당 150만원 기본공제<br>
-                - <strong>4대 보험료 (자동공제 추산):</strong><br>
-                &nbsp;&nbsp;• 국민연금: 4.5% (상한 적용)<br>
-                &nbsp;&nbsp;• 건강보험: 3.545% + 요양보험(건보의 12.95%)<br>
-                &nbsp;&nbsp;• 고용보험: 0.9%<br>
-                - <strong>세액공제:</strong> 근로소득세액공제(한도적용), 자녀세액공제(1인 15만원)<br><br>
-                <strong>3. 계산 로직 (Algorithm)</strong><br>
-                1) <strong>과세대상 급여</strong> = 총 급여 - 비과세<br>
-                2) <strong>근로소득금액</strong> = 과세대상 급여 - 근로소득공제<br>
-                3) <strong>과세표준</strong> = 근로소득금액 - 인적공제 - 4대보험공제 - 기타공제(표준 등)<br>
-                4) <strong>산출세액</strong> = 과세표준 × 기본세율 - 누진공제<br>
-                5) <strong>결정세액</strong> = 산출세액 - 세액공제
-              </div>
-            </details>
+        <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">근무 기간 확인</h3>
+        <div class="form-group"><label>근무 일수 (재직일수)</label>
+          <div class="input-wrapper"><input type="number" id="sev-days" value="730"><span class="unit">일</span>
           </div>
-          <div class="result-panel">
-            <div class="result-label">예상 결정세액 (지방세 포함)</div>
-            <div class="result-value-main" id="eit-res-final">0</div>
+        </div>
+        <button class="btn-calc" onclick="calcSeverance()">상세 퇴직금 계산</button>
 
-            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
-
-            <div class="result-row"><span>① 과세대상 급여</span><span id="eit-step-1">0</span></div>
-            <div class="result-row"><span>② 근로소득금액</span><span id="eit-step-2">0</span></div>
-            <div class="result-row"><span>③ 과세표준</span><span id="eit-step-3">0</span></div>
-            <div class="result-row"><span>④ 산출세액</span><span id="eit-step-4">0</span></div>
-            <div class="result-row"><span>⑤ 세액공제</span><span id="eit-step-5" style="color:#10b981">0</span></div>
-
-            <div style="background:var(--bg-body); padding:10px; border-radius:8px; margin-top:10px; font-size:0.9rem;">
-              <div class="result-row"><span>소득세</span><span id="eit-res-tax">0</span></div>
-              <div class="result-row"><span>지방소득세(10%)</span><span id="eit-res-local">0</span></div>
-            </div>
+        <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+          <summary style="cursor:pointer; font-weight:700;">💡 퇴직금 산정 공식 및 핵심 체크포인트</summary>
+          <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+            <strong>1. 퇴직금 산정 공식 (Formula)</strong><br>
+            $$ \text{퇴직금} = \text{1일 평균임금} \times 30일 \times \frac{\text{재직일수}}{365} $$<br><br>
+            <strong>2. 계산을 위한 핵심 변수와 절차</strong><br>
+            <strong>Step 1. 자격 요건 확인:</strong><br>
+            1년 이상 계속 근로 & 주 15시간 이상 근무.<br><br>
+            <strong>Step 2. '1일 평균임금' 산출:</strong><br>
+            (3개월 임금 총액 + 연간 상여금×3/12 + 연차수당×3/12) ÷ 3개월 일수<br><br>
+            <strong style="color:var(--primary);">💡 중요 체크포인트 (통상임금 vs 평균임금)</strong><br>
+            계산된 평균임금이 통상임금보다 적을 경우, <strong>통상임금</strong>을 기준으로 계산합니다. (근로자 유리 원칙)<br><br>
+            <strong>Step 3. 세금(퇴직소득세) 공제:</strong><br>
+            결과값은 '세전'이며, 실수령 시 근속연수 공제 등을 적용한 소득세가 차감됩니다.
           </div>
+        </details>
+      </div>
+      <div class="result-panel">
+        <div class="result-label">예상 퇴직금 (세전)</div>
+        <div class="result-value-main" id="sev-res">0</div>
+
+        <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+        <div class="result-row"><span>1일 평균임금</span><span id="sev-res-day">0</span></div>
+        <div class="result-row"><span>적용 기준</span><span id="sev-res-type" style="color:var(--accent)">평균임금</span>
+        </div>
+
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:10px;">
+          * 실제 지급액은 퇴직소득세 공제 후 금액입니다.<br>
+          * 정확한 계산을 위해 급여명세서를 참고하세요.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 19. Earned Income Tax -->
+  <div id="inc-tax" class="calculator-view">
+    <div class="header-section">
+      <h1>근로소득세 계산기 (연말정산용)</h1>
+      <p>연간 총 급여액에 따른 과세표준과 예상 세액을 산출합니다. (2026년 세법)</p>
+    </div>
+    <div class="calc-card">
+      <div class="calc-inputs">
+        <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">1. 사용자 입력 데이터 (Input Data)</h3>
+        <div class="form-group"><label>총 급여액 (연봉, 세전)</label>
+          <div class="input-wrapper"><input type="number" id="eit-salary" value="50000000"><span class="unit">원</span>
+          </div>
+        </div>
+        <div class="form-group"><label>비과세 소득 (연간 합계)</label>
+          <div class="input-wrapper"><input type="number" id="eit-nontax" value="2400000" placeholder="월 식대 등"><span
+              class="unit">원</span></div>
+        </div>
+        <div class="form-group"><label>부양가족 수 (본인 포함)</label>
+          <div class="input-wrapper"><input type="number" id="eit-fam" value="1"><span class="unit">명</span></div>
+        </div>
+        <div class="form-group"><label>20세 이하 자녀 수</label>
+          <div class="input-wrapper"><input type="number" id="eit-child" value="0"><span class="unit">명</span></div>
+        </div>
+
+        <button class="btn-calc" onclick="calcEarnedTax()">상세 세금 계산</button>
+
+        <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+          <summary style="cursor:pointer; font-weight:700;">💡 계산 로직 및 요율 정보 (System Data)</summary>
+          <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+            <strong>2. 세법 및 요율 데이터 (System Data)</strong><br>
+            - <strong>근로소득공제:</strong> 급여 구간별 차등 공제 (최대 2,000만원)<br>
+            - <strong>인적공제:</strong> 1인당 150만원 기본공제<br>
+            - <strong>4대 보험료 (자동공제 추산):</strong><br>
+            &nbsp;&nbsp;• 국민연금: 4.5% (상한 적용)<br>
+            &nbsp;&nbsp;• 건강보험: 3.545% + 요양보험(건보의 12.95%)<br>
+            &nbsp;&nbsp;• 고용보험: 0.9%<br>
+            - <strong>세액공제:</strong> 근로소득세액공제(한도적용), 자녀세액공제(1인 15만원)<br><br>
+            <strong>3. 계산 로직 (Algorithm)</strong><br>
+            1) <strong>과세대상 급여</strong> = 총 급여 - 비과세<br>
+            2) <strong>근로소득금액</strong> = 과세대상 급여 - 근로소득공제<br>
+            3) <strong>과세표준</strong> = 근로소득금액 - 인적공제 - 4대보험공제 - 기타공제(표준 등)<br>
+            4) <strong>산출세액</strong> = 과세표준 × 기본세율 - 누진공제<br>
+            5) <strong>결정세액</strong> = 산출세액 - 세액공제
+          </div>
+        </details>
+      </div>
+      <div class="result-panel">
+        <div class="result-label">예상 결정세액 (지방세 포함)</div>
+        <div class="result-value-main" id="eit-res-final">0</div>
+
+        <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+        <div class="result-row"><span>① 과세대상 급여</span><span id="eit-step-1">0</span></div>
+        <div class="result-row"><span>② 근로소득금액</span><span id="eit-step-2">0</span></div>
+        <div class="result-row"><span>③ 과세표준</span><span id="eit-step-3">0</span></div>
+        <div class="result-row"><span>④ 산출세액</span><span id="eit-step-4">0</span></div>
+        <div class="result-row"><span>⑤ 세액공제</span><span id="eit-step-5" style="color:#10b981">0</span></div>
+
+        <div style="background:var(--bg-body); padding:10px; border-radius:8px; margin-top:10px; font-size:0.9rem;">
+          <div class="result-row"><span>소득세</span><span id="eit-res-tax">0</span></div>
+          <div class="result-row"><span>지방소득세(10%)</span><span id="eit-res-local">0</span></div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- 20. Global Income Tax -->
-      <div id="tax-global" class="calculator-view">
-        <div class="header-section">
-          <h1>종합소득세 계산기</h1>
-          <p>사업소득, 기타소득 등 종합소득에 대한 세금을 계산합니다. (2026년 과세표준)</p>
-        </div>
-        <div class="calc-card">
-          <div class="calc-inputs">
-            <div class="form-group"><label>연간 총 수입금액 (매출)</label>
-              <div class="input-wrapper"><input type="number" id="git-revenue" value="80000000"><span
-                  class="unit">원</span></div>
-            </div>
-            <div class="form-group"><label>필요 경비</label>
-              <div class="input-wrapper"><input type="number" id="git-expense" value="30000000"><span
-                  class="unit">원</span></div>
-            </div>
-            <div class="form-group"><label>소득공제 (기본공제 등)</label>
-              <div class="input-wrapper"><input type="number" id="git-deduct" value="1500000"><span
-                  class="unit">원</span></div>
-            </div>
-            <button class="btn-calc" onclick="calcGlobalTax()">종합소득세 계산</button>
-          </div>
-          <div class="result-panel">
-            <div class="result-label">납부할 세액 (지방세 포함)</div>
-            <div class="result-value-main" id="git-res-final">0</div>
-            <div class="result-row"><span>종합소득금액</span><span id="git-res-inc">0</span></div>
-            <div class="result-row"><span>과세표준</span><span id="git-res-std">0</span></div>
-            <div class="result-row"><span>산출세액</span><span id="git-res-tax">0</span></div>
-            <div class="result-row"><span>지방소득세(10%)</span><span id="git-res-local">0</span></div>
+  <!-- 20. Global Income Tax -->
+  <div id="tax-global" class="calculator-view">
+    <div class="header-section">
+      <h1>종합소득세 계산기</h1>
+      <p>사업소득, 기타소득 등 종합소득에 대한 세금을 계산합니다. (2026년 과세표준)</p>
+    </div>
+    <div class="calc-card">
+      <div class="calc-inputs">
+        <div class="form-group"><label>연간 총 수입금액 (매출)</label>
+          <div class="input-wrapper"><input type="number" id="git-revenue" value="80000000"><span class="unit">원</span>
           </div>
         </div>
+        <div class="form-group"><label>필요 경비</label>
+          <div class="input-wrapper"><input type="number" id="git-expense" value="30000000"><span class="unit">원</span>
+          </div>
+        </div>
+        <div class="form-group"><label>소득공제 (기본공제 등)</label>
+          <div class="input-wrapper"><input type="number" id="git-deduct" value="1500000"><span class="unit">원</span>
+          </div>
+        </div>
+        <button class="btn-calc" onclick="calcGlobalTax()">종합소득세 계산</button>
       </div>
-
-      <!-- 21. VAT -->
-      <div id="tax-vat" class="calculator-view">
-        <div class="header-section">
-          <h1>부가가치세 (VAT) 계산기</h1>
-          <p>공급가액 또는 합계금액을 기준으로 부가세를 계산합니다.</p>
-        </div>
-        <div class="calc-card">
-          <div class="calc-inputs">
-            <div class="form-group"><label>기준 금액</label>
-              <div class="input-wrapper"><input type="number" id="vat-amt" value="110000"><span class="unit">원</span>
-              </div>
-            </div>
-            <div class="form-group"><label>계산 기준</label>
-              <div class="input-wrapper"><select id="vat-type">
-                  <option value="total">합계금액(부가세포함)에서 분리</option>
-                  <option value="supply">공급가액에 부가세 더하기</option>
-                </select></div>
-            </div>
-            <button class="btn-calc" onclick="calcVAT()">VAT 계산</button>
-          </div>
-          <div class="result-panel">
-            <div class="result-label">부가가치세</div>
-            <div class="result-value-main" id="vat-res-tax">0</div>
-            <div class="result-row"><span>공급가액</span><span id="vat-res-supply">0</span></div>
-            <div class="result-row"><span>합계금액</span><span id="vat-res-total">0</span></div>
-          </div>
-        </div>
+      <div class="result-panel">
+        <div class="result-label">납부할 세액 (지방세 포함)</div>
+        <div class="result-value-main" id="git-res-final">0</div>
+        <div class="result-row"><span>종합소득금액</span><span id="git-res-inc">0</span></div>
+        <div class="result-row"><span>과세표준</span><span id="git-res-std">0</span></div>
+        <div class="result-row"><span>산출세액</span><span id="git-res-tax">0</span></div>
+        <div class="result-row"><span>지방소득세(10%)</span><span id="git-res-local">0</span></div>
       </div>
+    </div>
+  </div>
 
-      <!-- 22. Stock Yield & Tax -->
-      <div id="tax-stock" class="calculator-view">
-        <div class="header-section">
-          <h1>주식 수익률 & 세금 계산기</h1>
-          <p>매매차익과 증권거래세, 양도소득세(해외/대주주)를 포함한 실질 수익률을 계산합니다. (2026년 세제안)</p>
-        </div>
-        <div class="calc-card">
-          <div class="calc-inputs">
-            <div class="form-group"><label>매수 단가</label>
-              <div class="input-wrapper"><input type="number" id="stk-buy" value="10000"><span class="unit">원/$</span>
-              </div>
-            </div>
-            <div class="form-group"><label>매도 단가</label>
-              <div class="input-wrapper"><input type="number" id="stk-sell" value="15000"><span class="unit">원/$</span>
-              </div>
-            </div>
-            <div class="form-group"><label>수량</label>
-              <div class="input-wrapper"><input type="number" id="stk-qty" value="100"><span class="unit">주</span></div>
-            </div>
-            <div class="form-group"><label>증권사 수수료율 (편도)</label>
-              <div class="input-wrapper"><input type="number" id="stk-fee-rate" value="0.015"><span
-                  class="unit">%</span></div>
-            </div>
-            <div class="form-group"><label>세금 유형</label>
-              <div class="input-wrapper"><select id="stk-tax-type">
-                  <option value="kor">국내주식 (거래세 0.15% - 2025/26 인하분)</option>
-                  <option value="usa">해외주식/대주주 (양도세 22%)</option>
-                </select></div>
-            </div>
-            <button class="btn-calc" onclick="calcStockTax()">수익률 계산</button>
-          </div>
-          <div class="result-panel">
-            <div class="result-label">실현 수익금 (세후)</div>
-            <div class="result-value-main" id="stk-res-net">0</div>
-            <div class="result-row"><span>수익률</span><span id="stk-res-yield"
-                style="color:var(--primary); font-weight:700;">0%</span></div>
-            <div class="result-row"><span>총 수수료</span><span id="stk-res-fee">0</span></div>
-            <div class="result-row"><span>총 세금(거래세/양도세)</span><span id="stk-res-tax">0</span></div>
+  <!-- 21. VAT -->
+  <div id="tax-vat" class="calculator-view">
+    <div class="header-section">
+      <h1>부가가치세 (VAT) 계산기</h1>
+      <p>공급가액 또는 합계금액을 기준으로 부가세를 계산합니다.</p>
+    </div>
+    <div class="calc-card">
+      <div class="calc-inputs">
+        <div class="form-group"><label>기준 금액</label>
+          <div class="input-wrapper"><input type="number" id="vat-amt" value="110000"><span class="unit">원</span>
           </div>
         </div>
+        <div class="form-group"><label>계산 기준</label>
+          <div class="input-wrapper"><select id="vat-type">
+              <option value="total">합계금액(부가세포함)에서 분리</option>
+              <option value="supply">공급가액에 부가세 더하기</option>
+            </select></div>
+        </div>
+        <button class="btn-calc" onclick="calcVAT()">VAT 계산</button>
       </div>
+      <div class="result-panel">
+        <div class="result-label">부가가치세</div>
+        <div class="result-value-main" id="vat-res-tax">0</div>
+        <div class="result-row"><span>공급가액</span><span id="vat-res-supply">0</span></div>
+        <div class="result-row"><span>합계금액</span><span id="vat-res-total">0</span></div>
+      </div>
+    </div>
+  </div>
 
-    </main>
+  <!-- 22. Stock Yield & Tax -->
+  <div id="tax-stock" class="calculator-view">
+    <div class="header-section">
+      <h1>주식 수익률 & 세금 계산기</h1>
+      <p>매매차익과 증권거래세, 양도소득세(해외/대주주)를 포함한 실질 수익률을 계산합니다. (2026년 세제안)</p>
+    </div>
+    <div class="calc-card">
+      <div class="calc-inputs">
+        <div class="form-group"><label>매수 단가</label>
+          <div class="input-wrapper"><input type="number" id="stk-buy" value="10000"><span class="unit">원/$</span>
+          </div>
+        </div>
+        <div class="form-group"><label>매도 단가</label>
+          <div class="input-wrapper"><input type="number" id="stk-sell" value="15000"><span class="unit">원/$</span>
+          </div>
+        </div>
+        <div class="form-group"><label>수량</label>
+          <div class="input-wrapper"><input type="number" id="stk-qty" value="100"><span class="unit">주</span></div>
+        </div>
+        <div class="form-group"><label>증권사 수수료율 (편도)</label>
+          <div class="input-wrapper"><input type="number" id="stk-fee-rate" value="0.015"><span class="unit">%</span>
+          </div>
+        </div>
+        <div class="form-group"><label>세금 유형</label>
+          <div class="input-wrapper"><select id="stk-tax-type">
+              <option value="kor">국내주식 (거래세 0.15% - 2025/26 인하분)</option>
+              <option value="usa">해외주식/대주주 (양도세 22%)</option>
+            </select></div>
+        </div>
+        <button class="btn-calc" onclick="calcStockTax()">수익률 계산</button>
+      </div>
+      <div class="result-panel">
+        <div class="result-label">실현 수익금 (세후)</div>
+        <div class="result-value-main" id="stk-res-net">0</div>
+        <div class="result-row"><span>수익률</span><span id="stk-res-yield"
+            style="color:var(--primary); font-weight:700;">0%</span></div>
+        <div class="result-row"><span>총 수수료</span><span id="stk-res-fee">0</span></div>
+        <div class="result-row"><span>총 세금(거래세/양도세)</span><span id="stk-res-tax">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  </main>
   </div>
 
   <script>
@@ -2123,28 +2150,51 @@
 
     function calcNetPay() {
       const monthly = parseFloat(document.getElementById('net-salary').value) || 0;
-      // Similar to calcSalary but input is monthly
-      let npBase = monthly;
-      if (npBase > 6400000) npBase = 6400000;
-      let np = npBase * 0.045;
-      let hi = monthly * 0.03545;
-      let ci = hi * 0.1295;
-      let ei = monthly * 0.009;
+      const nontax = parseFloat(document.getElementById('net-nontax').value) || 0;
+      const fam = parseFloat(document.getElementById('net-fam').value) || 1;
 
-      // Simple tax estimation (3% roughly for simple calc or reuse annual)
-      // Let's try to be a bit more dynamic:
-      let annualEst = monthly * 12;
-      let annualTax = getEarnedIncomeTax(annualEst);
-      let monthlyTax = annualTax / 12;
-      let localTax = monthlyTax * 0.1; // Local income tax
+      let monthlyTaxable = monthly - nontax;
+      if (monthlyTaxable < 0) monthlyTaxable = 0;
+
+      // Similar to calcSalary but input is monthly
+      let npBase = monthlyTaxable;
+      if (npBase > 6400000) npBase = 6400000;
+
+      // 4 Major Insurances
+      let np = npBase * 0.045; // National Pension
+      let hi = monthlyTaxable * 0.03545; // Health
+      let ci = hi * 0.1295; // Care
+      let ei = monthlyTaxable * 0.009; // Employment
+
+      // Floors
+      np = Math.floor(np / 10) * 10;
+      hi = Math.floor(hi / 10) * 10;
+      ci = Math.floor(ci / 10) * 10;
+      ei = Math.floor(ei / 10) * 10;
+
+      // Simple tax estimation (Use Annual logic / 12 for better accuracy or 3%)
+      let annualEst = monthly * 12; // Simple projection
+      let annualTax = getEarnedIncomeTax(annualEst); // Reuse the annual tax logic
+      // Adjustment: 간이세액표 is slightly different from Annual/12 usually (80-120% choice), but for estimate:
+      let monthlyTax = Math.floor((annualTax / 12) / 10) * 10;
+
+      let localTax = Math.floor((monthlyTax * 0.1) / 10) * 10;
 
       let totalIns = np + hi + ci + ei;
       let totalTax = monthlyTax + localTax;
       let final = monthly - totalIns - totalTax;
 
       document.getElementById('net-res-final').innerText = formatNum(final) + '원';
-      document.getElementById('net-res-ins').innerText = formatNum(totalIns) + '원';
-      document.getElementById('net-res-tax').innerText = formatNum(totalTax) + '원';
+
+      document.getElementById('net-res-np').innerText = '-' + formatNum(np) + '원';
+      document.getElementById('net-res-hi').innerText = '-' + formatNum(hi) + '원';
+      document.getElementById('net-res-ci').innerText = '-' + formatNum(ci) + '원';
+      document.getElementById('net-res-ei').innerText = '-' + formatNum(ei) + '원';
+      document.getElementById('net-res-ins').innerText = '-' + formatNum(totalIns) + '원';
+
+      document.getElementById('net-res-tax-main').innerText = '-' + formatNum(monthlyTax) + '원';
+      document.getElementById('net-res-tax-local').innerText = '-' + formatNum(localTax) + '원';
+      document.getElementById('net-res-tax').innerText = '-' + formatNum(totalTax) + '원';
     }
 
     function calcSeverance() {
