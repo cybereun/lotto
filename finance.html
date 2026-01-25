@@ -1407,14 +1407,39 @@
       <div id="inc-salary" class="calculator-view">
         <div class="header-section">
           <h1>연봉 계산기</h1>
-          <p>내 연봉의 실수령액과 공제항목을 한눈에 확인하세요. (2026년 기준)</p>
+          <p>내 연봉의 실수령액과 월급 ↔ 연봉 환산을 한눈에 확인하세요. (2026년 기준)</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
-            <div class="form-group"><label>연봉 (세전)</label>
+            <!-- Mode Toggle Tabs -->
+            <div style="display:flex; margin-bottom:20px; border-bottom:1px solid var(--border);">
+              <button id="tab-sal-y" onclick="setSalaryMode('year')"
+                style="flex:1; padding:10px; background:var(--bg-body); border:none; border-bottom:2px solid var(--primary); font-weight:700; cursor:pointer; color:var(--text-main);">
+                연봉 → 월급
+              </button>
+              <button id="tab-sal-m" onclick="setSalaryMode('month')"
+                style="flex:1; padding:10px; background:var(--bg-body); border:none; border-bottom:2px solid transparent; color:var(--text-muted); cursor:pointer;">
+                월급 → 연봉
+              </button>
+            </div>
+
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);" id="sal-input-title">연봉 정보 입력</h3>
+
+            <div class="form-group"><label id="sal-amount-label">연봉 (세전)</label>
               <div class="input-wrapper"><input type="number" id="sal-amount" value="50000000"><span
                   class="unit">원</span></div>
             </div>
+
+            <div class="form-group" id="sal-severance-grp"><label>퇴직금 포함 여부</label>
+              <div class="input-wrapper">
+                <select id="sal-severance">
+                  <option value="exclude">퇴직금 별도 (12분의 1)</option>
+                  <option value="include">퇴직금 포함 (13분의 1)</option>
+                </select>
+              </div>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">* '퇴직금 포함' 선택 시 월 실수령액이 줄어듭니다.</p>
+            </div>
+
             <div class="form-group"><label>비과세액 (월 식대 등)</label>
               <div class="input-wrapper"><input type="number" id="sal-nontax" value="200000"><span class="unit">원</span>
               </div>
@@ -1425,19 +1450,44 @@
             <div class="form-group"><label>20세 이하 자녀 수</label>
               <div class="input-wrapper"><input type="number" id="sal-child" value="0"><span class="unit">명</span></div>
             </div>
-            <button class="btn-calc" onclick="calcSalary()">계산하기</button>
+            <button class="btn-calc" onclick="calcSalary()">상세 내역 확인</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 연봉의 해부학 및 환산 로직</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. 연봉의 구성 요소 (Anatomy)</strong><br>
+                - <strong>계약 연봉 (Gross):</strong> 근로계약서상 세전 금액<br>
+                - <strong>공제 금액 (Deductions):</strong> 4대보험 + 세금 (국가가 미리 공제)<br>
+                - <strong>실수령액 (Net):</strong> 실제 입금액<br><br>
+                <strong>2. 필수 확인: '퇴직금'의 위치</strong><br>
+                - <strong>별도 (일반적):</strong> 연봉 ÷ 12 = 월급. 유리함.<br>
+                - <strong>포함 (주의):</strong> 연봉 ÷ 13 = 월급. 1/13은 퇴직 시 별도 지급.<br><br>
+                <strong>3. 환산 로직</strong><br>
+                - <strong>연봉 → 월급:</strong> (연봉 ÷ 12 또는 13) - 공제액<br>
+                - <strong>월급 → 연봉:</strong> (세전 월급 × 12) + 상여금 등
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">월 예상 실수령액</div>
+            <div class="result-label" id="sal-res-label">월 예상 실수령액</div>
             <div class="result-value-main" id="sal-res-net">0</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
             <div class="result-row"><span>국민연금 (4.5%)</span><span id="sal-res-np">0</span></div>
             <div class="result-row"><span>건강보험 (3.545%)</span><span id="sal-res-hi">0</span></div>
             <div class="result-row"><span>요양보험 (12.95%)</span><span id="sal-res-ci">0</span></div>
             <div class="result-row"><span>고용보험 (0.9%)</span><span id="sal-res-ei">0</span></div>
-            <div class="result-row"><span>근로소득세(간이세액)</span><span id="sal-res-tax">0</span></div>
+            <div class="result-row"><span>소득세(지방세포함)</span><span id="sal-res-tax">0</span></div>
             <div class="result-row"
               style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px; font-weight:700;"><span>총
                 공제액</span><span id="sal-res-deduct" style="color:#ef4444">0</span></div>
+
+            <div id="sal-res-year-grp"
+              style="display:none; margin-top:15px; background:var(--bg-body); padding:10px; border-radius:8px;">
+              <div class="result-row" style="font-weight:700; color:var(--primary);"><span>환산 연봉 (세전)</span><span
+                  id="sal-res-gross-year">0</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -2096,12 +2146,60 @@
       set('ra-res-exclusive', fmt.format(exclusive.toFixed(1)) + '㎡');
     }
     // --- Income & Salary Logic ---
+    let salaryMode = 'year'; // year (연봉->월급) or month (월급->연봉)
+
+    function setSalaryMode(mode) {
+      salaryMode = mode;
+      const tabY = document.getElementById('tab-sal-y');
+      const tabM = document.getElementById('tab-sal-m');
+      const title = document.getElementById('sal-input-title');
+      const label = document.getElementById('sal-amount-label');
+      const sevGrp = document.getElementById('sal-severance-grp');
+      const resLabel = document.getElementById('sal-res-label');
+      const resYearGrp = document.getElementById('sal-res-year-grp');
+
+      if (mode === 'year') {
+        tabY.style.borderBottomColor = 'var(--primary)'; tabY.style.color = 'var(--text-main)';
+        tabM.style.borderBottomColor = 'transparent'; tabM.style.color = 'var(--text-muted)';
+        title.innerText = "연봉 정보 입력";
+        label.innerText = "연봉 (세전)";
+        sevGrp.style.display = 'block';
+        resLabel.innerText = "월 예상 실수령액";
+        resYearGrp.style.display = 'none';
+      } else {
+        tabM.style.borderBottomColor = 'var(--primary)'; tabM.style.color = 'var(--text-main)';
+        tabY.style.borderBottomColor = 'transparent'; tabY.style.color = 'var(--text-muted)';
+        title.innerText = "월급 정보 입력";
+        label.innerText = "월 급여 (세전)";
+        sevGrp.style.display = 'none'; // Monthly input implies monthly gross
+        resLabel.innerText = "월 예상 실수령액";
+        resYearGrp.style.display = 'block';
+      }
+    }
+
     function calcSalary() {
-      const salary = parseFloat(document.getElementById('sal-amount').value) || 0;
+      const amount = parseFloat(document.getElementById('sal-amount').value) || 0;
       const nontax = parseFloat(document.getElementById('sal-nontax').value) || 0;
-      // Simple approximation for Monthly Net
+      const severanceType = document.getElementById('sal-severance').value;
+
+      let monthlyTotal = 0;
+      let grossYear = 0;
+
+      if (salaryMode === 'year') {
+        grossYear = amount;
+        // 1. Calculate Monthly Total based on Severance
+        if (severanceType === 'include') {
+          monthlyTotal = amount / 13;
+        } else {
+          monthlyTotal = amount / 12;
+        }
+      } else {
+        // Month -> Year
+        monthlyTotal = amount;
+        grossYear = amount * 12; // Simple conversion
+      }
+
       // 1. Monthly Taxable
-      let monthlyTotal = salary / 12;
       let monthlyTaxable = monthlyTotal - nontax;
       if (monthlyTaxable < 0) monthlyTaxable = 0;
 
@@ -2121,22 +2219,23 @@
       // Employment (0.9%)
       let ei = monthlyTaxable * 0.009;
 
+      // Floors
+      np = Math.floor(np / 10) * 10;
+      hi = Math.floor(hi / 10) * 10;
+      ci = Math.floor(ci / 10) * 10;
+      ei = Math.floor(ei / 10) * 10;
+
       // 3. Tax (Simplified using simple bracket on monthly taxable * 12)
       // This is a rough estimation. Accurate requires 'Gani start table'
       // Let's use annual tax bracket on (annual taxable) and divide by 12 for rough check
-      let annualTaxable = (monthlyTaxable - np - hi - ci - ei) * 12;
-      // Standard Deduction for Earned Income (approx)
-      // <= 5mil: 70%
-      // <= 15mil: 40%
-      // <= 45mil: 15%
-      // <= 100mil: 5%
-      // > 100 mil: 2%
-      // Actually simplified: take tax from calcEarnedTaxLogic and divide by 12
-      let annualTax = getEarnedIncomeTax(salary); // Reuse logic
-      let monthlyTax = annualTax / 12;
+      let annualEst = monthlyTaxable * 12;
+      let annualTax = getEarnedIncomeTax(annualEst); // Reuse logic
+      let monthlyTax = Math.floor((annualTax / 12) / 10) * 10;
+      let localTax = Math.floor((monthlyTax * 0.1) / 10) * 10;
+      let totalTax = monthlyTax + localTax;
 
       // Final
-      let totalDeduct = np + hi + ci + ei + monthlyTax;
+      let totalDeduct = np + hi + ci + ei + totalTax;
       let net = monthlyTotal - totalDeduct;
 
       document.getElementById('sal-res-net').innerText = formatNum(net) + '원';
@@ -2144,8 +2243,12 @@
       document.getElementById('sal-res-hi').innerText = '-' + formatNum(hi) + '원';
       document.getElementById('sal-res-ci').innerText = '-' + formatNum(ci) + '원';
       document.getElementById('sal-res-ei').innerText = '-' + formatNum(ei) + '원';
-      document.getElementById('sal-res-tax').innerText = '-' + formatNum(monthlyTax) + '원';
+      document.getElementById('sal-res-tax').innerText = '-' + formatNum(totalTax) + '원';
       document.getElementById('sal-res-deduct').innerText = '-' + formatNum(totalDeduct) + '원';
+
+      if (salaryMode === 'month') {
+        document.getElementById('sal-res-gross-year').innerText = formatNum(grossYear) + '원';
+      }
     }
 
     function calcNetPay() {
