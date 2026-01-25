@@ -1455,7 +1455,7 @@
                   class="unit">원</span></div>
             </div>
             <button class="btn-calc" onclick="calcNetPay()">계산하기</button>
-            <div <div
+            <div
               style="margin-top:20px; font-size:0.9rem; color:var(--text-muted); background:rgba(0,0,0,0.03); padding:15px; border-radius:12px;">
               <strong>💡 2026년 4대보험 요율 적용</strong><br>
               - 국민연금: 4.5% (기준소득월액 상한액 상향 반영)<br>
@@ -1642,6 +1642,7 @@
 
   <script>
     const fmt = new Intl.NumberFormat('ko-KR');
+    function formatNum(n) { return fmt.format(Math.round(n)); }
     function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
     function set(id, text) {
       const el = document.getElementById(id);
