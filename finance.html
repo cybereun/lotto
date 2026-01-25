@@ -820,27 +820,67 @@
       <!-- 3. Installment Interest -->
       <div id="loan-installment" class="calculator-view">
         <div class="header-section">
-          <h1>할부 이자 계산기</h1>
-          <p>신용카드 할부 구매 시 발생하는 실질적인 이자 비용을 계산합니다.</p>
+          <h1>할부 수수료 계산기</h1>
+          <p>신용카드 할부의 비밀! 매월 줄어드는 수수료 구조를 정확히 계산하여 '총 비용'을 확인하세요.</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
-            <div class="form-group"><label>할부 총액</label>
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">할부 결제 정보</h3>
+            <div class="form-group"><label>결제 총액 (원금)</label>
               <div class="input-wrapper"><input type="number" id="inst-p" value="1200000"><span class="unit">원</span>
               </div>
             </div>
-            <div class="form-group"><label>할부 개월</label>
-              <div class="input-wrapper"><input type="number" id="inst-t" value="12"><span class="unit">개월</span></div>
+            <div class="form-group"><label>할부 개월 수</label>
+              <div class="input-wrapper"><input type="number" id="inst-t" value="6"><span class="unit">개월</span></div>
             </div>
-            <div class="form-group"><label>연 할부수수료율</label>
-              <div class="input-wrapper"><input type="number" id="inst-r" value="14.5"><span class="unit">%</span></div>
+            <div class="form-group"><label>연 할부 수수료율</label>
+              <div class="input-wrapper"><input type="number" id="inst-r" value="14.0"><span class="unit">%</span></div>
             </div>
-            <button class="btn-calc" onclick="calcInstallment()">비용 계산</button>
+            <button class="btn-calc" onclick="calcInstallment()">수수료 계산</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 할부 수수료는 매달 줄어듭니다!</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. 원금 균등 상환 방식</strong><br>
+                대부분의 카드 할부는 '원금'을 똑같이 나누어 냅니다.<br><br>
+                <strong>2. 수수료 계산 원리 (잔액 기준)</strong><br>
+                수수료 = (남은 할부 원금 × 연 이자율) ÷ 12<br>
+                따라서 <strong>첫 달 수수료가 가장 비싸고</strong>, 마지막 달에는 아주 적게 나옵니다.<br><br>
+                <strong>3. 현명한 소비 팁</strong><br>
+                할부 개월 수가 길어질수록, 수수료율이 높을수록 총 비용은 눈덩이처럼 불어납니다. 무이자가 아니라면 일시불이 유리합니다.
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">월 할부금</div>
-            <div class="result-value-main" id="inst-res-m">0</div>
-            <div class="result-row"><span>총 수수료</span><span id="inst-res-i">0</span></div>
+            <div class="result-label">총 예상 납부액 (원금+수수료)</div>
+            <div class="result-value-main" id="inst-res-total">0원</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <div class="result-row"><span>할부 원금</span><span id="inst-res-p">0원</span></div>
+            <div class="result-row"><span>총 수수료</span><span id="inst-res-fee"
+                style="color:#ef4444; font-weight:700;">0원</span></div>
+
+            <details style="margin-top:15px;" open>
+              <summary style="cursor:pointer; font-size:0.9rem; font-weight:700; color:var(--text-main);">📅 월별 청구 스케줄
+                (상세)</summary>
+              <div
+                style="margin-top:10px; max-height:250px; overflow-y:auto; border:1px solid var(--border); border-radius:8px;">
+                <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:right;">
+                  <thead style="background:var(--bg-body); position:sticky; top:0;">
+                    <tr>
+                      <th style="padding:8px; text-align:center;">회차</th>
+                      <th style="padding:8px;">청구액</th>
+                      <th style="padding:8px; color:var(--text-muted);">원금</th>
+                      <th style="padding:8px; color:#ef4444;">수수료</th>
+                    </tr>
+                  </thead>
+                  <tbody id="inst-schedule-body">
+                    <!-- Dynamic Content -->
+                  </tbody>
+                </table>
+              </div>
+            </details>
           </div>
         </div>
       </div>
@@ -2215,12 +2255,53 @@
       set('lt-res-t', fmt.format(Math.round(p + totalInt)) + '원');
     }
 
-    // 3. Installment
+    // 3. Installment (Credit Card Fee)
     function calcInstallment() {
-      const p = v('inst-p'), t = v('inst-t'), r = v('inst-r') / 100 / 12;
-      const fee = p * (v('inst-r') / 100) * (t / 12); // Standard Card Installment Fee Logic
-      set('inst-res-m', fmt.format(Math.round((p + fee) / t)) + '원');
-      set('inst-res-i', fmt.format(Math.round(fee)) + '원');
+      const p = v('inst-p'); // Principal
+      const months = v('inst-t'); // Months
+      const rate = v('inst-r') / 100; // Annual Fee Rate
+
+      if (months <= 0) { alert('할부 기간을 입력하세요.'); return; }
+
+      // Standard Equal Principal Repayment for Card Installment
+      const monthlyPrincipal = Math.floor(p / months);
+      const remainder = p - (monthlyPrincipal * months); // Add to first month usually
+
+      let balance = p;
+      let totalFee = 0;
+      let html = '';
+
+      for (let i = 1; i <= months; i++) {
+        // Current Month Principal
+        let currentPrincipal = monthlyPrincipal;
+        if (i === 1) currentPrincipal += remainder; // Add remainder to first month
+
+        // Current Month Fee = Balance * Rate / 12
+        const currentFee = Math.floor(balance * rate / 12);
+
+        const currentTotal = currentPrincipal + currentFee;
+
+        // Update Schedule Table
+        html += `
+            <tr style="border-bottom:1px solid #eee;">
+                <td style="padding:8px; text-align:center;">${i}회차</td>
+                <td style="padding:8px; font-weight:700;">${fmt.format(currentTotal)}</td>
+                <td style="padding:8px; color:var(--text-muted);">${fmt.format(currentPrincipal)}</td>
+                <td style="padding:8px; color:#ef4444;">${fmt.format(currentFee)}</td>
+            </tr>
+          `;
+
+        totalFee += currentFee;
+        balance -= currentPrincipal;
+
+        if (balance < 0) balance = 0; // Safety
+      }
+
+      set('inst-res-total', fmt.format(p + totalFee) + '원');
+      set('inst-res-p', fmt.format(p) + '원');
+      set('inst-res-fee', '+' + fmt.format(totalFee) + '원');
+
+      document.getElementById('inst-schedule-body').innerHTML = html;
     }
 
     // 4. LTV DTI DSR
