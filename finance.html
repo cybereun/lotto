@@ -1517,18 +1517,60 @@
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
-            <div class="form-group"><label>연간 총 급여액</label>
-              <div class="input-wrapper"><input type="number" id="eit-salary" value="45000000"><span
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">1. 사용자 입력 데이터 (Input Data)</h3>
+            <div class="form-group"><label>총 급여액 (연봉, 세전)</label>
+              <div class="input-wrapper"><input type="number" id="eit-salary" value="50000000"><span
                   class="unit">원</span></div>
             </div>
-            <button class="btn-calc" onclick="calcEarnedTax()">세금 계산</button>
+            <div class="form-group"><label>비과세 소득 (연간 합계)</label>
+              <div class="input-wrapper"><input type="number" id="eit-nontax" value="2400000" placeholder="월 식대 등"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>부양가족 수 (본인 포함)</label>
+              <div class="input-wrapper"><input type="number" id="eit-fam" value="1"><span class="unit">명</span></div>
+            </div>
+            <div class="form-group"><label>20세 이하 자녀 수</label>
+              <div class="input-wrapper"><input type="number" id="eit-child" value="0"><span class="unit">명</span></div>
+            </div>
+
+            <button class="btn-calc" onclick="calcEarnedTax()">상세 세금 계산</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 계산 로직 및 요율 정보 (System Data)</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>2. 세법 및 요율 데이터 (System Data)</strong><br>
+                - <strong>근로소득공제:</strong> 급여 구간별 차등 공제 (최대 2,000만원)<br>
+                - <strong>인적공제:</strong> 1인당 150만원 기본공제<br>
+                - <strong>4대 보험료 (자동공제 추산):</strong><br>
+                &nbsp;&nbsp;• 국민연금: 4.5% (상한 적용)<br>
+                &nbsp;&nbsp;• 건강보험: 3.545% + 요양보험(건보의 12.95%)<br>
+                &nbsp;&nbsp;• 고용보험: 0.9%<br>
+                - <strong>세액공제:</strong> 근로소득세액공제(한도적용), 자녀세액공제(1인 15만원)<br><br>
+                <strong>3. 계산 로직 (Algorithm)</strong><br>
+                1) <strong>과세대상 급여</strong> = 총 급여 - 비과세<br>
+                2) <strong>근로소득금액</strong> = 과세대상 급여 - 근로소득공제<br>
+                3) <strong>과세표준</strong> = 근로소득금액 - 인적공제 - 4대보험공제 - 기타공제(표준 등)<br>
+                4) <strong>산출세액</strong> = 과세표준 × 기본세율 - 누진공제<br>
+                5) <strong>결정세액</strong> = 산출세액 - 세액공제
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">예상 산출세액</div>
-            <div class="result-value-main" id="eit-res">0</div>
-            <div class="result-row"><span>근로소득공제</span><span id="eit-res-deduct">0</span></div>
-            <div class="result-row"><span>과세표준</span><span id="eit-res-std">0</span></div>
-            <div class="result-row"><span>적용 세율</span><span id="eit-res-rate">0%</span></div>
+            <div class="result-label">예상 결정세액 (지방세 포함)</div>
+            <div class="result-value-main" id="eit-res-final">0</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <div class="result-row"><span>① 과세대상 급여</span><span id="eit-step-1">0</span></div>
+            <div class="result-row"><span>② 근로소득금액</span><span id="eit-step-2">0</span></div>
+            <div class="result-row"><span>③ 과세표준</span><span id="eit-step-3">0</span></div>
+            <div class="result-row"><span>④ 산출세액</span><span id="eit-step-4">0</span></div>
+            <div class="result-row"><span>⑤ 세액공제</span><span id="eit-step-5" style="color:#10b981">0</span></div>
+
+            <div style="background:var(--bg-body); padding:10px; border-radius:8px; margin-top:10px; font-size:0.9rem;">
+              <div class="result-row"><span>소득세</span><span id="eit-res-tax">0</span></div>
+              <div class="result-row"><span>지방소득세(10%)</span><span id="eit-res-local">0</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -2100,43 +2142,99 @@
 
     function calcEarnedTax() {
       const salary = parseFloat(document.getElementById('eit-salary').value) || 0;
+      const nontax = parseFloat(document.getElementById('eit-nontax').value) || 0;
+      const fam = parseFloat(document.getElementById('eit-fam').value) || 1;
+      const child = parseFloat(document.getElementById('eit-child').value) || 0;
 
-      // 1. Earned Income Deduction
+      // 1. Taxable Income
+      let taxableIncome = salary - nontax;
+      if (taxableIncome < 0) taxableIncome = 0;
+
+      // 2. Earned Income Deduction (2025-2026 limit 20m)
       let deduction = 0;
-      if (salary <= 5000000) deduction = salary * 0.7;
-      else if (salary <= 15000000) deduction = 3500000 + (salary - 5000000) * 0.4;
-      else if (salary <= 45000000) deduction = 7500000 + (salary - 15000000) * 0.15;
-      else if (salary <= 100000000) deduction = 12000000 + (salary - 45000000) * 0.05;
-      else deduction = 14750000 + (salary - 100000000) * 0.02;
+      if (taxableIncome <= 5000000) deduction = taxableIncome * 0.7;
+      else if (taxableIncome <= 15000000) deduction = 3500000 + (taxableIncome - 5000000) * 0.4;
+      else if (taxableIncome <= 45000000) deduction = 7500000 + (taxableIncome - 15000000) * 0.15;
+      else if (taxableIncome <= 100000000) deduction = 12000000 + (taxableIncome - 45000000) * 0.05;
+      else deduction = 14750000 + (taxableIncome - 100000000) * 0.02;
 
-      let incomeAmount = salary - deduction; // 근로소득금액
+      if (deduction > 20000000) deduction = 20000000;
 
-      // 2. Personal Deduction (Basic) - assume 1 person 1.5m
-      let personalDed = 1500000;
+      let earnedIncome = taxableIncome - deduction; // 근로소득금액
 
-      let stdBase = incomeAmount - personalDed;
-      if (stdBase < 0) stdBase = 0;
+      // 3. Subjective Deduction (Person)
+      let personDeduction = fam * 1500000;
 
-      // 3. Tax Rates (2026 Base - Assuming Brackets maintained or slightly adjusted, keeping current std)
-      // 14m: 6%
-      // 50m: 15% - 1.26m
-      // 88m: 24% - 5.76m
-      // 150m: 35% - 15.44m
-      // 300m: 38% - 19.94m
-      // 500m: 40% - 25.94m
-      // 1000m: 42% - 35.94m
-      // >1000m: 45% - 65.94m
+      // 4. Insurance Deduction (Estimate)
+      // Recalculate monthly base for insurance
+      let monthlyTaxable = taxableIncome / 12;
 
-      let tax = calcTaxFromBase(stdBase);
+      // NP (4.5%, Cap 6.4m)
+      let npBase = monthlyTaxable;
+      if (npBase > 6400000) npBase = 6400000;
+      let annualNP = npBase * 0.045 * 12;
 
-      document.getElementById('eit-res').innerText = formatNum(tax) + '원';
-      document.getElementById('eit-res-deduct').innerText = '-' + formatNum(deduction) + '원';
-      document.getElementById('eit-res-std').innerText = formatNum(stdBase) + '원';
+      // HI (3.545% + 12.95% Care)
+      let annualHI = (monthlyTaxable * 0.03545 * 1.1295) * 12;
 
-      // Effective Rate
-      let rate = 0;
-      if (stdBase > 0) rate = (tax / stdBase) * 100;
-      document.getElementById('eit-res-rate').innerText = rate.toFixed(1) + '% (실효세율 아님, 구간별 적용)';
+      // EI (0.9%)
+      let annualEI = annualNP * (0.009 / 0.045); // Approximate or separate calc
+      annualEI = monthlyTaxable * 0.009 * 12;
+
+      let insuranceDeduction = annualNP + annualHI + annualEI;
+
+      // 5. Tax Base
+      // We assume standard deduction if special deductions are not input?
+      // For simplicity, let's use: EarnedIncome - Person - Insurance
+      // Note: "Standard Tax Deduction" (130k) or Special Deduction applies. 
+      // This calculator does 'Detailed' approach with estimates.
+      let taxBase = earnedIncome - personDeduction - insuranceDeduction;
+      if (taxBase < 0) taxBase = 0;
+
+      // 6. Calculated Tax
+      let calcTax = calcTaxFromBase(taxBase);
+
+      // 7. Tax Credits
+      // A. Earned Income Tax Credit
+      let taxCredit = 0;
+      if (calcTax <= 1300000) {
+        taxCredit = calcTax * 0.55;
+      } else {
+        taxCredit = 715000 + (calcTax - 1300000) * 0.30;
+      }
+
+      // Limit check (Simplified standard limits)
+      let creditLimit = 740000;
+      if (taxableIncome > 70000000) creditLimit = 6600000; // Actually 660,000 -> typo fix: 660000
+      if (taxableIncome > 70000000) creditLimit = 660000;
+      if (taxableIncome > 120000000) creditLimit = 500000;
+
+      if (taxCredit > creditLimit) taxCredit = creditLimit;
+
+      // B. Child Tax Credit
+      let childCredit = child * 150000;
+      if (child >= 3) childCredit = 300000 + (child - 2) * 300000; // 3rd child+ gives more usually
+
+      let totalCredit = taxCredit + childCredit;
+
+      // 8. Final Tax
+      let finalTax = calcTax - totalCredit;
+      if (finalTax < 0) finalTax = 0;
+
+      let localTax = finalTax * 0.1;
+      let totalPayable = finalTax + localTax;
+
+      // Display
+      document.getElementById('eit-res-final').innerText = formatNum(totalPayable) + '원';
+
+      document.getElementById('eit-step-1').innerText = formatNum(taxableIncome) + '원';
+      document.getElementById('eit-step-2').innerText = formatNum(earnedIncome) + '원';
+      document.getElementById('eit-step-3').innerText = formatNum(taxBase) + '원';
+      document.getElementById('eit-step-4').innerText = formatNum(calcTax) + '원';
+      document.getElementById('eit-step-5').innerText = '-' + formatNum(totalCredit) + '원';
+
+      document.getElementById('eit-res-tax').innerText = formatNum(finalTax) + '원';
+      document.getElementById('eit-res-local').innerText = formatNum(localTax) + '원';
     }
 
     // Reuse logic helper
