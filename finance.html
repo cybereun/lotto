@@ -935,33 +935,91 @@
         </div>
       </div>
 
-      <!-- 7. Goal Savings -->
+      <!-- 7. Target Savings (Goal) -->
       <div id="inv-goal" class="calculator-view">
         <div class="header-section">
           <h1>목표 저축액 계산기</h1>
-          <p>목표 금액을 모으기 위해 매월 얼마를 저축해야 하는지 역산합니다.</p>
+          <p>꿈을 현실로 만드는 재무 내비게이션! 복리 효과를 고려한 월 저축액을 설계해 드립니다.</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
-            <div class="form-group"><label>목표 금액</label>
-              <div class="input-wrapper"><input type="number" id="goal-t" value="100000000"><span class="unit">원</span>
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">목표 설정</h3>
+            <div class="form-group"><label>목표 금액 (Target)</label>
+              <div class="input-wrapper"><input type="number" id="goal-target" value="100000000"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>현재 보유 금액 (Initial)</label>
+              <div class="input-wrapper"><input type="number" id="goal-initial" value="0" placeholder="거치식으로 운용"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>목표 기간</label>
+              <div style="display:flex; gap:10px;">
+                <input type="number" id="goal-period" value="3" style="flex:2">
+                <select id="goal-period-unit" style="flex:1;">
+                  <option value="year">년 (Year)</option>
+                  <option value="month">개월 (Month)</option>
+                </select>
               </div>
             </div>
-            <div class="form-group"><label>기간</label>
-              <div class="input-wrapper"><input type="number" id="goal-y" value="10"><span class="unit">년</span></div>
+
+            <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">투자 조건</h3>
+            <div class="form-group"><label>예상 수익률 (연 %)</label>
+              <div class="input-wrapper"><input type="number" id="goal-rate" value="4.0" step="0.1"><span
+                  class="unit">%</span></div>
             </div>
-            <div class="form-group"><label>예상 수익률</label>
-              <div class="input-wrapper"><input type="number" id="goal-r" value="5"><span class="unit">%</span></div>
+            <div class="form-group"><label>이자 과세율</label>
+              <div class="input-wrapper"><select id="goal-tax">
+                  <option value="15.4" selected>일반과세 (15.4%)</option>
+                  <option value="1.4">세금우대 (1.4%)</option>
+                  <option value="0">비과세 (0%)</option>
+                </select></div>
             </div>
-            <button class="btn-calc" onclick="calcGoal()">필요 저축액 확인</button>
+            <div class="form-group" style="display:flex; align-items:center; justify-content:space-between;">
+              <label>저축 증액하기 (Step-up)</label>
+              <div style="display:flex; align-items:center; gap:5px;">
+                <input type="checkbox" id="goal-stepup-check" onchange="toggleStepUp()">
+                <span style="font-size:0.9rem;">매년 증액</span>
+              </div>
+            </div>
+            <div class="form-group" id="goal-stepup-grp" style="display:none;"><label>매년 저축 증액률</label>
+              <div class="input-wrapper"><input type="number" id="goal-stepup-rate" value="5"><span
+                  class="unit">%</span></div>
+            </div>
+
+            <button class="btn-calc" onclick="calcGoal()">필요 저축액 계산</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 복리 계산 로직 (How it works)</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. 계산 원리 (Reverse Calculation)</strong><br>
+                단순히 (목표액 ÷ 개월수)가 아닙니다. <strong>보유 자산의 굴리기(거치)</strong> 효과와 <strong>매월 쌓이는 이자의 재투자(적립)</strong> 효과를 모두
+                고려하여 역산합니다.<br><br>
+                <strong>2. 프로세스</strong><br>
+                ① 현재 보유금이 기간 동안 불어나는 금액 계산<br>
+                ② (목표액 - ①) = 순수하게 적립으로 채워야 할 부족분<br>
+                ③ 부족분을 채우기 위한 월 납입액 산출 (세후 이자율 적용)
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">월 필요 저축액</div>
-            <div class="result-value-main" id="goal-res">0</div>
+            <div class="result-label">매월 필요한 저축액</div>
+            <div class="result-value-main" id="goal-res">0원</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <div class="result-row"><span>총 원금 합계</span><span id="goal-res-principal">0원</span></div>
+            <div class="result-row"><span>예상 이자(세후)</span><span id="goal-res-interest"
+                style="color:var(--primary); font-weight:700;">0원</span></div>
+            <div class="result-row"><span>만기 예상 실수령액</span><span id="goal-res-total">0원</span></div>
+
+            <div id="goal-stepup-msg"
+              style="display:none; margin-top:15px; padding:10px; background:var(--bg-body); border-radius:8px; font-size:0.9rem; color:var(--text-main);">
+              <span style="font-weight:700; color:var(--accent);">📈 증액 플랜 적용됨</span><br>
+              첫 달은 <span id="goal-res-first">0원</span>으로 시작하여,<br>매년 <span id="goal-res-inc">5%</span>씩 저축액을 늘려갑니다.
+            </div>
           </div>
         </div>
       </div>
-
       <!-- 8. Dividend Yield & YOC -->
       <div id="inv-dividend" class="calculator-view">
         <div class="header-section">
@@ -2026,7 +2084,12 @@
       set('sav-res-i', fmt.format(Math.round(res - m * t)) + '원');
     }
 
-    // 7. Goal
+    // 7. Target Savings With Advanced Logic
+    function toggleStepUp() {
+      const chk = document.getElementById('goal-stepup-check').checked;
+      document.getElementById('goal-stepup-grp').style.display = chk ? 'block' : 'none';
+    }
+
     function calcGoal() {
       const t = v('goal-t'), y = v('goal-y') * 12, r = v('goal-r') / 100 / 12;
       const res = t * r / ((Math.pow(1 + r, y) - 1) * (1 + r));
