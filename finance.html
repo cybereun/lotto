@@ -1250,11 +1250,15 @@
             </div>
             <div class="form-group"><label>목표 기간</label>
               <div style="display:flex; gap:10px;">
-                <input type="number" id="goal-period" value="3" style="flex:2">
-                <select id="goal-period-unit" style="flex:1;">
-                  <option value="year">년 (Year)</option>
-                  <option value="month">개월 (Month)</option>
-                </select>
+                <div class="input-wrapper" style="flex:2;">
+                  <input type="number" id="goal-period" value="3">
+                </div>
+                <div class="input-wrapper" style="flex:1;">
+                  <select id="goal-period-unit">
+                    <option value="year">년 (Year)</option>
+                    <option value="month">개월 (Month)</option>
+                  </select>
+                </div>
               </div>
             </div>
 
