@@ -30,6 +30,10 @@
             --shadow: rgba(0, 0, 0, 0.5);
             --glass-border: rgba(255, 255, 255, 0.1);
             --navbar-bg: rgba(15, 23, 42, 0.7);
+            --text-main: #f1f5f9;
+            --btn-text: #2b1e12;
+            --input-bg: #334155;
+            --results-bg: #0f172a;
         }
 
         * {
@@ -113,8 +117,8 @@
 
         .theme-toggle {
             cursor: pointer;
-            padding: 10px;
-            border-radius: 12px;
+            padding: 8px;
+            border-radius: 10px;
             background: var(--card);
             border: 1px solid var(--glass-border);
             color: var(--ink);
@@ -130,8 +134,8 @@
         }
 
         .menu-icon {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
         }
 
         body {
@@ -369,7 +373,7 @@
     </style>
 </head>
 
-<body>
+<body data-theme="light">
     <nav class="navbar">
         <div class="nav-left">
             <a href="index.html"
