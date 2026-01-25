@@ -751,40 +751,82 @@
     </aside>
 
     <main class="main-content">
-      <!-- 1. Loan Monthly Payment -->
+      <!-- 1. Monthly Repayment Calculator -->
       <div id="loan-monthly" class="calculator-view active">
         <div class="header-section">
           <h1>월 상환액 계산기</h1>
-          <p>원리금 균등 vs 원금 균등 상환 방식별 월 납입금을 비교합니다.</p>
+          <p>"한 달에 얼마씩 내야 할까?" 현금 흐름을 계획하는 가장 기초적인 도구입니다. 거치 기간과 상환 방식을 고려해 정확히 계산하세요.</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">대출 조건</h3>
             <div class="form-group"><label>대출 원금</label>
               <div class="input-wrapper"><input type="number" id="lm-p" value="50000000"><span class="unit">원</span>
               </div>
             </div>
-            <div class="form-group"><label>연 이자율 (%)</label>
-              <div class="input-wrapper"><input type="number" id="lm-r" value="4.5" step="0.1"><span
-                  class="unit">%</span></div>
+            <div class="form-group"><label>연 이자율</label>
+              <div class="input-wrapper"><input type="number" id="lm-r" value="4.5"><span class="unit">%</span></div>
             </div>
             <div class="form-group"><label>대출 기간</label>
-              <div class="input-wrapper"><input type="number" id="lm-t" value="5"><span class="unit">년</span></div>
+              <div class="input-wrapper"><input type="number" id="lm-t" value="3"><span class="unit">년</span></div>
+            </div>
+            <div class="form-group"><label>거치 기간 (이자만 납부)</label>
+              <div class="input-wrapper"><input type="number" id="lm-g" value="0" placeholder="0"><span
+                  class="unit">년</span></div>
             </div>
             <div class="form-group"><label>상환 방식</label>
               <div class="input-wrapper"><select id="lm-type">
-                  <option value="annuity">원리금 균등</option>
-                  <option value="equal">원금 균등</option>
+                  <option value="annuity">원리금 균등 (매월 일정액)</option>
+                  <option value="linear">원금 균등 (점점 줄어듦)</option>
+                  <option value="bullet">만기 일시 (이자만 납부)</option>
                 </select></div>
             </div>
-            <button class="btn-calc" onclick="calcLoanMonthly()">계산하기</button>
+            <button class="btn-calc" onclick="calcLoanMonthly()">상환 스케줄 확인</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 거치 기간과 상환의 충격</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. 거치 기간 (Grace Period)</strong><br>
+                대출 초기에 이자만 내는 기간입니다. 당장은 부담이 적지만, 거치가 끝나는 순간 원금 상환이 시작되며 월 납입액이 2~3배 급증할 수 있습니다.<br><br>
+                <strong>2. 상환 방식별 현금 흐름</strong><br>
+                - <strong>원리금 균등:</strong> 매달 똑같은 돈이 나갑니다. 예산 짜기 좋습니다.<br>
+                - <strong>원금 균등:</strong> 첫 달이 가장 비싸고 갈수록 싸집니다.<br>
+                - <strong>만기 일시:</strong> 월 부담은 적지만 만기에 원금 폭탄이 터집니다.
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">월 평균 상환액</div>
-            <div class="result-value-main" id="lm-res-main">0</div>
-            <div class="result-row"><span class="result-label">총 이자</span><span class="result-val"
-                id="lm-res-i">0</span></div>
-            <div class="result-row"><span class="result-label">총 상환액</span><span class="result-val"
-                id="lm-res-t">0</span></div>
+            <div class="result-label">1회차 월 예상 납부액</div>
+            <div class="result-value-main" id="lm-res-main">0원</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <div class="result-row"><span>거치 기간 월 납부액</span><span id="lm-res-grace" style="color:var(--text-muted);">0원
+                (해당 없음)</span></div>
+            <div class="result-row"><span>총이자 비용</span><span id="lm-res-i">0원</span></div>
+            <div class="result-row"><span>총 상환 금액</span><span id="lm-res-t">0원</span></div>
+
+            <details style="margin-top:15px;">
+              <summary style="cursor:pointer; font-size:0.9rem; font-weight:700; color:var(--text-main);">📅 상세 상환 스케줄
+                (전체)</summary>
+              <div
+                style="margin-top:10px; max-height:250px; overflow-y:auto; border:1px solid var(--border); border-radius:8px;">
+                <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:right;">
+                  <thead style="background:var(--bg-body); position:sticky; top:0;">
+                    <tr>
+                      <th style="padding:8px; text-align:center;">회차</th>
+                      <th style="padding:8px;">납입금</th>
+                      <th style="padding:8px; color:var(--text-muted);">원금</th>
+                      <th style="padding:8px; color:var(--text-muted);">이자</th>
+                      <th style="padding:8px; color:var(--primary);">잔액</th>
+                    </tr>
+                  </thead>
+                  <tbody id="lm-schedule-body">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+            </details>
           </div>
         </div>
       </div>
@@ -2281,21 +2323,139 @@
       window.scrollTo(0, 0);
     }
 
-    // 1. Loan Monthly
+    // 1. Monthly Repayment Calculator (Cash Flow Focused)
     function calcLoanMonthly() {
-      const p = v('lm-p'), r = v('lm-r') / 100 / 12, t = v('lm-t') * 12, type = document.getElementById('lm-type').value;
-      let monthly = 0, total = 0;
-      if (type === 'annuity') {
-        monthly = p * r * Math.pow(1 + r, t) / (Math.pow(1 + r, t) - 1);
-        total = monthly * t;
-      } else {
-        const first = (p / t) + (p * r), last = (p / t) + (p / t * r);
-        monthly = (first + last) / 2;
-        total = monthly * t;
+      const p = v('lm-p'); // Principal
+      const r_annual = v('lm-r') / 100; // Annual Rate
+      const years = v('lm-t'); // Loan Term (Years)
+      const graceYears = v('lm-g') || 0; // Grace Period
+      const type = document.getElementById('lm-type').value;
+
+      const totalMonths = years * 12;
+      const graceMonths = graceYears * 12;
+      const repayMonths = totalMonths - graceMonths;
+      const r_monthly = r_annual / 12;
+
+      if (repayMonths <= 0) {
+        alert('상환 기간은 거치 기간보다 길어야 합니다.');
+        return;
       }
-      set('lm-res-main', fmt.format(Math.round(monthly)) + '원');
-      set('lm-res-i', fmt.format(Math.round(total - p)) + '원');
-      set('lm-res-t', fmt.format(Math.round(total)) + '원');
+
+      let scheduleHtml = '';
+      let balance = p;
+      let totalInterest = 0;
+      let totalPayment = 0;
+      let firstMonthPayment = 0;
+      let gracePayment = 0;
+
+      // Calculate PMT for Amortization if needed (Standard Formula for remaining period)
+      let pmt = 0;
+      if (type === 'annuity') {
+        if (r_monthly > 0) {
+          pmt = p * r_monthly * Math.pow(1 + r_monthly, repayMonths) / (Math.pow(1 + r_monthly, repayMonths) - 1);
+        } else {
+          pmt = p / repayMonths;
+        }
+      }
+
+      // Generate Schedule
+      for (let m = 1; m <= totalMonths; m++) {
+        let interestPayment = balance * r_monthly;
+        let principalPayment = 0;
+        let monthlyTotal = interestPayment;
+
+        if (m <= graceMonths) {
+          // Grace Period
+          principalPayment = 0;
+          monthlyTotal = interestPayment;
+          if (m === 1) gracePayment = monthlyTotal;
+        } else {
+          // Repayment Period
+          if (type === 'bullet') {
+            // Bullet Repayment
+            if (m === totalMonths) {
+              principalPayment = balance;
+              monthlyTotal = principalPayment + interestPayment;
+            } else {
+              principalPayment = 0;
+              monthlyTotal = interestPayment;
+            }
+          } else if (type === 'linear') {
+            // Linear (Level Principal)
+            principalPayment = p / repayMonths;
+            monthlyTotal = principalPayment + interestPayment;
+          } else if (type === 'annuity') {
+            // Annuity (Level Payment)
+            if (m === totalMonths) {
+              // Adjust last month
+              principalPayment = balance;
+              monthlyTotal = principalPayment + interestPayment;
+            } else {
+              monthlyTotal = pmt;
+              interestPayment = balance * r_monthly;
+              principalPayment = monthlyTotal - interestPayment;
+            }
+          }
+        }
+
+        if (m === 1) firstMonthPayment = monthlyTotal; // First Month total (might be grace)
+
+        // Capture first repayment month if grace existed
+        if (graceMonths > 0 && m === graceMonths + 1) {
+          // This is the payment jump
+          firstMonthPayment = monthlyTotal; // Update display to show the repayment amount? 
+          // Usually users want to know the Repayment Amount, not just Grace amount.
+          // Let's keep logic simple: Display 1st Repayment Amount mainly, or handle UI text
+        }
+
+        balance -= principalPayment;
+        if (balance < 10) balance = 0; // Floating point fix
+        totalInterest += interestPayment;
+        totalPayment += monthlyTotal;
+
+        scheduleHtml += `
+            <tr style="border-bottom:1px solid #f8f9fa;">
+                <td style="padding:8px; text-align:center;">${m}회</td>
+                <td style="padding:8px; font-weight:700;">${fmt.format(Math.round(monthlyTotal))}</td>
+                <td style="padding:8px; color:var(--text-muted);">${fmt.format(Math.round(principalPayment))}</td>
+                <td style="padding:8px; color:var(--text-muted);">${fmt.format(Math.round(interestPayment))}</td>
+                <td style="padding:8px; color:var(--primary);">${fmt.format(Math.round(balance))}</td>
+            </tr>
+          `;
+      }
+
+      // Display Logic
+      // If Grace Period Exist, Show Grace Amount separately
+      if (graceMonths > 0) {
+        set('lm-res-grace', fmt.format(Math.round(gracePayment)) + '원 (' + graceYears + '년)');
+        // Main display should probably show the Repayment Amount (Max payment) or First Repayment Amount?
+        // Let's show the Payment after grace in Main if possible, or just 1st month.
+        let firstRepayAmt = 0;
+        // Recalculate quick for display if needed or stick to loop result
+        // The loop updated firstMonthPayment to be the repayment amount if grace exists? No, I overwrote it.
+        // Let's show the Max Payment or Repayment Phase Payment.
+        // For Linear, it's highest at start of repayment. For Annuity it's constant.
+        // Let's show the payment at month (graceMonths + 1)
+      } else {
+        set('lm-res-grace', '해당 없음');
+      }
+
+      // Better UX: Show "Repayment Phase" payment in main box 
+      // If Linear: Show First Repayment Month Amount
+      // If Annuity: Show PMT
+      // If Bullet: Show Interest (Last month is exception)
+
+      let displayMain = 0;
+      if (type === 'bullet') displayMain = p * r_monthly; // Interest only
+      else if (type === 'annuity') displayMain = pmt;
+      else if (type === 'linear') displayMain = (p / repayMonths) + (p * r_monthly); // Max payment at start of repayment
+
+      set('lm-res-main', fmt.format(Math.round(displayMain)) + '원');
+
+      set('lm-res-i', fmt.format(Math.round(totalInterest)) + '원');
+      set('lm-res-t', fmt.format(Math.round(totalPayment)) + '원');
+
+      document.getElementById('lm-schedule-body').innerHTML = scheduleHtml;
     }
 
     // 2. Total Loan Interest (Advanced)
