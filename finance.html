@@ -989,30 +989,81 @@
         </div>
       </div>
 
-      <!-- 9. ROI / CAGR -->
+      <!-- 9. ROI & CAGR -->
       <div id="inv-roi" class="calculator-view">
         <div class="header-section">
-          <h1>ROI / CAGR 계산기</h1>
-          <p>투자 성적의 총 수익률과 연평균 성장률(CAGR)을 공식 산출합니다.</p>
+          <h1>투자 수익률 분석 (ROI/CAGR)</h1>
+          <p>총 수익률(ROI)과 연평균 복리 성장률(CAGR)을 동시에 분석합니다.</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
-            <div class="form-group"><label>투자 원금 (초기값)</label>
-              <div class="input-wrapper"><input type="number" id="roi-p" value="10000000"><span class="unit">원</span>
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">자산 가치 입력</h3>
+            <div class="form-group"><label>초기 투자금 (Initial Investment)</label>
+              <div class="input-wrapper"><input type="number" id="roi-p" value="1000000"><span class="unit">원</span>
               </div>
             </div>
-            <div class="form-group"><label>최종 가치 (현재값)</label>
-              <div class="input-wrapper"><input type="number" id="roi-f" value="25000000"><span class="unit">원</span>
+            <div class="form-group"><label>최종 가치 (Final Value)</label>
+              <div class="input-wrapper"><input type="number" id="roi-f" value="1500000"><span class="unit">원</span>
               </div>
             </div>
-            <div class="form-group"><label>투자 기간</label>
-              <div class="input-wrapper"><input type="number" id="roi-t" value="5"><span class="unit">년</span></div>
+
+            <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">기간 설정 (CAGR 산출용)</h3>
+
+            <!-- Tab for Period Input -->
+            <div style="display:flex; margin-bottom:15px; border-bottom:1px solid var(--border);">
+              <button id="tab-period-y" onclick="setPeriodMode('year')"
+                style="flex:1; padding:10px; background:var(--bg-body); border:none; border-bottom:2px solid var(--primary); font-weight:700; cursor:pointer; color:var(--text-main);">
+                년수 직접 입력
+              </button>
+              <button id="tab-period-d" onclick="setPeriodMode('date')"
+                style="flex:1; padding:10px; background:var(--bg-body); border:none; border-bottom:2px solid transparent; color:var(--text-muted); cursor:pointer;">
+                날짜로 계산
+              </button>
             </div>
-            <button class="btn-calc" onclick="calcROI()">성과 분석</button>
+
+            <div class="form-group" id="grp-period-year"><label>투자 기간 (년)</label>
+              <div class="input-wrapper"><input type="number" id="roi-t" value="3"><span class="unit">년</span></div>
+            </div>
+
+            <div id="grp-period-date" style="display:none;">
+              <div class="form-group"><label>시작일 (Start Date)</label>
+                <div class="input-wrapper"><input type="date" id="roi-start-date"></div>
+              </div>
+              <div class="form-group"><label>종료일 (End Date)</label>
+                <div class="input-wrapper"><input type="date" id="roi-end-date"></div>
+              </div>
+              <p id="roi-date-diff" style="font-size:0.8rem; color:var(--primary); margin-top:5px; text-align:right;">
+              </p>
+            </div>
+
+            <button class="btn-calc" onclick="calcROI()">수익률 분석</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 ROI와 CAGR의 차이점 및 계산 공식</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. ROI (총 투자 수익률)</strong><br>
+                "그래서 총 얼마 벌었는데?"를 보여주는 스냅샷입니다.<br>
+                $$ \text{ROI} = \left( \frac{\text{최종} - \text{초기}}{\text{초기}} \right) \times 100 $$<br><br>
+                <strong>2. CAGR (연평균 복리 성장률)</strong><br>
+                "매년 복리로 몇 %씩 성장한 거야?"를 보여주는 동영상입니다.<br>
+                $$ \text{CAGR} = \left[ \left( \frac{\text{최종}}{\text{초기}} \right)^{\frac{1}{n}} - 1 \right] \times 100
+                $$<br>
+                * n = 기간(년). 1년 미만 시 연환산 왜곡에 주의하세요.
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-row"><span>총 수익률 (ROI)</span><span id="res-roi">0%</span></div>
-            <div class="result-row"><span>연평균 성장률 (CAGR)</span><span id="res-cagr">0%</span></div>
+            <div class="result-label">총 수익률 (ROI)</div>
+            <div class="result-value-main" id="res-roi">0%</div>
+            <div class="result-row"><span>순수익 금액</span><span id="res-profit">0원</span></div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <div class="result-label" style="font-size:1rem; color:var(--text-main);">연평균 성장률 (CAGR)</div>
+            <div class="result-value-main" id="res-cagr" style="font-size:1.8rem; color:var(--primary);">0%</div>
+            <p id="cagr-warning" style="font-size:0.8rem; color:var(--accent); margin-top:5px; display:none;">
+              * 1년 미만 단기 투자는 CAGR(연환산)이 과장될 수 있습니다.
+            </p>
           </div>
         </div>
       </div>
@@ -1888,10 +1939,99 @@
     }
 
     // 9. ROI CAGR
+    let periodMode = 'year';
+
+    function setPeriodMode(mode) {
+      periodMode = mode;
+      const tabY = document.getElementById('tab-period-y');
+      const tabD = document.getElementById('tab-period-d');
+      const grpY = document.getElementById('grp-period-year');
+      const grpD = document.getElementById('grp-period-date');
+
+      if (mode === 'year') {
+        tabY.style.borderBottomColor = 'var(--primary)'; tabY.style.color = 'var(--text-main)';
+        tabD.style.borderBottomColor = 'transparent'; tabD.style.color = 'var(--text-muted)';
+        grpY.style.display = 'block';
+        grpD.style.display = 'none';
+      } else {
+        tabD.style.borderBottomColor = 'var(--primary)'; tabD.style.color = 'var(--text-main)';
+        tabY.style.borderBottomColor = 'transparent'; tabY.style.color = 'var(--text-muted)';
+        grpY.style.display = 'none';
+        grpD.style.display = 'block';
+
+        // Set default dates if empty
+        if (!document.getElementById('roi-start-date').value) {
+          document.getElementById('roi-start-date').valueAsDate = new Date();
+          let nextYear = new Date();
+          nextYear.setFullYear(nextYear.getFullYear() + 1);
+          document.getElementById('roi-end-date').valueAsDate = nextYear;
+        }
+      }
+    }
+
     function calcROI() {
-      const p = v('roi-p'), f = v('roi-f'), t = v('roi-t');
-      set('res-roi', (((f / p) - 1) * 100).toFixed(2) + '%');
-      set('res-cagr', ((Math.pow(f / p, 1 / t) - 1) * 100).toFixed(2) + '%');
+      const p = v('roi-p');
+      const f = v('roi-f');
+      let t = 0;
+
+      // Edge Case: Initial Investment Zero
+      if (p === 0) {
+        alert("초기 투자금은 0원일 수 없습니다.");
+        return;
+      }
+
+      // Calculate Period
+      if (periodMode === 'year') {
+        t = v('roi-t');
+      } else {
+        const s = new Date(document.getElementById('roi-start-date').value);
+        const e = new Date(document.getElementById('roi-end-date').value);
+        if (s && e && e > s) {
+          const diffTime = Math.abs(e - s);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          t = diffDays / 365;
+          document.getElementById('roi-date-diff').innerText = `${diffDays}일 (${t.toFixed(2)}년)`;
+        } else {
+          alert("종료일은 시작일보다 미래여야 합니다.");
+          return;
+        }
+      }
+
+      if (t <= 0) t = 0.0001; // Avoid div by zero
+
+      // ROI Calculation
+      const profit = f - p;
+      const roi = (profit / p) * 100;
+
+      // CAGR Calculation
+      // If final value is negative (debt), CAGR is complex (imaginary numbers), show error or handle gracefully
+      let cagr = 0;
+      let cagrText = "0%";
+      if (f < 0) {
+        cagrText = "산출불가 (자산 음수)";
+      } else if (f === 0) {
+        cagrText = "-100%"; // Total loss
+      } else {
+        cagr = (Math.pow(f / p, 1 / t) - 1) * 100;
+        cagrText = cagr.toFixed(2) + '%';
+      }
+
+      set('res-roi', roi.toFixed(2) + '%');
+      set('res-profit', fmt.format(Math.round(profit)) + '원');
+      document.getElementById('res-cagr').innerText = cagrText;
+
+      // Colors
+      const resRoiEl = document.getElementById('res-roi');
+      if (roi > 0) resRoiEl.style.color = '#ef4444'; // Korea: Red is profit
+      else if (roi < 0) resRoiEl.style.color = '#3b82f6'; // Blue is loss
+      else resRoiEl.style.color = 'var(--text-main)';
+
+      // Warning for Short Term
+      if (t < 1) {
+        document.getElementById('cagr-warning').style.display = 'block';
+      } else {
+        document.getElementById('cagr-warning').style.display = 'none';
+      }
     }
 
     // 10. Real Return
