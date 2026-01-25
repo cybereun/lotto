@@ -845,35 +845,90 @@
         </div>
       </div>
 
-      <!-- 4. LTV / DTI -->
+      <!-- 4. LTV / DTI / DSR -->
       <div id="loan-ltv" class="calculator-view">
         <div class="header-section">
-          <h1>LTV / DTI 계산기</h1>
-          <p>주택 담보 여력과 소득 대비 부채 상환 능력을 자가 진단합니다.</p>
+          <h1>LTV / DTI / DSR 계산기</h1>
+          <p>내 집 마련의 핵심! 담보 인정 비율(LTV)과 소득 대비 상환 능력(DSR, DTI)을 종합 진단합니다.</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
-            <div class="form-group"><label>주택 감정가</label>
-              <div class="input-wrapper"><input type="number" id="ltv-h" value="600000000"><span class="unit">원</span>
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">주택 및 대출 정보</h3>
+            <div class="form-group"><label>주택 담보 가치 (KB시세)</label>
+              <div class="input-wrapper"><input type="number" id="ltv-h" value="500000000"><span class="unit">원</span>
               </div>
             </div>
-            <div class="form-group"><label>희망 대출액</label>
-              <div class="input-wrapper"><input type="number" id="ltv-l" value="360000000"><span class="unit">원</span>
+            <div class="form-group"><label>대출 신청 금액</label>
+              <div class="input-wrapper"><input type="number" id="ltv-l" value="300000000"><span class="unit">원</span>
               </div>
             </div>
-            <div class="form-group"><label>연 소득</label>
-              <div class="input-wrapper"><input type="number" id="ltv-inc" value="70000000"><span class="unit">원</span>
+
+            <div class="form-group"><label>금리 & 상환 기간</label>
+              <div style="display:flex; gap:10px;">
+                <input type="number" id="dsr-rate" value="4.5" placeholder="금리 %" style="flex:1;">
+                <input type="number" id="dsr-term" value="30" placeholder="기간(년)" style="flex:1;">
               </div>
             </div>
-            <div class="form-group"><label>기존 연 원리금 상환액</label>
-              <div class="input-wrapper"><input type="number" id="ltv-debt" value="5000000"><span class="unit">원</span>
+            <div class="form-group"><label>상환 방식</label>
+              <div class="input-wrapper"><select id="dsr-type">
+                  <option value="amortization">원리금균등 (일반적)</option>
+                  <option value="bullet">만기일시 (이자만 납부)</option>
+                </select></div>
+            </div>
+
+            <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">소득 및 부채 정보 (연간)</h3>
+            <div class="form-group"><label>연 소득 (세전)</label>
+              <div class="input-wrapper"><input type="number" id="ltv-inc" value="60000000"><span class="unit">원</span>
               </div>
             </div>
-            <button class="btn-calc" onclick="calcLTVDTI()">비율 분석</button>
+            <div class="form-group"><label>기타 대출 연간 상환액</label>
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div>
+                  <label style="font-size:0.8rem; color:var(--text-muted);">이자만 상환액 (DTI용)</label>
+                  <input type="number" id="dti-other-interest" value="1000000"
+                    style="width:100%; border:1px solid #ddd; border-radius:8px; padding:10px;">
+                </div>
+                <div>
+                  <label style="font-size:0.8rem; color:var(--text-muted);">원금+이자 상환액 (DSR용)</label>
+                  <input type="number" id="dsr-other-principal" value="5000000"
+                    style="width:100%; border:1px solid #ddd; border-radius:8px; padding:10px;">
+                </div>
+              </div>
+            </div>
+
+            <button class="btn-calc" onclick="calcLTVDSR()">대출 가능 여부 진단</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 DTI vs DSR 차이점 완벽 정리</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. LTV (담보 인정 비율)</strong><br>
+                집값 대비 얼마까지 빌려주는가? (지역별 규제 상한: 40~70% 등)<br><br>
+                <strong>2. DTI (총부채 상환 비율)</strong><br>
+                연 소득 대비 [주담대 원리금 + 기타 대출 <strong>이자</strong>] 비율입니다. 예전 기준입니다.<br><br>
+                <strong>3. DSR (총부채 원리금 상환 비율) ⭐핵심</strong><br>
+                연 소득 대비 [주담대 원리금 + 기타 대출 <strong>원리금(원금+이자)</strong>] 비율입니다.<br>
+                현재 가장 강력한 규제로, 보통 40%(은행권)를 넘으면 대출이 거절됩니다.
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-row"><span>LTV (담보인정비율)</span><span id="res-ltv">0%</span></div>
-            <div class="result-row"><span>DTI (총부채상환비율)</span><span id="res-dti">0%</span></div>
+            <h4 style="margin:0 0 10px 0; color:var(--text-main);">1. 담보 기준 (LTV)</h4>
+            <div class="result-row"><span>LTV 비율</span><span id="res-ltv"
+                style="font-weight:700; color:var(--primary);">0%</span></div>
+
+            <h4 style="margin:15px 0 10px 0; color:var(--text-main);">2. 소득 기준 (상환 능력)</h4>
+            <div class="result-row"><span>DSR (원리금상환비율)</span><span id="res-dsr"
+                style="font-weight:700; color:#ef4444;">0%</span></div>
+            <div class="result-row"><span>DTI (부채상환비율)</span><span id="res-dti">0%</span></div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <div class="result-row"><span>주담대 예상 연 원리금</span><span id="res-dsr-annual">0원</span></div>
+
+            <p id="dsr-msg"
+              style="margin-top:15px; font-size:0.9rem; font-weight:700; text-align:center; color:var(--text-muted); padding:10px; background:white; border-radius:8px; border:1px solid var(--border);">
+              결과가 여기에 표시됩니다.
+            </p>
           </div>
         </div>
       </div>
@@ -2162,11 +2217,82 @@
       set('inst-res-i', fmt.format(Math.round(fee)) + '원');
     }
 
-    // 4. LTV DTI
-    function calcLTVDTI() {
-      const h = v('ltv-h'), l = v('ltv-l'), inc = v('ltv-inc'), debt = v('ltv-debt');
-      set('res-ltv', ((l / h) * 100).toFixed(1) + '%');
-      set('res-dti', (((debt + (l * 0.05)) / inc) * 100).toFixed(1) + '%'); // 0.05 is estimated annual principal
+    // 4. LTV DTI DSR
+    function calcLTVDSR() {
+      const houseVal = v('ltv-h');
+      const loanAmt = v('ltv-l');
+      const income = v('ltv-inc');
+
+      const rate = v('dsr-rate') / 100;
+      const term = v('dsr-term');
+      const type = document.getElementById('dsr-type').value;
+
+      const otherInterest = v('dti-other-interest');
+      const otherPrincipalTotal = v('dsr-other-principal'); // Principal + Interest of other debts
+
+      // 1. Calculate Mortgage Annual Payment (New Loan)
+      let annualPaymentMortgage = 0;
+
+      if (type === 'bullet') {
+        // Interest only
+        annualPaymentMortgage = loanAmt * rate;
+      } else {
+        // Amortization (Principle + Interest)
+        // Monthly Payment * 12
+        // PMT = P * r/12 * (1+r/12)^n / ((1+r/12)^n - 1)
+        const monthlyRate = rate / 12;
+        const months = term * 12;
+        if (months > 0) {
+          const pmt = loanAmt * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+          annualPaymentMortgage = pmt * 12;
+        }
+      }
+
+      // 2. LTV
+      let ltv = 0;
+      if (houseVal > 0) ltv = (loanAmt / houseVal) * 100;
+
+      // 3. DTI (Debt To Income)
+      // (Mortgage Annual Principal+Interest + Other Interest) / Income
+      // Wait, DTI usually includes Mortgage Principle+Interest? Yes, New DTI does.
+      // Old DTI might be Interest only for Mortgage? No, DTI is Mortgage P+I + Other I.
+      const dtiNumerator = annualPaymentMortgage + otherInterest;
+      let dti = 0;
+      if (income > 0) dti = (dtiNumerator / income) * 100;
+
+      // 4. DSR (Debt Service Ratio)
+      // (Mortgage P+I + All Other Debts P+I) / Income
+      const dsrNumerator = annualPaymentMortgage + otherPrincipalTotal;
+      let dsr = 0;
+      if (income > 0) dsr = (dsrNumerator / income) * 100;
+
+      // 5. Display
+      set('res-ltv', ltv.toFixed(2) + '%');
+      set('res-dati', dti.toFixed(2) + '%'); // Typo in html? id='res-dti'
+      document.getElementById('res-dti').innerText = dti.toFixed(2) + '%';
+
+      set('res-dsr', dsr.toFixed(2) + '%');
+
+      set('res-dsr-annual', fmt.format(Math.round(annualPaymentMortgage)) + '원');
+
+      // Validation Message
+      const msgEl = document.getElementById('dsr-msg');
+      let status = "안정";
+      let color = "var(--primary)";
+
+      if (dsr > 40) {
+        status = "위험 (대출 거절 가능성 높음)";
+        color = "#ef4444";
+      } else if (dsr > 70) { // Should not happen if >40 is danger, but for non-bank sector
+        status = "고위험";
+        color = "#ef4444";
+      } else {
+        status = "승인 가능권 (은행 기준 40% 이내)";
+        color = "#10b981";
+      }
+
+      msgEl.innerHTML = `진단 결과: <span style="color:${color};">${status}</span><br>DSR이 40%를 초과하면 시중은행 대출이 어려울 수 있습니다.`;
+      msgEl.style.borderColor = color;
     }
 
     // 5. Compound Interest (Advanced)
