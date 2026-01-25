@@ -755,8 +755,17 @@
                 if (mode === 's2l') {
                     const solar = Solar.fromYmd(y, m, d);
                     const lunar = solar.getLunar();
+
+                    let extraInfo = '';
+                    try {
+                        extraInfo = `${lunar.getYearInGanZhi()}년 (${lunar.getYearShengXiao()}띠)`;
+                    } catch (e) {
+                        // Fallback mechanism
+                        extraInfo = '';
+                    }
+
                     resultVal.style.fontSize = "1.8rem";
-                    resultVal.innerHTML = `<div>${lunar.getYear()}년 ${lunar.getMonth()}월 ${lunar.getDay()}일</div><div style="font-size:1.1rem; color:var(--text-muted); margin-top:0.5rem;">${lunar.getYearGanZi()}년 (${lunar.getYearShengXiao()}띠)</div>`;
+                    resultVal.innerHTML = `<div>${lunar.getYear()}년 ${lunar.getMonth()}월 ${lunar.getDay()}일</div><div style="font-size:1.1rem; color:var(--text-muted); margin-top:0.5rem;">${extraInfo}</div>`;
                 } else {
                     const lunar = Lunar.fromYmd(y, m, d);
                     const solar = lunar.getSolar();
