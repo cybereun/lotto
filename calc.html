@@ -362,8 +362,6 @@
         </div>
 
         <div class="calc-card" id="calcCard">
-            <div class="graph-container" id="plotArea"></div>
-
             <div class="display-area">
                 <div class="history-text" id="history"></div>
                 <div class="current-text" id="display">0</div>
@@ -382,7 +380,7 @@
                 <button class="key op" onclick="append('/')">÷</button>
 
                 <!-- Sci 2 -->
-                <button class="key sci" onclick="append('asin(')">kyp</button>
+                <button class="key sci" onclick="append('asin(')">asin</button>
                 <button class="key sci" onclick="append('acos(')">acos</button>
                 <button class="key sci" onclick="append('atan(')">atan</button>
                 <button class="key sci" onclick="append('e')">e</button>
@@ -422,11 +420,10 @@
                 <!-- Std 5 -->
                 <button class="key col-span-2" onclick="append('0')">0</button>
                 <button class="key" onclick="append('.')">.</button>
-
-                <!-- Equal (Positioned absolutely via grid in CSS for std, relative for sci) -->
-                <!-- Note: Grid placement hack for equals key to span rows in std mode if wanted, but simpler to just place it inline -->
                 <button class="key eq" onclick="calculate()">=</button>
             </div>
+
+            <div class="graph-container" id="plotArea"></div>
         </div>
         <p style="margin-top:1rem; color:var(--text-muted); font-size:0.9rem;">
             * 공학 모드에서 'Graph'를 누르면 수식 그래프를 그립니다. (예: x^2)
