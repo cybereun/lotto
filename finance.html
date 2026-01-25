@@ -962,29 +962,71 @@
         </div>
       </div>
 
-      <!-- 8. Dividend Yield -->
+      <!-- 8. Dividend Yield & YOC -->
       <div id="inv-dividend" class="calculator-view">
         <div class="header-section">
-          <h1>배당수익률 계산기</h1>
-          <p>현재 주가 대비 연간 배당금의 비율과 예상 배당 소득을 확인합니다.</p>
+          <h1>배당 수익률 & 현금흐름 분석기</h1>
+          <p>시가 배당률뿐만 아니라 투자 원금 대비 수익률(YOC)과 세후 월 배당금까지 분석합니다.</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
-            <div class="form-group"><label>현재 주가</label>
-              <div class="input-wrapper"><input type="number" id="div-p" value="60000"><span class="unit">원</span></div>
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">주가 및 배당 정보</h3>
+            <div class="form-group"><label>현재 주가 (Current Price)</label>
+              <div class="input-wrapper"><input type="number" id="div-price-cur" value="70000"><span
+                  class="unit">원/$</span></div>
             </div>
-            <div class="form-group"><label>연 배당금 (주당)</label>
-              <div class="input-wrapper"><input type="number" id="div-d" value="2100"><span class="unit">원</span></div>
+            <div class="form-group"><label>나의 매수 단가 (My Average Price)</label>
+              <div class="input-wrapper"><input type="number" id="div-p" value="50000"><span class="unit">원/$</span>
+              </div>
             </div>
-            <div class="form-group"><label>보유 주식 수</label>
+
+            <div class="form-group"><label>주당 연간 배당금 (Annual DPS)</label>
+              <div class="input-wrapper"><input type="number" id="div-d" value="2500" placeholder="예상 배당금"><span
+                  class="unit">원/$</span></div>
+            </div>
+            <div class="form-group"><label>보유 주식 수 (Shares)</label>
               <div class="input-wrapper"><input type="number" id="div-n" value="100"><span class="unit">주</span></div>
             </div>
-            <button class="btn-calc" onclick="calcDividend()">수익률 측정</button>
+
+            <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">세금 및 계좌 설정</h3>
+            <div class="form-group"><label>적용 세율</label>
+              <div class="input-wrapper"><select id="div-tax">
+                  <option value="15.4">국내 일반 (15.4%)</option>
+                  <option value="15.0">미국 주식 (15%)</option>
+                  <option value="9.9">ISA 일반 (9.9%)</option>
+                  <option value="0">비과세/연금 (0%)</option>
+                </select></div>
+            </div>
+
+            <button class="btn-calc" onclick="calcDividend()">현금흐름 분석</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 시가 배당률 vs YOC (Yield On Cost)</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. 시가 배당수익률 (Current Yield)</strong><br>
+                지금 이 주식을 산다면? (주당배당금 ÷ 현재주가)<br><br>
+                <strong>2. 투자 원금 대비 수익률 (YOC)</strong><br>
+                내가 산 가격 기준 수익률입니다. 장기 보유 시 이 수치가 계속 올라가야 성공한 배당 투자입니다. (주당배당금 ÷ 내 평단가)<br><br>
+                <strong>3. 세후 현금흐름</strong><br>
+                세금(배당소득세 등)을 제외하고 실제 내 통장에 입금되는 금액입니다.
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">배당 수익률</div>
-            <div class="result-value-main" id="div-res-r">0%</div>
-            <div class="result-row"><span>연 예상 배당금</span><span id="div-res-t">0</span></div>
+            <div class="result-label">연간 세후 수령액 (Total Net)</div>
+            <div class="result-value-main" id="div-res-t">0</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <div class="result-row"><span>월 환산 수령액 (세후)</span><span id="div-res-m"
+                style="color:var(--primary); font-weight:700;">0</span></div>
+
+            <h4 style="margin:15px 0 10px 0; color:var(--text-main);">수익률 분석</h4>
+            <div class="result-row"><span>시가 배당률</span><span id="div-res-yield-cur">0%</span></div>
+            <div class="result-row"><span>나의 YOC (투자원금 기준)</span><span id="div-res-yoc"
+                style="color:#ef4444; font-weight:700;">0%</span></div>
+            <div class="result-row"><span>연간 세전 배당총액</span><span id="div-res-gross">0</span></div>
+            <div class="result-row"><span>예상 배당세금</span><span id="div-res-tax">0</span></div>
           </div>
         </div>
       </div>
@@ -1977,11 +2019,36 @@
       set('goal-res', fmt.format(Math.round(res)) + '원');
     }
 
-    // 8. Dividend
+    // 8. Dividend & YOC
     function calcDividend() {
-      const p = v('div-p'), d = v('div-d'), n = v('div-n');
-      set('div-res-r', ((d / p) * 100).toFixed(2) + '%');
-      set('div-res-t', fmt.format(d * n) + '원');
+      const priceCur = v('div-price-cur');
+      const priceMy = v('div-p');
+      const dps = v('div-d');
+      const shares = v('div-n');
+      const taxRate = parseFloat(document.getElementById('div-tax').value) / 100;
+
+      // 1. Yields
+      let yieldCur = 0;
+      let yieldYoc = 0;
+
+      if (priceCur > 0) yieldCur = (dps / priceCur) * 100;
+      if (priceMy > 0) yieldYoc = (dps / priceMy) * 100;
+
+      // 2. Amounts
+      const grossTotal = dps * shares;
+      const taxAmount = grossTotal * taxRate;
+      const netTotal = grossTotal - taxAmount;
+      const netMonthly = netTotal / 12;
+
+      // Display
+      set('div-res-t', fmt.format(Math.round(netTotal)) + '원'); // Or currency unit aware? simplified to Won for now
+      set('div-res-m', fmt.format(Math.round(netMonthly)) + '원');
+
+      set('div-res-yield-cur', yieldCur.toFixed(2) + '%');
+      set('div-res-yoc', yieldYoc.toFixed(2) + '%');
+
+      set('div-res-gross', fmt.format(Math.round(grossTotal)) + '원');
+      set('div-res-tax', '-' + fmt.format(Math.round(taxAmount)) + '원');
     }
 
     // 9. ROI CAGR
