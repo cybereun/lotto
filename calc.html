@@ -265,7 +265,6 @@
         .key.eq {
             background: var(--primary);
             color: white;
-            grid-row: span 2;
             height: 100%;
         }
 
@@ -303,6 +302,68 @@
                 padding: 16px 0;
             }
         }
+
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 32px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-xl);
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 24px;
+            color: var(--text-muted);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            color: var(--primary);
+        }
+
+        .graph-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
     </style>
 </head>
 
@@ -329,12 +390,12 @@
         <div class="nav-center">
             <ul class="navbar-menu">
                 <li><a href="index.html">Intro</a></li>
+                <li><a href="calc.html" style="color:var(--primary)">계산기</a></li>
                 <li><a href="lotto.html">Lotto</a></li>
                 <li><a href="money.html">주식-물타기</a></li>
                 <li><a href="changemoney.html">환전기</a></li>
                 <li><a href="health.html">건강</a></li>
                 <li><a href="finance.html">금융</a></li>
-                <li><a href="calc.html" style="color:var(--primary)">계산기</a></li>
                 <li><a href="tools.html">도구함</a></li>
             </ul>
         </div>
@@ -423,11 +484,20 @@
                 <button class="key eq" onclick="calculate()">=</button>
             </div>
 
-            <div class="graph-container" id="plotArea"></div>
+
         </div>
         <p style="margin-top:1rem; color:var(--text-muted); font-size:0.9rem;">
             * 공학 모드에서 'Graph'를 누르면 수식 그래프를 그립니다. (예: x^2)
         </p>
+    </div>
+
+    <!-- Graph Modal -->
+    <div id="graphModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeGraph()">&times;</span>
+            <div class="graph-header">Function Graph</div>
+            <div id="plotArea" style="width:100%; height:400px;"></div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.js"></script>
@@ -454,7 +524,6 @@
             if (mode === 'sci') {
                 card.classList.add('scientific');
                 keypad.classList.add('sci-grid');
-                drawEmptyGraph();
             } else {
                 card.classList.remove('scientific');
                 keypad.classList.remove('sci-grid');
@@ -508,36 +577,61 @@
 
         function drawGraph() {
             try {
-                const width = document.getElementById('plotArea').clientWidth;
-                functionPlot({
-                    target: '#plotArea',
-                    width: width,
-                    height: 320,
-                    yAxis: { domain: [-10, 10] },
-                    grid: true,
-                    data: [{
-                        fn: expr,
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()
-                    }]
-                });
+                if (!expr) {
+                    alert('그래프를 그릴 수식을 입력해주세요.');
+                    return;
+                }
+
+                openGraph();
+                // Wait for modal to be visible for correct dimension calculation
+                setTimeout(() => {
+                    const plotElement = document.getElementById('plotArea');
+                    const width = plotElement.clientWidth;
+                    const height = plotElement.clientHeight;
+
+                    functionPlot({
+                        target: '#plotArea',
+                        width: width,
+                        height: height,
+                        yAxis: { domain: [-10, 10] },
+                        grid: true,
+                        data: [{
+                            fn: expr,
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()
+                        }]
+                    });
+                }, 100);
             } catch (e) {
                 alert('그래프를 그릴 수 있는 수식이 아닙니다. 변수 x를 포함해주세요.');
+                closeGraph();
             }
         }
 
-        function drawEmptyGraph() {
-            try {
-                const width = document.getElementById('plotArea').clientWidth || 800;
-                functionPlot({
-                    target: '#plotArea',
-                    width: width,
-                    height: 320,
-                    yAxis: { domain: [-10, 10] },
-                    grid: true,
-                    data: []
-                });
-            } catch (e) { }
+        function openGraph() {
+            const modal = document.getElementById('graphModal');
+            modal.style.display = 'flex';
+            // Force reflow
+            modal.offsetHeight;
+            modal.classList.add('show');
         }
+
+        function closeGraph() {
+            const modal = document.getElementById('graphModal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('graphModal');
+            if (event.target == modal) {
+                closeGraph();
+            }
+        }
+
+
 
         // Keyboard Support
         document.addEventListener('keydown', (e) => {
