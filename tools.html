@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProTools - 올인원 도구함</title>
-    <!-- Last Build: 2026-01-25 13:35 -->
+    <!-- Last Build: 2026-01-25 13:40 (API Fix) -->
     <meta name="google-adsense-account" content="ca-pub-5655610048474795">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5655610048474795"
         crossorigin="anonymous"></script>
@@ -730,7 +730,7 @@
             document.getElementById('age-label').innerText = `${birthStr}생 (${zodiac}띠)`;
         }
 
-        // Lunar/Solar Conversion (Updated v3)
+        // Lunar/Solar Conversion (Fixed API)
         function convertLunar() {
             const dateStr = document.getElementById('lunar-date').value;
             const mode = document.getElementById('lunar-mode').value;
@@ -742,7 +742,7 @@
             }
 
             if (typeof Solar === 'undefined' || typeof Lunar === 'undefined') {
-                resultVal.innerText = "라이브러리 로딩 중... 잠시 후 다시 시도해주세요.";
+                resultVal.innerText = "라이브러리 로드가 지연되고 있습니다. 새로고침 후 다시 시도해주세요.";
                 return;
             }
 
@@ -756,7 +756,7 @@
                     const solar = Solar.fromYmd(y, m, d);
                     const lunar = solar.getLunar();
                     resultVal.style.fontSize = "1.8rem";
-                    resultVal.innerHTML = `<div>${lunar.getYear()}년 ${lunar.getMonth()}월 ${lunar.getDay()}일</div><div style="font-size:1.1rem; color:var(--text-muted); margin-top:0.5rem;">${lunar.getYearInGanZi()}년 (${lunar.getYearInXun()} / ${lunar.getYearShengXiao()}띠)</div>`;
+                    resultVal.innerHTML = `<div>${lunar.getYear()}년 ${lunar.getMonth()}월 ${lunar.getDay()}일</div><div style="font-size:1.1rem; color:var(--text-muted); margin-top:0.5rem;">${lunar.getYearGanZi()}년 (${lunar.getYearShengXiao()}띠)</div>`;
                 } else {
                     const lunar = Lunar.fromYmd(y, m, d);
                     const solar = lunar.getSolar();
@@ -765,7 +765,8 @@
                 }
             } catch (error) {
                 console.error(error);
-                resultVal.innerText = "Error: 날짜 범위 초과 또는 형식 오류";
+                resultVal.style.fontSize = "1.1rem";
+                resultVal.innerText = "오류 발생: " + error.message;
             }
         }
 
