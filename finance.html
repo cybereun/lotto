@@ -906,31 +906,84 @@
         </div>
       </div>
 
-      <!-- 6. Savings/Deposit -->
-      <div id="inv-saving" class="calculator-view">
+      <!-- 6. Savings (Deposit / Installment) -->
+      <div id="inv-savings" class="calculator-view">
         <div class="header-section">
-          <h1>적금/예금 만기액</h1>
-          <p>월 불입액 또는 일시금 기준의 만기 수령액을 계산합니다.</p>
+          <h1>적금/예금 만기액 계산기</h1>
+          <p>예금(거치식)과 적금(적립식)의 차이를 명확히 구분하여 정확한 세후 만기액을 계산합니다.</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
-            <div class="form-group"><label>월 불입액</label>
-              <div class="input-wrapper"><input type="number" id="sav-m" value="500000"><span class="unit">원</span>
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">상품 정보 입력</h3>
+
+            <!-- Type Toggle -->
+            <div style="display:flex; margin-bottom:15px; border-bottom:1px solid var(--border);">
+              <button id="tab-sav-dep" onclick="setSavType('deposit')"
+                style="flex:1; padding:10px; background:var(--bg-body); border:none; border-bottom:2px solid var(--primary); font-weight:700; cursor:pointer; color:var(--text-main);">
+                예금 (거치식)
+              </button>
+              <button id="tab-sav-inst" onclick="setSavType('savings')"
+                style="flex:1; padding:10px; background:var(--bg-body); border:none; border-bottom:2px solid transparent; color:var(--text-muted); cursor:pointer;">
+                적금 (적립식)
+              </button>
+            </div>
+
+            <div class="form-group"><label id="sav-amt-label">예치 금액</label>
+              <div class="input-wrapper"><input type="number" id="sav-amt" value="10000000"><span class="unit">원</span>
               </div>
             </div>
-            <div class="form-group"><label>적립 기간</label>
-              <div class="input-wrapper"><input type="number" id="sav-t" value="24"><span class="unit">개월</span></div>
+
+            <div class="form-group"><label>가입 기간 (개월)</label>
+              <div class="input-wrapper"><input type="number" id="sav-period" value="12"><span class="unit">개월</span>
+              </div>
             </div>
-            <div class="form-group"><label>연 이율</label>
-              <div class="input-wrapper"><input type="number" id="sav-r" value="3.5"><span class="unit">%</span></div>
+
+            <div class="form-group"><label>연 이자율 (%)</label>
+              <div class="input-wrapper"><input type="number" id="sav-rate" value="3.5" step="0.1"><span
+                  class="unit">%</span></div>
             </div>
-            <button class="btn-calc" onclick="calcSavings()">만기액 확인</button>
+
+            <div class="form-group"><label>이자 계산 방식</label>
+              <div class="input-wrapper"><select id="sav-method">
+                  <option value="simple">단리 (일반적)</option>
+                  <option value="compound">월 복리</option>
+                </select></div>
+            </div>
+
+            <div class="form-group"><label>이자 과세율</label>
+              <div class="input-wrapper"><select id="sav-tax">
+                  <option value="15.4">일반과세 (15.4%)</option>
+                  <option value="1.4">세금우대 (1.4%)</option>
+                  <option value="9.5">세금우대 (9.5%)</option>
+                  <option value="0">비과세 (0%)</option>
+                </select></div>
+            </div>
+
+            <button class="btn-calc" onclick="calcSavings()">만기 수령액 계산</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 예금 vs 적금 이자 계산의 오해</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. 정기 예금 (거치식)</strong><br>
+                목돈을 처음부터 끝까지 묵혀두므로, 모든 원금에 대해 기간만큼의 이자가 꽉 차게 붙습니다.<br><br>
+                <strong>2. 정기 적금 (적립식)</strong><br>
+                "연 5% 적금"은 모든 돈에 5%를 주는 게 아닙니다. 첫 달 낸 돈은 12개월치 이자를 받지만, 마지막 달 돈은 1개월치만 받습니다. (실제 체감 금리는 절반 수준)<br><br>
+                <strong>3. 세금 (15.4%)</strong><br>
+                이자의 15.4%는 국가가 가져갑니다. 만기 시 '세후 수령액'이 진짜 내 돈입니다.
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">만기 수령액 (세전)</div>
-            <div class="result-value-main" id="sav-res-t">0</div>
-            <div class="result-row"><span>원금 합계</span><span id="sav-res-p">0</span></div>
-            <div class="result-row"><span>이자 수익</span><span id="sav-res-i">0</span></div>
+            <div class="result-label">만기 예상 수령액 (세후)</div>
+            <div class="result-value-main" id="sav-res-final">0원</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <div class="result-row"><span>납입 원금 합계</span><span id="sav-res-p">0원</span></div>
+            <div class="result-row"><span>세전 이자</span><span id="sav-res-i-gross">0원</span></div>
+            <div class="result-row"><span>이자 과세금</span><span id="sav-res-tax" style="color:#ef4444">0원</span></div>
+            <div class="result-row" style="margin-top:10px; font-weight:700;"><span>세후 이자</span><span id="sav-res-i-net"
+                style="color:var(--primary)">0원</span></div>
           </div>
         </div>
       </div>
@@ -2075,13 +2128,87 @@
       set('cp-res-i', fmt.format(Math.round(res - p)) + '원');
     }
 
-    // 6. Savings
+    // 6. Savings & Deposit Logic
+    let savType = 'deposit'; // deposit (예금) or savings (적금)
+
+    function setSavType(type) {
+      savType = type;
+      const tabD = document.getElementById('tab-sav-dep');
+      const tabS = document.getElementById('tab-sav-inst');
+      const label = document.getElementById('sav-amt-label');
+      const amtInput = document.getElementById('sav-amt');
+
+      if (type === 'deposit') {
+        tabD.style.borderBottomColor = 'var(--primary)'; tabD.style.color = 'var(--text-main)';
+        tabS.style.borderBottomColor = 'transparent'; tabS.style.color = 'var(--text-muted)';
+        label.innerText = '예치 금액 (거치)';
+        if (amtInput.value < 1000000) amtInput.value = 10000000; // Recommend lump sum default
+      } else {
+        tabS.style.borderBottomColor = 'var(--primary)'; tabS.style.color = 'var(--text-main)';
+        tabD.style.borderBottomColor = 'transparent'; tabD.style.color = 'var(--text-muted)';
+        label.innerText = '월 납입액 (적립)';
+        if (amtInput.value > 1000000) amtInput.value = 500000; // Recommend monthly default
+      }
+    }
+
     function calcSavings() {
-      const m = v('sav-m'), t = v('sav-t'), r = v('sav-r') / 100 / 12;
-      const res = m * (Math.pow(1 + r, t) - 1) / r * (1 + r);
-      set('sav-res-t', fmt.format(Math.round(res)) + '원');
-      set('sav-res-p', fmt.format(m * t) + '원');
-      set('sav-res-i', fmt.format(Math.round(res - m * t)) + '원');
+      const amount = v('sav-amt');
+      const months = v('sav-period');
+      const rateAnnual = v('sav-rate') / 100;
+      const method = document.getElementById('sav-method').value; // simple / compound
+      const taxRate = parseFloat(document.getElementById('sav-tax').value) / 100;
+
+      let principalTotal = 0;
+      let interestGross = 0;
+
+      const rateMonthly = rateAnnual / 12;
+
+      if (savType === 'deposit') {
+        // A. Deposit (Lump Sum)
+        principalTotal = amount;
+
+        if (method === 'simple') {
+          // Interest = P * r * (n/12)
+          interestGross = amount * rateAnnual * (months / 12);
+        } else {
+          // Compound: P * (1+r/12)^n - P
+          interestGross = amount * Math.pow(1 + rateMonthly, months) - amount;
+        }
+      } else {
+        // B. Savings (Installment)
+        principalTotal = amount * months;
+
+        if (method === 'simple') {
+          // Sum of arithmetic progression: A * n(n+1)/2 * r/12 check?
+          // Each payment earns interest for remaining months.
+          // 1st month: A * r/12 * n
+          // Last month: A * r/12 * 1
+          // Sum = A * rateMonthly * (n + n-1 + ... + 1) = A * rateMonthly * n(n+1)/2
+          interestGross = amount * rateMonthly * (months * (months + 1) / 2);
+        } else {
+          // Monthly Compound Savings
+          // FV = A * [ ((1+r)^n - 1) / r ] * (1+r) if payment at start (Prepaid) usually
+          // Let's assume standard 'Start of Month' payment for max interest? 
+          // Or 'End of Month'? Usually calculators assume Start (Prepaid) or End.
+          // Standard Korean bank calc for monthly compound usually assumes simple compounding on each deposit?
+          // Formula: A * (1+r) * [ (1+r)^n - 1 ] / r  (Prepaid annuity)
+          // Let's use Prepaid type as it's common for goal setting calculators
+          interestGross = (amount * (Math.pow(1 + rateMonthly, months) - 1) / rateMonthly * (1 + rateMonthly)) - principalTotal;
+        }
+      }
+
+      // C. Tax
+      // Tax is ceil or floor? Usually floor 10 won units in Korea.
+      // Let's just do math round for general purpose
+      let taxAmount = interestGross * taxRate;
+      let interestNet = interestGross - taxAmount;
+      let finalAmount = principalTotal + interestNet;
+
+      set('sav-res-final', fmt.format(Math.round(finalAmount)) + '원');
+      set('sav-res-p', fmt.format(Math.round(principalTotal)) + '원');
+      set('sav-res-i-gross', fmt.format(Math.round(interestGross)) + '원');
+      set('sav-res-tax', '-' + fmt.format(Math.round(taxAmount)) + '원');
+      set('sav-res-i-net', fmt.format(Math.round(interestNet)) + '원');
     }
 
     // 7. Target Savings With Advanced Logic
