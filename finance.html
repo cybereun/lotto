@@ -793,26 +793,77 @@
       <div id="loan-total" class="calculator-view">
         <div class="header-section">
           <h1>총 대출 이자 계산기</h1>
-          <p>만기 상환 시 지불하게 될 전체 이자 비용을 확인합니다.</p>
+          <p>똑같은 금리라도 '상환 방식'에 따라 수백만 원 차이가 납니다. 내 대출의 총비용을 정확히 확인하세요.</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">대출 조건 입력</h3>
             <div class="form-group"><label>대출 원금</label>
               <div class="input-wrapper"><input type="number" id="lt-p" value="100000000"><span class="unit">원</span>
               </div>
             </div>
             <div class="form-group"><label>연 이자율</label>
-              <div class="input-wrapper"><input type="number" id="lt-r" value="5.2"><span class="unit">%</span></div>
+              <div class="input-wrapper"><input type="number" id="lt-r" value="4.5"><span class="unit">%</span></div>
             </div>
-            <div class="form-group"><label>기간</label>
-              <div class="input-wrapper"><input type="number" id="lt-t" value="20"><span class="unit">년</span></div>
+            <div class="form-group"><label>대출 기간</label>
+              <div class="input-wrapper"><input type="number" id="lt-t" value="10"><span class="unit">년</span></div>
             </div>
-            <button class="btn-calc" onclick="calcLoanTotal()">분석하기</button>
+            <div class="form-group"><label>상환 방식</label>
+              <div class="input-wrapper"><select id="lt-method">
+                  <option value="amortization">원리금 균등 (매월 일정액 납부)</option>
+                  <option value="level_principal">원금 균등 (이자 점점 감소)</option>
+                  <option value="bullet">만기 일시 (이자만 내다가 끝)</option>
+                </select></div>
+            </div>
+            <div class="form-group"><label>거치 기간 (선택)</label>
+              <div class="input-wrapper"><input type="number" id="lt-g" value="0" placeholder="0"><span
+                  class="unit">년</span></div>
+            </div>
+
+            <button class="btn-calc" onclick="calcLoanTotal()">총 비용 분석</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 어떤 상환 방식이 유리할까요?</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. 원금 균등 상환 (총 이자 最少)</strong><br>
+                매달 원금을 똑같이 갚습니다. 잔액이 빨리 줄어들어 이자 비용이 가장 적지만, 초반 월 납입액이 부담될 수 있습니다.<br><br>
+                <strong>2. 원리금 균등 상환 (가장 대중적)</strong><br>
+                매달 내는 돈이 똑같아 계획 세우기 좋습니다. 하지만 초반에는 원금이 거의 안 줄어들어 총 이자는 원금 균등보다 많습니다.<br><br>
+                <strong>3. 만기 일시 상환 (총 이자 最多)</strong><br>
+                기간 동안 이자만 냅니다. 당장은 편하지만, 원금이 그대로라 총 이자 비용은 가장 큽니다.
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">총 납부 이자</div>
-            <div class="result-value-main" id="lt-res-i">0</div>
-            <div class="result-row"><span>상환 후 총금액</span><span id="lt-res-t">0</span></div>
+            <div class="result-label">총 상환 금액 (원금+이자)</div>
+            <div class="result-value-main" id="lt-res-total">0원</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <div class="result-row"><span>대출 원금</span><span id="lt-res-p">0원</span></div>
+            <div class="result-row"><span>총이자 비용</span><span id="lt-res-i"
+                style="color:#ef4444; font-weight:700;">0원</span></div>
+
+            <details style="margin-top:15px;">
+              <summary style="cursor:pointer; font-size:0.9rem; font-weight:700; color:var(--text-main);">📅 월별 상환 스케줄
+                보기</summary>
+              <div
+                style="margin-top:10px; max-height:250px; overflow-y:auto; border:1px solid var(--border); border-radius:8px;">
+                <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:right;">
+                  <thead style="background:var(--bg-body); position:sticky; top:0;">
+                    <tr>
+                      <th style="padding:8px; text-align:center;">회차</th>
+                      <th style="padding:8px;">납입금</th>
+                      <th style="padding:8px; color:var(--text-muted);">이자</th>
+                      <th style="padding:8px; color:var(--primary);">잔액</th>
+                    </tr>
+                  </thead>
+                  <tbody id="lt-schedule-body">
+                    <!-- Dynamic -->
+                  </tbody>
+                </table>
+              </div>
+            </details>
           </div>
         </div>
       </div>
@@ -2247,12 +2298,95 @@
       set('lm-res-t', fmt.format(Math.round(total)) + '원');
     }
 
-    // 2. Loan Total
+    // 2. Total Loan Interest (Advanced)
     function calcLoanTotal() {
-      const p = v('lt-p'), r = v('lt-r') / 100, t = v('lt-t');
-      const totalInt = p * r * t; // Simplified Simple Interest or user can choose compound
-      set('lt-res-i', fmt.format(Math.round(totalInt)) + '원');
-      set('lt-res-t', fmt.format(Math.round(p + totalInt)) + '원');
+      const p = v('lt-p'); // Principal
+      const r_annual = v('lt-r') / 100; // Annual Rate
+      const years = v('lt-t'); // Years
+      const graceYears = v('lt-g') || 0; // Grace Period
+      const method = document.getElementById('lt-method').value;
+
+      const totalMonths = years * 12;
+      const graceMonths = graceYears * 12;
+      const repayMonths = totalMonths - graceMonths;
+      const r_monthly = r_annual / 12;
+
+      let balance = p;
+      let totalInterest = 0;
+      let html = '';
+
+      // Amortization (PMT) Calculation if needed
+      let pmt = 0;
+      if (method === 'amortization' && repayMonths > 0) {
+        if (r_monthly > 0) {
+          pmt = p * r_monthly * Math.pow(1 + r_monthly, repayMonths) / (Math.pow(1 + r_monthly, repayMonths) - 1);
+        } else {
+          pmt = p / repayMonths;
+        }
+      }
+
+      for (let m = 1; m <= totalMonths; m++) {
+        let interestPayment = balance * r_monthly;
+        let principalPayment = 0;
+        let monthlyTotal = interestPayment;
+
+        if (m <= graceMonths) {
+          // Grace Period: Interest Only
+          principalPayment = 0;
+          monthlyTotal = interestPayment;
+        } else {
+          // Repayment Period
+          if (method === 'bullet') {
+            // Bullet: Interest Only until last month
+            if (m === totalMonths) {
+              principalPayment = balance;
+              monthlyTotal = principalPayment + interestPayment;
+            } else {
+              principalPayment = 0;
+              monthlyTotal = interestPayment;
+            }
+          } else if (method === 'level_principal') {
+            // Level Principal: Fixed Principal
+            principalPayment = p / repayMonths;
+            monthlyTotal = principalPayment + interestPayment;
+          } else if (method === 'amortization') {
+            // Level Payment: Fixed PMT
+            // Last month adjustment handled by logic or simple check
+            if (m === totalMonths) {
+              // Adjust for rounding
+              principalPayment = balance;
+              monthlyTotal = principalPayment + interestPayment;
+            } else {
+              monthlyTotal = pmt;
+              // Cap monthly total if balance is small (edge case)
+              interestPayment = balance * r_monthly;
+              principalPayment = monthlyTotal - interestPayment;
+            }
+          }
+        }
+
+        totalInterest += interestPayment;
+        balance -= principalPayment;
+        if (balance < 10) balance = 0; // Floating point clean up
+
+        // Add to Schedule (Show every month? or Every Year if too long?
+        // Showing all for detailed verification is good but might be long. 
+        // Let's show all but in a scrollable div.
+        html += `
+            <tr style="border-bottom:1px solid #f8f9fa;">
+                <td style="padding:8px; text-align:center;">${m}회</td>
+                <td style="padding:8px; font-weight:700;">${fmt.format(Math.round(monthlyTotal))}</td>
+                <td style="padding:8px; color:var(--text-muted);">${fmt.format(Math.round(interestPayment))}</td>
+                <td style="padding:8px; color:var(--primary);">${fmt.format(Math.round(balance))}</td>
+            </tr>
+          `;
+      }
+
+      set('lt-res-total', fmt.format(Math.round(p + totalInterest)) + '원');
+      set('lt-res-p', fmt.format(Math.round(p)) + '원');
+      set('lt-res-i', fmt.format(Math.round(totalInterest)) + '원');
+
+      document.getElementById('lt-schedule-body').innerHTML = html;
     }
 
     // 3. Installment (Credit Card Fee)
