@@ -1,0 +1,1201 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProFinance - 올인원 금융 계산기</title>
+  <meta name="description" content="대출, 투자, 은퇴, 부동산, 세금 등 15가지 전문 금융 계산기로 당신의 자산을 관리하세요.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
+
+    :root {
+      --primary: #2563eb;
+      --primary-light: #60a5fa;
+      --primary-dark: #1e40af;
+      --secondary: #7c3aed;
+      --accent: #f59e0b;
+      --bg-body: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --sidebar-bg: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+      --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      --radius-lg: 32px;
+      --radius-md: 20px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme='dark'] {
+      --bg-body: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --sidebar-bg: #1e293b;
+      --shadow-md: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Pretendard', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      transition: background-color 0.3s, color 0.3s;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 72px;
+      background: rgba(var(--card-bg), 0.8);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      z-index: 1000;
+    }
+
+    .logo {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+      margin: 0 2rem;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .theme-toggle {
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 12px;
+      background: var(--bg-body);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    /* Layout */
+    .app-container {
+      display: flex;
+      max-width: 1440px;
+      margin: 72px auto 0;
+      min-height: calc(100vh - 72px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1rem;
+      position: sticky;
+      top: 72px;
+      height: calc(100vh - 72px);
+      overflow-y: auto;
+      transition: var(--transition);
+    }
+
+    .sidebar h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin: 1.5rem 0 0.75rem 1rem;
+    }
+
+    .sidebar h2:first-child {
+      margin-top: 0;
+    }
+
+    .menu-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+      color: var(--text-main);
+      border-radius: 14px;
+      transition: var(--transition);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .menu-link:hover {
+      background-color: var(--bg-body);
+      color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    .menu-link.active {
+      background-color: rgba(37, 99, 235, 0.1);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .menu-icon {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 3rem 4rem;
+      max-width: 1000px;
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 240px;
+      }
+
+      .main-content {
+        padding: 3rem 2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .app-container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        display: flex;
+        overflow-x: auto;
+        padding: 1rem;
+        gap: 10px;
+        border: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .sidebar h2 {
+        display: none;
+      }
+
+      .menu-link {
+        white-space: nowrap;
+        padding: 0.5rem 1rem;
+      }
+
+      .main-content {
+        width: 100%;
+        padding: 2rem 1.5rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    .header-section {
+      margin-bottom: 3.5rem;
+    }
+
+    .header-section h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+
+    /* Calculator View Area */
+    .calculator-view {
+      display: none;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    .calculator-view.active {
+      display: block;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Card System */
+    .calc-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+
+    @media (max-width: 900px) {
+      .calc-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Form Controls */
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper input,
+    .input-wrapper select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      background: var(--bg-body);
+      color: var(--text-main);
+    }
+
+    .input-wrapper input:focus,
+    .input-wrapper select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+      background: var(--card-bg);
+    }
+
+    .unit {
+      position: absolute;
+      right: 16px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+
+    .btn-calc {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 0.5rem;
+    }
+
+    .btn-calc:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+    }
+
+    /* Results Display */
+    .result-panel {
+      background: var(--bg-body);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 1px solid var(--border);
+    }
+
+    .result-value-main {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-family: 'Outfit', sans-serif;
+      text-align: center;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 0.75rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px dashed var(--border);
+      font-size: 0.9rem;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .result-label {
+      color: var(--text-muted);
+    }
+
+    .result-val {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .pop {
+      animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.95);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body data-theme="light">
+
+  <nav class="navbar">
+    <a href="index.html" class="logo">
+      <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <path d="M12 2v20M2 12h20" />
+        <path d="m19 16-7 7-7-7" />
+      </svg>
+      ProFinance
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Intro</a></li>
+      <li><a href="index.html#lotto-app">Lotto</a></li>
+      <li><a href="money.html">주식-코인물타기</a></li>
+      <li><a href="changemoney.html">실시간 환전기</a></li>
+      <li><a href="health.html">건강 계산기</a></li>
+      <li><a href="finance.html">금융 계산기</a></li>
+    </ul>
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+      <svg class="menu-icon" id="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5" />
+        <path
+          d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M17.66 6.34l1.42-1.42" />
+      </svg>
+      <svg class="menu-icon" id="moon-icon" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+    </button>
+  </nav>
+
+  <div class="app-container">
+    <aside class="sidebar">
+      <h2>대출 & 부채</h2>
+      <div class="menu-list">
+        <a href="#loan-monthly" class="menu-link active" onclick="showCalc('loan-monthly', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+          월 상환액 (원리금/원금)
+        </a>
+        <a href="#loan-total" class="menu-link" onclick="showCalc('loan-total', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          총 대출 이자
+        </a>
+        <a href="#loan-installment" class="menu-link" onclick="showCalc('loan-installment', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <path d="M3 6h18" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          할부 이자 계산
+        </a>
+        <a href="#loan-ltv" class="menu-link" onclick="showCalc('loan-ltv', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          LTV / DTI 계산
+        </a>
+      </div>
+
+      <h2>저축 & 투자</h2>
+      <div class="menu-list">
+        <a href="#inv-compound" class="menu-link" onclick="showCalc('inv-compound', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+            <polyline points="17 6 23 6 23 12" />
+          </svg>
+          복리 계산기
+        </a>
+        <a href="#inv-saving" class="menu-link" onclick="showCalc('inv-saving', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 5c0 1.5-2.24 3-5 3s-5-1.5-5-3 2.24-3 5-3 5 1.5 5 3Z" />
+            <path d="M9 12c0 1.5 2.24 3 5 3s5-1.5 5-3" />
+            <path d="M9 19c0 1.5 2.24 3 5 3s5-1.5 5-3" />
+            <path d="M5 5v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5" />
+          </svg>
+          적금/예금 만기액
+        </a>
+        <a href="#inv-goal" class="menu-link" onclick="showCalc('inv-goal', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <circle cx="12" cy="12" r="6" />
+            <circle cx="12" cy="12" r="2" />
+          </svg>
+          목표 저축액
+        </a>
+        <a href="#inv-dividend" class="menu-link" onclick="showCalc('inv-dividend', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="21" x2="21" y2="21" />
+            <line x1="3" y1="7" x2="21" y2="7" />
+            <path d="M4 7v10" />
+            <path d="M8 7v10" />
+            <path d="M12 7v10" />
+            <path d="M16 7v10" />
+            <path d="M20 7v10" />
+            <path d="M10 2 8 7" />
+            <path d="M14 2 16 7" />
+            <path d="m18 2 3 5" />
+            <path d="M6 2 3 7" />
+          </svg>
+          배당수익률
+        </a>
+        <a href="#inv-roi" class="menu-link" onclick="showCalc('inv-roi', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+          ROI / CAGR
+        </a>
+        <a href="#inv-real" class="menu-link" onclick="showCalc('inv-real', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="8" r="6" />
+            <path d="M18.09 10.37A6 6 0 1 1 10.34 18.1" />
+            <path d="M7 6h1v4" />
+            <path d="m16.71 13.88.7.71-2.82 2.82" />
+          </svg>
+          실질 수익률
+        </a>
+      </div>
+
+      <h2>은퇴 & 세금</h2>
+      <div class="menu-list">
+        <a href="#ret-fund" class="menu-link" onclick="showCalc('ret-fund', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+          </svg>
+          노후 자금 설계
+        </a>
+        <a href="#ret-pension" class="menu-link" onclick="showCalc('ret-pension', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="7" />
+            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+          </svg>
+          연금/IRP 필요액
+        </a>
+        <a href="#tax-salary" class="menu-link" onclick="showCalc('tax-salary', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z" />
+            <path d="M14 8H8" />
+            <path d="M16 12H8" />
+            <path d="M13 16H8" />
+          </svg>
+          연봉 실수령액
+        </a>
+        <a href="#tax-benefit" class="menu-link" onclick="showCalc('tax-benefit', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="6" cy="6" r="3" />
+            <circle cx="6" cy="18" r="3" />
+            <line x1="20" y1="4" x2="8.12" y2="15.88" />
+            <line x1="14.47" y1="14.48" x2="20" y2="20" />
+            <line x1="8.12" y1="8.12" x2="12" y2="12" />
+          </svg>
+          절세 효과
+        </a>
+      </div>
+
+      <h2>부동산</h2>
+      <div class="menu-list">
+        <a href="#prop-rent" class="menu-link" onclick="showCalc('prop-rent', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3-3 3z" />
+          </svg>
+          전세 vs 월세 비교
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- 1. Loan Monthly Payment -->
+      <div id="loan-monthly" class="calculator-view active">
+        <div class="header-section">
+          <h1>월 상환액 계산기</h1>
+          <p>원리금 균등 vs 원금 균등 상환 방식별 월 납입금을 비교합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>대출 원금</label>
+              <div class="input-wrapper"><input type="number" id="lm-p" value="50000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>연 이자율 (%)</label>
+              <div class="input-wrapper"><input type="number" id="lm-r" value="4.5" step="0.1"><span
+                  class="unit">%</span></div>
+            </div>
+            <div class="form-group"><label>대출 기간</label>
+              <div class="input-wrapper"><input type="number" id="lm-t" value="5"><span class="unit">년</span></div>
+            </div>
+            <div class="form-group"><label>상환 방식</label>
+              <div class="input-wrapper"><select id="lm-type">
+                  <option value="annuity">원리금 균등</option>
+                  <option value="equal">원금 균등</option>
+                </select></div>
+            </div>
+            <button class="btn-calc" onclick="calcLoanMonthly()">계산하기</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">월 평균 상환액</div>
+            <div class="result-value-main" id="lm-res-main">0</div>
+            <div class="result-row"><span class="result-label">총 이자</span><span class="result-val"
+                id="lm-res-i">0</span></div>
+            <div class="result-row"><span class="result-label">총 상환액</span><span class="result-val"
+                id="lm-res-t">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Total Loan Interest -->
+      <div id="loan-total" class="calculator-view">
+        <div class="header-section">
+          <h1>총 대출 이자 계산기</h1>
+          <p>만기 상환 시 지불하게 될 전체 이자 비용을 확인합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>대출 원금</label>
+              <div class="input-wrapper"><input type="number" id="lt-p" value="100000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>연 이자율</label>
+              <div class="input-wrapper"><input type="number" id="lt-r" value="5.2"><span class="unit">%</span></div>
+            </div>
+            <div class="form-group"><label>기간</label>
+              <div class="input-wrapper"><input type="number" id="lt-t" value="20"><span class="unit">년</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcLoanTotal()">분석하기</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">총 납부 이자</div>
+            <div class="result-value-main" id="lt-res-i">0</div>
+            <div class="result-row"><span>상환 후 총금액</span><span id="lt-res-t">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Installment Interest -->
+      <div id="loan-installment" class="calculator-view">
+        <div class="header-section">
+          <h1>할부 이자 계산기</h1>
+          <p>신용카드 할부 구매 시 발생하는 실질적인 이자 비용을 계산합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>할부 총액</label>
+              <div class="input-wrapper"><input type="number" id="inst-p" value="1200000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>할부 개월</label>
+              <div class="input-wrapper"><input type="number" id="inst-t" value="12"><span class="unit">개월</span></div>
+            </div>
+            <div class="form-group"><label>연 할부수수료율</label>
+              <div class="input-wrapper"><input type="number" id="inst-r" value="14.5"><span class="unit">%</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcInstallment()">비용 계산</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">월 할부금</div>
+            <div class="result-value-main" id="inst-res-m">0</div>
+            <div class="result-row"><span>총 수수료</span><span id="inst-res-i">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. LTV / DTI -->
+      <div id="loan-ltv" class="calculator-view">
+        <div class="header-section">
+          <h1>LTV / DTI 계산기</h1>
+          <p>주택 담보 여력과 소득 대비 부채 상환 능력을 자가 진단합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>주택 감정가</label>
+              <div class="input-wrapper"><input type="number" id="ltv-h" value="600000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>희망 대출액</label>
+              <div class="input-wrapper"><input type="number" id="ltv-l" value="360000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>연 소득</label>
+              <div class="input-wrapper"><input type="number" id="ltv-inc" value="70000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>기존 연 원리금 상환액</label>
+              <div class="input-wrapper"><input type="number" id="ltv-debt" value="5000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <button class="btn-calc" onclick="calcLTVDTI()">비율 분석</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-row"><span>LTV (담보인정비율)</span><span id="res-ltv">0%</span></div>
+            <div class="result-row"><span>DTI (총부채상환비율)</span><span id="res-dti">0%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Compound Interest -->
+      <div id="inv-compound" class="calculator-view">
+        <div class="header-section">
+          <h1>복리 계산기</h1>
+          <p>시간과 이자가 만나 만드는 강력한 자산 증식 효과를 확인하세요.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>투자 원금</label>
+              <div class="input-wrapper"><input type="number" id="cp-p" value="10000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>연 수익률</label>
+              <div class="input-wrapper"><input type="number" id="cp-r" value="8"><span class="unit">%</span></div>
+            </div>
+            <div class="form-group"><label>기간</label>
+              <div class="input-wrapper"><input type="number" id="cp-t" value="10"><span class="unit">년</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcCompound()">미래 가치 계산</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">최종 자산</div>
+            <div class="result-value-main" id="cp-res-t">0</div>
+            <div class="result-row"><span>순수익</span><span id="cp-res-i">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Savings/Deposit -->
+      <div id="inv-saving" class="calculator-view">
+        <div class="header-section">
+          <h1>적금/예금 만기액</h1>
+          <p>월 불입액 또는 일시금 기준의 만기 수령액을 계산합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>월 불입액</label>
+              <div class="input-wrapper"><input type="number" id="sav-m" value="500000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>적립 기간</label>
+              <div class="input-wrapper"><input type="number" id="sav-t" value="24"><span class="unit">개월</span></div>
+            </div>
+            <div class="form-group"><label>연 이율</label>
+              <div class="input-wrapper"><input type="number" id="sav-r" value="3.5"><span class="unit">%</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcSavings()">만기액 확인</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">만기 수령액 (세전)</div>
+            <div class="result-value-main" id="sav-res-t">0</div>
+            <div class="result-row"><span>원금 합계</span><span id="sav-res-p">0</span></div>
+            <div class="result-row"><span>이자 수익</span><span id="sav-res-i">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Goal Savings -->
+      <div id="inv-goal" class="calculator-view">
+        <div class="header-section">
+          <h1>목표 저축액 계산기</h1>
+          <p>목표 금액을 모으기 위해 매월 얼마를 저축해야 하는지 역산합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>목표 금액</label>
+              <div class="input-wrapper"><input type="number" id="goal-t" value="100000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>기간</label>
+              <div class="input-wrapper"><input type="number" id="goal-y" value="10"><span class="unit">년</span></div>
+            </div>
+            <div class="form-group"><label>예상 수익률</label>
+              <div class="input-wrapper"><input type="number" id="goal-r" value="5"><span class="unit">%</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcGoal()">필요 저축액 확인</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">월 필요 저축액</div>
+            <div class="result-value-main" id="goal-res">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Dividend Yield -->
+      <div id="inv-dividend" class="calculator-view">
+        <div class="header-section">
+          <h1>배당수익률 계산기</h1>
+          <p>현재 주가 대비 연간 배당금의 비율과 예상 배당 소득을 확인합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>현재 주가</label>
+              <div class="input-wrapper"><input type="number" id="div-p" value="60000"><span class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>연 배당금 (주당)</label>
+              <div class="input-wrapper"><input type="number" id="div-d" value="2100"><span class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>보유 주식 수</label>
+              <div class="input-wrapper"><input type="number" id="div-n" value="100"><span class="unit">주</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcDividend()">수익률 측정</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">배당 수익률</div>
+            <div class="result-value-main" id="div-res-r">0%</div>
+            <div class="result-row"><span>연 예상 배당금</span><span id="div-res-t">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. ROI / CAGR -->
+      <div id="inv-roi" class="calculator-view">
+        <div class="header-section">
+          <h1>ROI / CAGR 계산기</h1>
+          <p>투자 성적의 총 수익률과 연평균 성장률(CAGR)을 공식 산출합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>투자 원금 (초기값)</label>
+              <div class="input-wrapper"><input type="number" id="roi-p" value="10000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>최종 가치 (현재값)</label>
+              <div class="input-wrapper"><input type="number" id="roi-f" value="25000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>투자 기간</label>
+              <div class="input-wrapper"><input type="number" id="roi-t" value="5"><span class="unit">년</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcROI()">성과 분석</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-row"><span>총 수익률 (ROI)</span><span id="res-roi">0%</span></div>
+            <div class="result-row"><span>연평균 성장률 (CAGR)</span><span id="res-cagr">0%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Real Return (Inflation) -->
+      <div id="inv-real" class="calculator-view">
+        <div class="header-section">
+          <h1>실질 수익률 계산기</h1>
+          <p>명목 수익률에서 인플레이션을 제외한 실제 자산가치 상승률을 확인합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>명목 수익률 (%)</label>
+              <div class="input-wrapper"><input type="number" id="real-n" value="6"><span class="unit">%</span></div>
+            </div>
+            <div class="form-group"><label>물가 상승률 (%)</label>
+              <div class="input-wrapper"><input type="number" id="real-inf" value="3.5"><span class="unit">%</span>
+              </div>
+            </div>
+            <button class="btn-calc" onclick="calcRealReturn()">실질 수익 측정</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">실질 수익률</div>
+            <div class="result-value-main" id="real-res">0%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11. Retirement Fund -->
+      <div id="ret-fund" class="calculator-view">
+        <div class="header-section">
+          <h1>노후 자금 설계</h1>
+          <p>은퇴 후 필요 생활비를 기반으로 총 필요 자산 규모를 추산합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>월 필요 생활비 (현재기준)</label>
+              <div class="input-wrapper"><input type="number" id="rf-m" value="3000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>현재 나이</label>
+              <div class="input-wrapper"><input type="number" id="rf-now" value="35"><span class="unit">세</span></div>
+            </div>
+            <div class="form-group"><label>은퇴 목표 나이</label>
+              <div class="input-wrapper"><input type="number" id="rf-ret" value="60"><span class="unit">세</span></div>
+            </div>
+            <div class="form-group"><label>기대 수명</label>
+              <div class="input-wrapper"><input type="number" id="rf-life" value="95"><span class="unit">세</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcRetFund()">노후 필요 자금</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">총 은퇴 필요 자금</div>
+            <div class="result-value-main" id="rf-res-t" style="font-size:1.8rem">0</div>
+            <p style="font-size:0.8rem; color:var(--text-muted); text-align:center;">물가 상승률 3% 반영 추정치입니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 12. Pension / IRP Need -->
+      <div id="ret-pension" class="calculator-view">
+        <div class="header-section">
+          <h1>연금/IRP 필요액</h1>
+          <p>은퇴 후 연금 소득을 위해 지금부터 적립해야 할 월 납입액을 제안합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>목표 연금 수령액 (월)</label>
+              <div class="input-wrapper"><input type="number" id="pen-t" value="1500000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>준비 기간 (년)</label>
+              <div class="input-wrapper"><input type="number" id="pen-y" value="25"><span class="unit">년</span></div>
+            </div>
+            <div class="form-group"><label>예상 운용 수익률</label>
+              <div class="input-wrapper"><input type="number" id="pen-r" value="4.5"><span class="unit">%</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcPensionNeed()">준비 계획 산출</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">월 권장 납입액</div>
+            <div class="result-value-main" id="pen-res">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 13. Net Salary -->
+      <div id="tax-salary" class="calculator-view">
+        <div class="header-section">
+          <h1>연봉 실수령액 계산</h1>
+          <p>세금과 보험료를 제한 실제 내 통장에 입금되는 금액을 간편 추정합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>연봉 (세전)</label>
+              <div class="input-wrapper"><input type="number" id="sal-a" value="50000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>부양 가족 수</label>
+              <div class="input-wrapper"><input type="number" id="sal-f" value="1"><span class="unit">명</span></div>
+            </div>
+            <div class="form-group"><label>비과세액 (월)</label>
+              <div class="input-wrapper"><input type="number" id="sal-e" value="200000"><span class="unit">원</span>
+              </div>
+            </div>
+            <button class="btn-calc" onclick="calcSalNet()">실수령 확인</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">월 예상 실수령액</div>
+            <div class="result-value-main" id="sal-res-m">0</div>
+            <div class="result-row"><span>연 예상 실수령</span><span id="sal-res-y">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 14. Tax Benefit -->
+      <div id="tax-benefit" class="calculator-view">
+        <div class="header-section">
+          <h1>절세 효과 계산기</h1>
+          <p>연금저축/IRP 납입 금액에 따른 연말 정산 세액 공제 혜택을 확인합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>연간 납입액 합계 (연금+IRP)</label>
+              <div class="input-wrapper"><input type="number" id="tax-p" value="9000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>총 급여액 구간</label>
+              <div class="input-wrapper"><select id="tax-type">
+                  <option value="0.165">5,500만원 이하 (16.5%)</option>
+                  <option value="0.132">5,500만원 초과 (13.2%)</option>
+                </select></div>
+            </div>
+            <button class="btn-calc" onclick="calcTaxBenefit()">공제 혜택 분석</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label">연말정산 환급 예상액</div>
+            <div class="result-value-main" id="tax-res">0</div>
+            <p style="font-size:0.8rem; color:var(--text-muted); text-align:center;">한도 내 최대 절세액 기준입니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 15. Property Rent Comparison -->
+      <div id="prop-rent" class="calculator-view">
+        <div class="header-section">
+          <h1>전세 vs 월세 비교</h1>
+          <p>보증금의 기회비용과 월세를 비교하여 경제적인 선택을 돕습니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>전세 보증금</label>
+              <div class="input-wrapper"><input type="number" id="rent-j" value="300000000"><span class="unit">원</span>
+              </div>
+            </div>
+            <div class="form-group"><label>월세 조건 (보증금/월세)</label>
+              <div style="display:flex; gap:10px;"><input type="number" id="rent-m-d" placeholder="보증금"
+                  style="flex:1;"><input type="number" id="rent-m-r" placeholder="월세" style="flex:1;"></div>
+            </div>
+            <div class="form-group"><label>전환율/기회비용 (%)</label>
+              <div class="input-wrapper"><input type="number" id="rent-rate" value="4.5"><span class="unit">%</span>
+              </div>
+            </div>
+            <button class="btn-calc" onclick="calcPropRent()">비교 분석</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-row"><span>전세 월 환산 비용</span><span id="rent-res-j">0</span></div>
+            <div class="result-row"><span>월세 방식 총 비용</span><span id="rent-res-m">0</span></div>
+            <div class="result-label" id="rent-res-best" style="margin-top:1rem; color:var(--accent)">어느 쪽이 유리할까요?</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const fmt = new Intl.NumberFormat('ko-KR');
+    function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
+    function set(id, text) {
+      const el = document.getElementById(id);
+      el.innerText = text;
+      el.classList.add('pop');
+      setTimeout(() => el.classList.remove('pop'), 400);
+    }
+
+    function toggleTheme() {
+      const next = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', next);
+      document.getElementById('sun-icon').style.display = next === 'light' ? 'block' : 'none';
+      document.getElementById('moon-icon').style.display = next === 'dark' ? 'block' : 'none';
+    }
+
+    function showCalc(id, event) {
+      if (event) event.preventDefault();
+      document.querySelectorAll('.menu-link').forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+      document.querySelectorAll('.calculator-view').forEach(v => v.classList.toggle('active', v.id === id));
+      window.scrollTo(0, 0);
+    }
+
+    // 1. Loan Monthly
+    function calcLoanMonthly() {
+      const p = v('lm-p'), r = v('lm-r') / 100 / 12, t = v('lm-t') * 12, type = document.getElementById('lm-type').value;
+      let monthly = 0, total = 0;
+      if (type === 'annuity') {
+        monthly = p * r * Math.pow(1 + r, t) / (Math.pow(1 + r, t) - 1);
+        total = monthly * t;
+      } else {
+        const first = (p / t) + (p * r), last = (p / t) + (p / t * r);
+        monthly = (first + last) / 2;
+        total = monthly * t;
+      }
+      set('lm-res-main', fmt.format(Math.round(monthly)) + '원');
+      set('lm-res-i', fmt.format(Math.round(total - p)) + '원');
+      set('lm-res-t', fmt.format(Math.round(total)) + '원');
+    }
+
+    // 2. Loan Total
+    function calcLoanTotal() {
+      const p = v('lt-p'), r = v('lt-r') / 100, t = v('lt-t');
+      const totalInt = p * r * t; // Simplified Simple Interest or user can choose compound
+      set('lt-res-i', fmt.format(Math.round(totalInt)) + '원');
+      set('lt-res-t', fmt.format(Math.round(p + totalInt)) + '원');
+    }
+
+    // 3. Installment
+    function calcInstallment() {
+      const p = v('inst-p'), t = v('inst-t'), r = v('inst-r') / 100 / 12;
+      const fee = p * (v('inst-r') / 100) * (t / 12); // Standard Card Installment Fee Logic
+      set('inst-res-m', fmt.format(Math.round((p + fee) / t)) + '원');
+      set('inst-res-i', fmt.format(Math.round(fee)) + '원');
+    }
+
+    // 4. LTV DTI
+    function calcLTVDTI() {
+      const h = v('ltv-h'), l = v('ltv-l'), inc = v('ltv-inc'), debt = v('ltv-debt');
+      set('res-ltv', ((l / h) * 100).toFixed(1) + '%');
+      set('res-dti', (((debt + (l * 0.05)) / inc) * 100).toFixed(1) + '%'); // 0.05 is estimated annual principal
+    }
+
+    // 5. Compound
+    function calcCompound() {
+      const p = v('cp-p'), r = v('cp-r') / 100, t = v('cp-t');
+      const res = p * Math.pow(1 + r, t);
+      set('cp-res-t', fmt.format(Math.round(res)) + '원');
+      set('cp-res-i', fmt.format(Math.round(res - p)) + '원');
+    }
+
+    // 6. Savings
+    function calcSavings() {
+      const m = v('sav-m'), t = v('sav-t'), r = v('sav-r') / 100 / 12;
+      const res = m * (Math.pow(1 + r, t) - 1) / r * (1 + r);
+      set('sav-res-t', fmt.format(Math.round(res)) + '원');
+      set('sav-res-p', fmt.format(m * t) + '원');
+      set('sav-res-i', fmt.format(Math.round(res - m * t)) + '원');
+    }
+
+    // 7. Goal
+    function calcGoal() {
+      const t = v('goal-t'), y = v('goal-y') * 12, r = v('goal-r') / 100 / 12;
+      const res = t * r / ((Math.pow(1 + r, y) - 1) * (1 + r));
+      set('goal-res', fmt.format(Math.round(res)) + '원');
+    }
+
+    // 8. Dividend
+    function calcDividend() {
+      const p = v('div-p'), d = v('div-d'), n = v('div-n');
+      set('div-res-r', ((d / p) * 100).toFixed(2) + '%');
+      set('div-res-t', fmt.format(d * n) + '원');
+    }
+
+    // 9. ROI CAGR
+    function calcROI() {
+      const p = v('roi-p'), f = v('roi-f'), t = v('roi-t');
+      set('res-roi', (((f / p) - 1) * 100).toFixed(2) + '%');
+      set('res-cagr', ((Math.pow(f / p, 1 / t) - 1) * 100).toFixed(2) + '%');
+    }
+
+    // 10. Real Return
+    function calcRealReturn() {
+      const n = v('real-n') / 100, i = v('real-inf') / 100;
+      const real = ((1 + n) / (1 + i) - 1) * 100;
+      set('real-res', real.toFixed(2) + '%');
+    }
+
+    // 11. Retirement Fund
+    function calcRetFund() {
+      const m = v('rf-m'), now = v('rf-now'), ret = v('rf-ret'), life = v('rf-life');
+      const gap = ret - now, years = life - ret;
+      const inflM = m * Math.pow(1.03, gap); // Monthly spending at retirement
+      const total = inflM * 12 * years;
+      set('rf-res-t', fmt.format(Math.round(total)) + '원');
+    }
+
+    // 12. Pension Need
+    function calcPensionNeed() {
+      const t = v('pen-t'), y = v('pen-y') * 12, r = v('pen-r') / 100 / 12;
+      // Simplified pension model
+      const targetFund = t * 12 * 25; // Target 25 years of withdrawal
+      const monthly = targetFund * r / (Math.pow(1 + r, y) - 1);
+      set('pen-res', fmt.format(Math.round(monthly)) + '원');
+    }
+
+    // 13. Sal Net
+    function calcSalNet() {
+      const a = v('sal-a'), e = v('sal-e') * 12;
+      const taxable = (a - e) / 12;
+      const net = taxable * 0.85 + (e / 12); // Rough 15% deductions estimate
+      set('sal-res-m', fmt.format(Math.round(net)) + '원');
+      set('sal-res-y', fmt.format(Math.round(net * 12)) + '원');
+    }
+
+    // 14. Tax Benefit
+    function calcTaxBenefit() {
+      const p = Math.min(v('tax-p'), 9000000), r = parseFloat(document.getElementById('tax-type').value);
+      set('tax-res', fmt.format(Math.round(p * r)) + '원');
+    }
+
+    // 15. Prop Rent
+    function calcPropRent() {
+      const j = v('rent-j'), md = v('rent-m-d'), mr = v('rent-m-r'), r = v('rent-rate') / 100 / 12;
+      const costJ = j * r, costM = (md * r) + mr;
+      set('rent-res-j', fmt.format(Math.round(costJ)) + '원');
+      set('rent-res-m', fmt.format(Math.round(costM)) + '원');
+      set('rent-res-best', costJ < costM ? '전세가 더 경제적입니다' : '월세가 더 경제적입니다');
+    }
+  </script>
+</body>
+
+</html>
