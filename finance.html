@@ -445,6 +445,23 @@
         opacity: 1;
       }
     }
+
+    /* Fix Input Overlap Issues */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+      padding-right: 3rem !important;
+      /* Ensure space for unit text */
+    }
+
+    .input-wrapper input {
+      padding-right: 48px;
+    }
   </style>
 </head>
 
