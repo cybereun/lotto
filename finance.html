@@ -360,7 +360,8 @@
 
     .unit {
       position: absolute;
-      right: 16px;
+      right: 2.5rem;
+      /* Moved left to avoid spinner */
       color: var(--text-muted);
       font-weight: 600;
       font-size: 0.85rem;
@@ -446,21 +447,9 @@
       }
     }
 
-    /* Fix Input Overlap Issues */
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    input[type=number] {
-      -moz-appearance: textfield;
-      padding-right: 3rem !important;
-      /* Ensure space for unit text */
-    }
-
+    /* Input padding for units and spinners */
     .input-wrapper input {
-      padding-right: 48px;
+      padding-right: 4.5rem !important;
     }
   </style>
 </head>

@@ -430,6 +430,8 @@
         .input-wrapper select {
             width: 100%;
             padding: 14px 18px;
+            padding-right: 4.5rem;
+            /* Space for unit + spinner */
             border: 2px solid var(--border);
             border-radius: 16px;
             font-size: 1.05rem;
@@ -448,7 +450,8 @@
 
         .unit {
             position: absolute;
-            right: 18px;
+            right: 2.5rem;
+            /* Moved left to avoid spinner */
             color: var(--text-muted);
             font-weight: 600;
             font-size: 0.9rem;
