@@ -878,30 +878,79 @@
         </div>
       </div>
 
-      <!-- 5. Compound Interest -->
+      <!-- 5. Compound Interest (Snowball) -->
       <div id="inv-compound" class="calculator-view">
         <div class="header-section">
-          <h1>복리 계산기</h1>
-          <p>시간과 이자가 만나 만드는 강력한 자산 증식 효과를 확인하세요.</p>
+          <h1>복리 계산기 (스노우볼)</h1>
+          <p>아인슈타인이 극찬한 복리의 마법! 시간이 돈을 어떻게 불리는지 직접 확인하세요.</p>
         </div>
         <div class="calc-card">
           <div class="calc-inputs">
-            <div class="form-group"><label>투자 원금</label>
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">투자 자본 설정</h3>
+            <div class="form-group"><label>초기 투자금 (거치)</label>
               <div class="input-wrapper"><input type="number" id="cp-p" value="10000000"><span class="unit">원</span>
               </div>
             </div>
-            <div class="form-group"><label>연 수익률</label>
-              <div class="input-wrapper"><input type="number" id="cp-r" value="8"><span class="unit">%</span></div>
+            <div class="form-group"><label>월 추가 납입금 (적립)</label>
+              <div class="input-wrapper"><input type="number" id="cp-pmt" value="1000000"><span class="unit">원</span>
+              </div>
             </div>
-            <div class="form-group"><label>기간</label>
+
+            <h3 style="margin-top:20px; font-size:1rem; color:var(--text-muted);">성장 조건 설정</h3>
+            <div class="form-group"><label>투자 기간</label>
               <div class="input-wrapper"><input type="number" id="cp-t" value="10"><span class="unit">년</span></div>
             </div>
-            <button class="btn-calc" onclick="calcCompound()">미래 가치 계산</button>
+            <div class="form-group"><label>연 예상 수익률</label>
+              <div class="input-wrapper"><input type="number" id="cp-r" value="8.0" step="0.1"><span
+                  class="unit">%</span></div>
+            </div>
+            <div class="form-group"><label>복리 횟수 (Compounding)</label>
+              <div class="input-wrapper"><select id="cp-n">
+                  <option value="12" selected>월 복리 (일반적)</option>
+                  <option value="1">연 복리 (주식/펀드)</option>
+                  <option value="365">일 복리 (파킹통장)</option>
+                </select></div>
+            </div>
+
+            <button class="btn-calc" onclick="calcCompound()">복리 효과 확인</button>
+
+            <details style="margin-top:20px; background:rgba(0,0,0,0.03); border-radius:12px; padding:15px;">
+              <summary style="cursor:pointer; font-weight:700;">💡 복리의 3요소와 스노우볼 효과</summary>
+              <div style="margin-top:10px; font-size:0.9rem; line-height:1.6; color:var(--text-muted);">
+                <strong>1. 초기 자금 (Current Snow)</strong><br>
+                처음 굴리기 시작한 눈덩이입니다. 클수록 유리하지만, 없어도 시작할 수 있습니다.<br><br>
+                <strong>2. 시간 (Hill Length)</strong><br>
+                눈덩이가 굴러갈 언덕의 길이입니다. 복리 효과는 시간이 지날수록 기하급수적으로 폭발합니다.<br><br>
+                <strong>3. 수익률 (Slope)</strong><br>
+                언덕의 경사입니다. 수익률이 높을수록 눈덩이는 더 빨리 커집니다.
+              </div>
+            </details>
           </div>
           <div class="result-panel">
-            <div class="result-label">최종 자산</div>
-            <div class="result-value-main" id="cp-res-t">0</div>
-            <div class="result-row"><span>순수익</span><span id="cp-res-i">0</span></div>
+            <div class="result-label">n년 후 예상 자산 (세전)</div>
+            <div class="result-value-main" id="cp-res-total">0원</div>
+
+            <div style="border-top:1px dashed var(--border); margin:15px 0;"></div>
+
+            <!-- Result Breakdown Bar -->
+            <div
+              style="display:flex; height:24px; border-radius:6px; overflow:hidden; margin-bottom:15px; font-size:0.8rem; line-height:24px; color:white; font-weight:700;">
+              <div id="cp-bar-p" style="background:#cbd5e1; width:33%; text-align:center;">원금</div>
+              <div id="cp-bar-i" style="background:var(--primary); width:67%; text-align:center;">이자</div>
+            </div>
+
+            <div class="result-row"><span>순수 원금 (투자금)</span><span id="cp-res-p">0원</span></div>
+            <div class="result-row"><span>복리 수익 (이자)</span><span id="cp-res-i"
+                style="color:var(--primary); font-weight:700;">0원</span></div>
+            <div class="result-row"><span>수익률</span><span id="cp-res-r">0%</span></div>
+
+            <details style="margin-top:10px;">
+              <summary style="cursor:pointer; font-size:0.9rem; color:var(--text-muted);">📈 연도별 성장 추이 보기</summary>
+              <div id="cp-year-list"
+                style="margin-top:10px; max-height:200px; overflow-y:auto; font-size:0.85rem; border-top:1px solid var(--border);">
+                <!-- Dynamic Rows -->
+              </div>
+            </details>
           </div>
         </div>
       </div>
@@ -2120,12 +2169,63 @@
       set('res-dti', (((debt + (l * 0.05)) / inc) * 100).toFixed(1) + '%'); // 0.05 is estimated annual principal
     }
 
-    // 5. Compound
+    // 5. Compound Interest (Advanced)
     function calcCompound() {
-      const p = v('cp-p'), r = v('cp-r') / 100, t = v('cp-t');
-      const res = p * Math.pow(1 + r, t);
-      set('cp-res-t', fmt.format(Math.round(res)) + '원');
-      set('cp-res-i', fmt.format(Math.round(res - p)) + '원');
+      const p = v('cp-p'); // Principal Lump Sum
+      const pmt = v('cp-pmt'); // Monthly Contribution
+      const t = v('cp-t'); // Years
+      const r_annual = v('cp-r') / 100;
+      const n = parseInt(document.getElementById('cp-n').value); // Compounding freq
+
+      const totalMonths = t * 12;
+
+      // Calculate effective monthly multiplier based on n
+      // If n=12 (Monthly): (1 + r/12)
+      // If n=1 (Yearly): (1 + r)^(1/12)
+      // If n=365 (Daily): (1 + r/365)^(365/12) approximately
+      const multiplier = Math.pow(1 + r_annual / n, n / 12);
+
+      let balance = p;
+      let totalInvested = p;
+      let breakdownHtml = '<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee; font-weight:700;"><span>연차</span><span>누적 금액</span></div>';
+
+      for (let m = 1; m <= totalMonths; m++) {
+        // 1. Add Contribution
+        balance += pmt;
+        totalInvested += pmt;
+
+        // 2. Grow (Interest) -- Assuming Interest is applied/accrued monthly effectively
+        balance = balance * multiplier;
+
+        // Record Yearly
+        if (m % 12 === 0) {
+          const year = m / 12;
+          breakdownHtml += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #f8f9fa;">
+                  <span>${year}년차</span>
+                  <span>${fmt.format(Math.round(balance))}원</span>
+              </div>`;
+        }
+      }
+
+      const totalInterest = balance - totalInvested;
+      const yieldRate = (totalInterest / totalInvested) * 100;
+
+      set('cp-res-total', fmt.format(Math.round(balance)) + '원');
+      set('cp-res-p', fmt.format(Math.round(totalInvested)) + '원');
+      set('cp-res-i', fmt.format(Math.round(totalInterest)) + '원');
+      set('cp-res-r', yieldRate.toFixed(1) + '%');
+
+      // Update List
+      document.getElementById('cp-year-list').innerHTML = breakdownHtml;
+
+      // Update Bar Chart
+      const pPercent = Math.max(10, Math.min(90, (totalInvested / balance) * 100)); // Min 10% for visibility
+      const iPercent = 100 - pPercent;
+
+      document.getElementById('cp-bar-p').style.width = pPercent + '%';
+      document.getElementById('cp-bar-p').innerText = '원금 ' + (totalInvested / balance * 100).toFixed(0) + '%';
+      document.getElementById('cp-bar-i').style.width = iPercent + '%';
+      document.getElementById('cp-bar-i').innerText = '수익 ' + (totalInterest / balance * 100).toFixed(0) + '%';
     }
 
     // 6. Savings & Deposit Logic
