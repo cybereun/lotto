@@ -17,6 +17,19 @@
             --card: #fffdf9;
             --shadow: rgba(43, 30, 18, 0.15);
             --glass-border: rgba(230, 81, 0, 0.1);
+            --navbar-bg: rgba(255, 255, 255, 0.7);
+        }
+
+        [data-theme='dark'] {
+            --bg-1: #0f172a;
+            --bg-2: #1e293b;
+            --ink: #f1f5f9;
+            --accent: #fbbf24;
+            --accent-2: #f59e0b;
+            --card: #1e293b;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --navbar-bg: rgba(15, 23, 42, 0.7);
         }
 
         * {
@@ -31,15 +44,34 @@
             top: 0;
             left: 0;
             width: 100%;
-            background: rgba(255, 255, 255, 0.7);
+            height: 72px;
+            background: var(--navbar-bg);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            z-index: 2000;
+            border-bottom: 1px solid var(--glass-border);
+            transition: background 0.3s;
+        }
+
+        .nav-left,
+        .nav-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-right {
+            justify-content: flex-end;
+        }
+
+        .nav-center {
+            display: flex;
             justify-content: center;
             align-items: center;
-            padding: 16px 24px;
-            z-index: 2000;
-            border-bottom: 1px solid rgba(37, 99, 235, 0.1);
         }
 
         .navbar-menu {
@@ -76,6 +108,29 @@
 
         .navbar-menu a:hover::after {
             width: 100%;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 12px;
+            background: var(--card);
+            border: 1px solid var(--glass-border);
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .menu-icon {
+            width: 22px;
+            height: 22px;
         }
 
         body {
@@ -291,14 +346,34 @@
 
 <body>
     <nav class="navbar">
-        <ul class="navbar-menu">
-            <li><a href="index.html">Intro</a></li>
-            <li><a href="lotto.html">Lotto</a></li>
-            <li><a href="money.html">주식-코인물타기</a></li>
-            <li><a href="changemoney.html">실시간 환전기</a></li>
-            <li><a href="health.html">건강 계산기</a></li>
-            <li><a href="finance.html">금융 계산기</a></li>
-        </ul>
+        <div class="nav-left">
+            <a href="index.html"
+                style="text-decoration:none; font-family:'Pretendard',sans-serif; font-weight:800; color:var(--accent); font-size:1.4rem;">ProFinance</a>
+        </div>
+        <div class="nav-center">
+            <ul class="navbar-menu">
+                <li><a href="index.html">Intro</a></li>
+                <li><a href="lotto.html">Lotto</a></li>
+                <li><a href="money.html">주식-코인물타기</a></li>
+                <li><a href="changemoney.html">실시간 환전기</a></li>
+                <li><a href="health.html">건강 계산기</a></li>
+                <li><a href="finance.html">금융 계산기</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                <svg class="menu-icon" id="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5" />
+                    <path
+                        d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M17.66 6.34l1.42-1.42" />
+                </svg>
+                <svg class="menu-icon" id="moon-icon" style="display:none" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+            </button>
+        </div>
     </nav>
     <div class="container">
         <header>
@@ -366,6 +441,15 @@
     </div>
 
     <script>
+        function toggleTheme() {
+            const body = document.body;
+            const current = body.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', next);
+            document.getElementById('sun-icon').style.display = next === 'light' ? 'block' : 'none';
+            document.getElementById('moon-icon').style.display = next === 'dark' ? 'block' : 'none';
+        }
+
         const inputs = ['currentPrice', 'currentQty', 'buyPrice', 'buyQty'];
         const elements = {};
         inputs.forEach(id => elements[id] = document.getElementById(id));
