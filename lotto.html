@@ -15,6 +15,10 @@
       --card: #fffdf9;
       --shadow: rgba(43, 30, 18, 0.15);
       --navbar-bg: rgba(255, 255, 255, 0.7);
+      --text-muted: #4a3222;
+      --input-bg: #fff4e4;
+      --ticket-bg: #fff7ed;
+      --btn-text: white;
     }
 
     [data-theme='dark'] {
@@ -26,6 +30,10 @@
       --card: #1e293b;
       --shadow: rgba(0, 0, 0, 0.5);
       --navbar-bg: rgba(15, 23, 42, 0.7);
+      --text-muted: #94a3b8;
+      --input-bg: #334155;
+      --ticket-bg: #0f172a;
+      --btn-text: #2b1e12;
     }
 
     * {
@@ -163,7 +171,7 @@
     p {
       margin: 0;
       font-size: 16px;
-      color: #4a3222;
+      color: var(--text-muted);
     }
 
     .panel {
@@ -196,13 +204,13 @@
     }
 
     select {
-      background: #fff4e4;
+      background: var(--input-bg);
       color: var(--ink);
     }
 
     button {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: white;
+      color: var(--btn-text);
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
       box-shadow: 0 10px 24px rgba(230, 81, 0, 0.35);
@@ -222,10 +230,10 @@
       gap: 8px;
       padding: 8px 12px;
       border-radius: 999px;
-      background: #fff4e4;
+      background: var(--input-bg);
       font-size: 13px;
       font-weight: 700;
-      color: #4a3222;
+      color: var(--ink);
     }
 
     .toggle input {
@@ -245,7 +253,7 @@
     .ticket {
       border-radius: 18px;
       padding: 16px;
-      background: #fff7ed;
+      background: var(--ticket-bg);
       border: 1px dashed rgba(230, 81, 0, 0.3);
       display: grid;
       gap: 10px;
