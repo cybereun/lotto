@@ -2091,9 +2091,95 @@
     }
 
     function calcGoal() {
-      const t = v('goal-t'), y = v('goal-y') * 12, r = v('goal-r') / 100 / 12;
-      const res = t * r / ((Math.pow(1 + r, y) - 1) * (1 + r));
-      set('goal-res', fmt.format(Math.round(res)) + '원');
+      const target = v('goal-target');
+      const initial = v('goal-initial'); // Present Value
+      let period = v('goal-period');
+      const periodUnit = document.getElementById('goal-period-unit').value;
+      const rate = v('goal-rate') / 100; // Annual Rate
+      const taxRate = parseFloat(document.getElementById('goal-tax').value) / 100;
+
+      const isStepUp = document.getElementById('goal-stepup-check').checked;
+      const stepRate = v('goal-stepup-rate') / 100;
+
+      // Convert Period to Months
+      let months = (periodUnit === 'year') ? period * 12 : period;
+      if (months <= 0) months = 1;
+
+      // Effective Monthly Rate (After Tax)
+      const monthlyRate = (rate * (1 - taxRate)) / 12;
+
+      // 1. Future Value of Initial Principal (Lump Sum)
+      const fvInitial = initial * Math.pow(1 + monthlyRate, months);
+
+      // 2. Remaining Gap to Target
+      let gap = target - fvInitial;
+      if (gap < 0) gap = 0; // Already achieved
+
+      // 3. Calculate PMT (Monthly Payment)
+      let pmt = 0;
+      let totalPrincipal = initial;
+
+      if (gap > 0) {
+        if (monthlyRate === 0) {
+          pmt = gap / months;
+        } else if (!isStepUp) {
+          // Standard PMT formula: PMT = FV * r / ((1+r)^n - 1)
+          pmt = gap * monthlyRate / (Math.pow(1 + monthlyRate, months) - 1);
+        } else {
+          // Step-up Logic: Iterative approach
+          let low = 0, high = gap, ans = gap;
+          for (let i = 0; i < 30; i++) {
+            let mid = (low + high) / 2;
+            let currentFV = 0;
+            let currentPmt = mid;
+            for (let m = 1; m <= months; m++) {
+              currentFV = currentFV * (1 + monthlyRate) + currentPmt;
+              if (m < months && m % 12 === 0) {
+                currentPmt = currentPmt * (1 + stepRate);
+              }
+            }
+            if (currentFV > gap) { ans = mid; high = mid; }
+            else { low = mid; }
+          }
+          pmt = ans;
+        }
+      }
+
+      // Display Results
+      if (!isStepUp) {
+        totalPrincipal += pmt * months;
+      } else {
+        let currentPmt = pmt;
+        for (let m = 1; m <= months; m++) {
+          totalPrincipal += currentPmt;
+          if (m < months && m % 12 === 0) currentPmt = currentPmt * (1 + stepRate);
+        }
+      }
+
+      let resText = fmt.format(Math.round(pmt)) + '원';
+      if (gap === 0) {
+        resText = "0원 (현재 보유액으로 달성 가능)";
+      }
+
+      set('goal-res', resText);
+      set('goal-res-principal', fmt.format(Math.round(totalPrincipal)) + '원');
+
+      // Interest = Final Value (Target) - Total Principal
+      let finalValue = (gap === 0) ? fvInitial : target;
+      let interestNet = finalValue - totalPrincipal;
+
+      set('goal-res-interest', '+' + fmt.format(Math.round(interestNet)) + '원');
+      set('goal-res-total', fmt.format(Math.round(finalValue)) + '원');
+
+      // Step-up Message
+      const msgEl = document.getElementById('goal-stepup-msg');
+      if (isStepUp && gap > 0) {
+        msgEl.style.display = 'block';
+        set('goal-res-first', fmt.format(Math.round(pmt)) + '원');
+        set('goal-res-inc', (stepRate * 100) + '%');
+      } else {
+        msgEl.style.display = 'none';
+      }
     }
 
     // 8. Dividend & YOC
