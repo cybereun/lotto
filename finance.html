@@ -637,6 +637,43 @@
           </svg>
           전세 vs 월세 비교
         </a>
+        <a href="#real-tax" class="menu-link" onclick="showCalc('real-tax', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+          부동산 취득세
+        </a>
+        <a href="#real-broker" class="menu-link" onclick="showCalc('real-broker', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+            <path d="M12 18V6"></path>
+          </svg>
+          중개 수수료
+        </a>
+        <a href="#real-conversion" class="menu-link" onclick="showCalc('real-conversion', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="17 1 21 5 17 9"></polyline>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+            <polyline points="7 23 3 19 7 15"></polyline>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+          </svg>
+          전월세 전환
+        </a>
+        <a href="#real-area" class="menu-link" onclick="showCalc('real-area', event)">
+          <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18" />
+            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+          </svg>
+          평수 계산기
+        </a>
       </div>
     </aside>
 
@@ -1076,6 +1113,223 @@
         </div>
       </div>
 
+      <!-- 16. Real Estate Tax -->
+      <div id="real-tax" class="calculator-view">
+        <div class="header-section">
+          <h1>부동산 취득세 계산기</h1>
+          <p>주택, 오피스텔, 토지 등 부동산 취득 시 납부해야 할 세금을 계산합니다. (2025년 기준)</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>취득 원인</label>
+              <select id="rt-cause"
+                style="width:100%; padding:12px; border:2px solid var(--border); border-radius:12px;">
+                <option value="buy">매매 (유상승계)</option>
+                <option value="build">원시취득 (신축 등)</option>
+                <option value="inherit">상속</option>
+                <option value="gift">증여</option>
+              </select>
+            </div>
+            <div class="form-group"><label>물건 종류</label>
+              <select id="rt-type"
+                style="width:100%; padding:12px; border:2px solid var(--border); border-radius:12px;">
+                <option value="apt">주택 (아파트/빌라 등)</option>
+                <option value="off">오피스텔</option>
+                <option value="land">토지 (농지 외)</option>
+                <option value="farm">농지</option>
+              </select>
+            </div>
+            <div class="form-group" id="rt-area-grp"><label>전용 면적</label>
+              <select id="rt-area"
+                style="width:100%; padding:12px; border:2px solid var(--border); border-radius:12px;">
+                <option value="under85">85㎡ 이하 (국민평형)</option>
+                <option value="over85">85㎡ 초과</option>
+              </select>
+            </div>
+            <div class="form-group" id="rt-count-grp"><label>보유 주택 수 (취득 후 기준)</label>
+              <select id="rt-count"
+                style="width:100%; padding:12px; border:2px solid var(--border); border-radius:12px;">
+                <option value="1">1주택 (무주택자)</option>
+                <option value="2">2주택 (일시적 2주택 포함)</option>
+                <option value="3">3주택</option>
+                <option value="4">4주택 이상 / 법인</option>
+              </select>
+            </div>
+            <div class="form-group"><label>취득 가액</label>
+              <div class="input-wrapper"><input type="number" id="rt-price" placeholder="금액 입력"><span
+                  class="unit">원</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcRealTax()">세금 계산하기</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-row"><span>취득세</span><span id="rt-res-acq">0원</span></div>
+            <div class="result-row"><span>지방교육세</span><span id="rt-res-edu">0원</span></div>
+            <div class="result-row"><span>농어촌특별세</span><span id="rt-res-farm">0원</span></div>
+            <div class="result-total-label">총 납부 세액</div>
+            <div class="result-total-value" id="rt-res-total">0원</div>
+            <p class="result-desc" style="margin-top:1rem">* 조정대상지역 여부 등에 따라 중과세율이 적용될 수 있습니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 17. Brokerage Fee -->
+      <div id="real-broker" class="calculator-view">
+        <div class="header-section">
+          <h1>부동산 중개 수수료</h1>
+          <p>매매, 전세, 월세 거래 시 발생하는 법정 중개 보수 상한요율을 계산합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>물건 종류</label>
+              <select id="rb-type"
+                style="width:100%; padding:12px; border:2px solid var(--border); border-radius:12px;">
+                <option value="house">주택</option>
+                <option value="off">오피스텔 (주거용)</option>
+                <option value="land">토지/상가/기타</option>
+              </select>
+            </div>
+            <div class="form-group"><label>거래 유형</label>
+              <select id="rb-deal"
+                style="width:100%; padding:12px; border:2px solid var(--border); border-radius:12px;">
+                <option value="buy">매매/교환</option>
+                <option value="rent">전세/월세</option>
+              </select>
+            </div>
+            <div class="form-group"><label>거래 금액 (보증금/매매가)</label>
+              <div class="input-wrapper"><input type="number" id="rb-price" placeholder="금액 입력"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group" id="rb-rent-grp" style="display:none"><label>월세액 (전월세인 경우)</label>
+              <div class="input-wrapper"><input type="number" id="rb-monthly" placeholder="없으면 0"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>협의 요율 (%)</label>
+              <div style="display:flex; gap:10px;">
+                <input type="number" id="rb-rate" placeholder="상한요율 자동 적용" step="0.01" style="flex:1;">
+                <span style="align-self:center; font-size:0.9rem; color:var(--text-muted)">입력 시 우선 적용</span>
+              </div>
+            </div>
+            <button class="btn-calc" onclick="calcBrokerFee()">수수료 계산</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-row"><span>상한 요율</span><span id="rb-res-rate">-%</span></div>
+            <div class="result-row"><span>거래 기준 가액</span><span id="rb-res-val">0원</span></div>
+            <div class="result-total-label">최대 중개 보수 (VAT 별도)</div>
+            <div class="result-total-value" id="rb-res-fee">0원</div>
+            <p class="result-desc" style="margin-top:1rem; color:var(--accent)" id="rb-res-limit"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 18. Jeonse Conversion -->
+      <div id="real-conversion" class="calculator-view">
+        <div class="header-section">
+          <h1>전월세 전환 계산기</h1>
+          <p>전세를 월세로, 또는 월세를 전세로 전환할 때 적정 금액을 계산하세요.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group"><label>계산 방향</label>
+              <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <button class="btn-calc" id="btn-j2m" onclick="setConversionMode('j2m')"
+                  style="background:var(--primary); opacity:1;">전세 → 월세</button>
+                <button class="btn-calc" id="btn-m2j" onclick="setConversionMode('m2j')"
+                  style="background:var(--bg-body); color:var(--text-main); border:1px solid var(--border);">월세 →
+                  전세</button>
+              </div>
+            </div>
+            <div class="form-group"><label>기존 전세금 / 보증금</label>
+              <div class="input-wrapper"><input type="number" id="rc-base" placeholder="금액 입력"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group" id="rc-target-grp"><label>보증금을 얼마로 내리시겠습니까?</label>
+              <div class="input-wrapper"><input type="number" id="rc-deposit" placeholder="새로운 보증금"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group" id="rc-rent-grp" style="display:none"><label>현재 월세</label>
+              <div class="input-wrapper"><input type="number" id="rc-monthly-current" placeholder="현재 월세"><span
+                  class="unit">원</span></div>
+            </div>
+            <div class="form-group"><label>전월세 전환율 (%)</label>
+              <div class="input-wrapper"><input type="number" id="rc-rate" value="5.0" step="0.1"><span
+                  class="unit">%</span></div>
+            </div>
+            <button class="btn-calc" onclick="calcConversion()">전환 금액 계산</button>
+          </div>
+          <div class="result-panel">
+            <div class="result-label" id="rc-res-label">예상 월세</div>
+            <div class="result-total-value" id="rc-res-val">0원</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 19. Pyeong Area -->
+      <div id="real-area" class="calculator-view">
+        <div class="header-section">
+          <h1>평수 계산기 (면적 변환)</h1>
+          <p>평 ↔ 제곱미터(㎡) 간편 변환 및 자주 쓰는 평형 정보를 제공합니다.</p>
+        </div>
+        <div class="calc-card">
+          <div class="calc-inputs">
+            <div class="form-group">
+              <style>
+                .area-presets {
+                  display: grid;
+                  grid-template-columns: repeat(4, 1fr);
+                  gap: 8px;
+                  margin-bottom: 1rem;
+                }
+
+                .preset-btn {
+                  padding: 8px;
+                  border: 1px solid var(--border);
+                  background: var(--bg-body);
+                  color: var(--text-main);
+                  border-radius: 8px;
+                  cursor: pointer;
+                  transition: all 0.2s;
+                }
+
+                .preset-btn:hover {
+                  background: var(--primary-light);
+                  color: white;
+                  border-color: var(--primary);
+                }
+              </style>
+              <label>자주 찾는 평형</label>
+              <div class="area-presets">
+                <button class="preset-btn" onclick="setArea(20)">20평</button>
+                <button class="preset-btn" onclick="setArea(25)">25평</button>
+                <button class="preset-btn" onclick="setArea(30)">30평</button>
+                <button class="preset-btn" onclick="setArea(34)">34평</button>
+                <button class="preset-btn" onclick="setArea(40)">40평</button>
+                <button class="preset-btn" onclick="setArea(45)">45평</button>
+                <button class="preset-btn" onclick="setArea(50)">50평</button>
+                <button class="preset-btn" onclick="setArea(60)">60평</button>
+              </div>
+            </div>
+            <div class="form-group"><label>평수 입력</label>
+              <div class="input-wrapper">
+                <input type="number" id="ra-py" oninput="convertArea('py')" placeholder="평 입력"><span
+                  class="unit">평</span>
+              </div>
+            </div>
+            <div style="text-align:center; font-size:1.5rem; color:var(--primary); margin: 0.5rem 0;">⇵</div>
+            <div class="form-group"><label>제곱미터 (㎡) 입력</label>
+              <div class="input-wrapper">
+                <input type="number" id="ra-m2" oninput="convertArea('m2')" placeholder="㎡ 입력"><span
+                  class="unit">㎡</span>
+              </div>
+            </div>
+          </div>
+          <div class="result-panel">
+            <div class="result-row"><span>공급면적 기준</span><span id="ra-res-supply">-</span></div>
+            <div class="result-row"><span>전용면적 (약 75% 추산)</span><span id="ra-res-exclusive">-</span></div>
+            <p class="result-desc" style="margin-top:1rem">1평 = 3.305785㎡ / 1㎡ = 0.3025평</p>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -1228,6 +1482,209 @@
       set('rent-res-j', fmt.format(Math.round(costJ)) + '원');
       set('rent-res-m', fmt.format(Math.round(costM)) + '원');
       set('rent-res-best', costJ < costM ? '전세가 더 경제적입니다' : '월세가 더 경제적입니다');
+    }
+
+    // 16. Real Tax
+    function calcRealTax() {
+      const p = v('rt-price');
+      const cause = document.getElementById('rt-cause').value;
+      const type = document.getElementById('rt-type').value;
+      const count = parseInt(document.getElementById('rt-count').value);
+      const isOver85 = document.getElementById('rt-area').value === 'over85';
+
+      let rateAcq = 0.04; // Default standard (e.g. commercial land)
+      if (cause === 'buy') {
+        if (type === 'apt') {
+          // House acquisition tax rates (Simplified 2024-2025)
+          // 1 house: 1-3% based on price
+          let baseRate = 0.01;
+          if (p > 600000000 && p <= 900000000) {
+            baseRate = (p * 2 / 300000000 - 3) / 100; // Formula
+          } else if (p > 900000000) {
+            baseRate = 0.03;
+          }
+
+          // Heavy tax for multi-home (Simplified logic: ignore adjustment area complexity for now, assume standard heavy tax if >2)
+          // 1: 1-3%, 2: 1-3% (non-adj), 3: 8%, 4+: 12%
+          if (count === 3) baseRate = 0.08;
+          else if (count >= 4) baseRate = 0.12;
+
+          rateAcq = baseRate;
+        } else if (type === 'off') {
+          rateAcq = 0.04;
+        } else if (type === 'farm') {
+          rateAcq = 0.03;
+        } else {
+          rateAcq = 0.04; // Land/Commercial
+        }
+      } else if (cause === 'build') {
+        rateAcq = 0.028;
+      } else if (cause === 'inherit') {
+        rateAcq = (type === 'farm') ? 0.023 : 0.028;
+      } else if (cause === 'gift') {
+        rateAcq = 0.035; // Standard gift (can be 12% if in adj area and >300m, but keep simple)
+      }
+
+      // Edu & Farm Tax
+      // Edu tax: usually 0.1 of rate (or 0.4% if multi-home heavy)
+      // Farm tax: 0.2% if > 85m2
+      let rateEdu = 0.002; // Standard approx
+      let rateFarm = 0;
+
+      if (type === 'apt' && cause === 'buy') {
+        if (count >= 3) rateEdu = 0.004; // Heavy tax case
+        else if (p <= 600000000) rateEdu = 0.001;
+        else if (p <= 900000000) rateEdu = 0.002;
+        else rateEdu = 0.003;
+
+        if (isOver85) rateFarm = 0.002;
+      } else if (type === 'off') {
+        rateEdu = 0.004;
+        rateFarm = 0.002; // Officetel usually has farm tax? Standard is 4.6% total
+      } else {
+        rateEdu = 0.002;
+        if (type !== 'apt' && isOver85) rateFarm = 0.002;
+      }
+
+      // Calculation
+      const taxAcq = Math.floor(p * rateAcq);
+      const taxEdu = Math.floor(p * rateEdu);
+      const taxFarm = Math.floor(p * rateFarm);
+
+      set('rt-res-acq', fmt.format(taxAcq) + '원');
+      set('rt-res-edu', fmt.format(taxEdu) + '원');
+      set('rt-res-farm', fmt.format(taxFarm) + '원');
+      set('rt-res-total', fmt.format(taxAcq + taxEdu + taxFarm) + '원');
+    }
+
+    // 17. Broker Fee
+    function calcBrokerFee() {
+      const type = document.getElementById('rb-type').value;
+      const deal = document.getElementById('rb-deal').value;
+      let price = v('rb-price');
+      const monthly = v('rb-monthly');
+      const manualRate = v('rb-rate');
+
+      // Rental conversion
+      if (deal === 'rent') {
+        let rentalVal = price + (monthly * 100);
+        if (rentalVal < 50000000) {
+          rentalVal = price + (monthly * 70);
+        }
+        price = rentalVal;
+      }
+
+      set('rb-res-val', fmt.format(price) + '원');
+
+      let maxRate = 0;
+      let limit = 0;
+
+      if (manualRate > 0) {
+        maxRate = manualRate;
+      } else {
+        // Standard 2024 rates
+        if (type === 'house') {
+          if (deal === 'buy') {
+            if (price < 50000000) { maxRate = 0.6; limit = 250000; }
+            else if (price < 200000000) { maxRate = 0.5; limit = 800000; }
+            else if (price < 900000000) { maxRate = 0.4; }
+            else if (price < 1200000000) { maxRate = 0.5; }
+            else if (price < 1500000000) { maxRate = 0.6; }
+            else { maxRate = 0.7; }
+          } else { // Rent
+            if (price < 50000000) { maxRate = 0.5; limit = 200000; }
+            else if (price < 100000000) { maxRate = 0.4; limit = 300000; }
+            else if (price < 600000000) { maxRate = 0.3; }
+            else if (price < 1000000000) { maxRate = 0.4; }
+            else { maxRate = 0.5; }
+          }
+        } else if (type === 'off') { // Officetel (Residential)
+          maxRate = (deal === 'buy') ? 0.5 : 0.4;
+        } else { // Land/Comm
+          maxRate = 0.9;
+        }
+      }
+
+      let fee = Math.floor(price * (maxRate / 100));
+      if (limit > 0 && fee > limit) fee = limit;
+
+      set('rb-res-rate', maxRate.toFixed(2) + '%');
+      set('rb-res-fee', fmt.format(fee) + '원');
+      if (limit > 0 && fee === limit) document.getElementById('rb-res-limit').innerText = "* 한도액 적용됨";
+      else document.getElementById('rb-res-limit').innerText = "";
+    }
+
+    // 18. Conversion
+    let convMode = 'j2m';
+    function setConversionMode(mode) {
+      convMode = mode;
+      const btnJ = document.getElementById('btn-j2m');
+      const btnM = document.getElementById('btn-m2j');
+      const rentGrp = document.getElementById('rc-rent-grp');
+      const targetGrp = document.getElementById('rc-target-grp');
+
+      if (mode === 'j2m') {
+        // Jeonse -> Monthly
+        btnJ.style.background = 'var(--primary)'; btnJ.style.color = 'white'; btnJ.style.borderColor = 'transparent';
+        btnM.style.background = 'var(--bg-body)'; btnM.style.color = 'var(--text-main)'; btnM.style.borderColor = 'var(--border)';
+        rentGrp.style.display = 'none';
+        targetGrp.style.display = 'block';
+        document.getElementById('rc-res-label').innerText = "예상 월세";
+      } else {
+        // Monthly -> Jeonse
+        btnM.style.background = 'var(--primary)'; btnM.style.color = 'white'; btnM.style.borderColor = 'transparent';
+        btnJ.style.background = 'var(--bg-body)'; btnJ.style.color = 'var(--text-main)'; btnJ.style.borderColor = 'var(--border)';
+        rentGrp.style.display = 'block';
+        targetGrp.style.display = 'none'; // target deposit input not needed? Or used as target?
+        // Actually M2J usually means "I have 1000/50, what is this in Jeonse?"
+        // Formula: Deposit + (Rent * 12 / Rate) = Jeonse
+        document.getElementById('rc-res-label').innerText = "전세 환산액";
+      }
+    }
+
+    function calcConversion() {
+      const base = v('rc-base');
+      const rate = v('rc-rate') / 100;
+
+      if (convMode === 'j2m') {
+        const deposit = v('rc-deposit');
+        // (BaseJeonse - NewDeposit) * Rate / 12
+        const diff = base - deposit;
+        const monthly = (diff * rate) / 12;
+        set('rc-res-val', fmt.format(Math.floor(monthly)) + '원');
+      } else {
+        const monthlyCurrent = v('rc-monthly-current');
+        // BaseDeposit + (Monthly * 12 / Rate)
+        const jeonse = base + (monthlyCurrent * 12 / rate);
+        set('rc-res-val', fmt.format(Math.floor(jeonse)) + '원');
+      }
+    }
+
+    // 19. Area
+    function setArea(py) {
+      document.getElementById('ra-py').value = py;
+      convertArea('py');
+    }
+
+    function convertArea(from) {
+      if (from === 'py') {
+        const py = v('ra-py');
+        const m2 = py * 3.305785;
+        document.getElementById('ra-m2').value = m2.toFixed(2);
+        updateAreaInfo(m2);
+      } else {
+        const m2 = v('ra-m2');
+        const py = m2 / 3.305785;
+        document.getElementById('ra-py').value = py.toFixed(2);
+        updateAreaInfo(m2);
+      }
+    }
+
+    function updateAreaInfo(m2) {
+      const supply = m2; // Assume input is supply area usually
+      const exclusive = m2 * 0.75; // Approx 75% efficiency
+      set('ra-res-supply', fmt.format(supply.toFixed(1)) + '㎡');
+      set('ra-res-exclusive', fmt.format(exclusive.toFixed(1)) + '㎡');
     }
   </script>
 </body>
