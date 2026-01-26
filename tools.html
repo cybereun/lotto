@@ -1273,73 +1273,225 @@
                 </div>
             </div>
 
-            <!-- Work Time Calculator -->
+            <!-- Work Time Calculator (Upgraded) -->
             <div id="worktime" class="calculator-view">
+                <style>
+                    .wt-dashboard {
+                        background: var(--card-bg);
+                        border-radius: 20px;
+                        border: 1px solid var(--border);
+                        overflow: hidden;
+                    }
+
+                    .wt-tabs {
+                        display: flex;
+                        background: rgba(0, 0, 0, 0.03);
+                        border-bottom: 1px solid var(--border);
+                    }
+
+                    .wt-tab {
+                        flex: 1;
+                        padding: 14px;
+                        text-align: center;
+                        background: none;
+                        border: none;
+                        font-weight: 600;
+                        color: var(--text-muted);
+                        cursor: pointer;
+                        border-bottom: 2px solid transparent;
+                        transition: all 0.2s;
+                    }
+
+                    .wt-tab.active {
+                        color: var(--primary);
+                        border-bottom-color: var(--primary);
+                        background: var(--card-bg);
+                    }
+
+                    .wt-content {
+                        display: none;
+                        padding: 20px;
+                    }
+
+                    .wt-content.active {
+                        display: block;
+                    }
+
+                    .wt-day-card {
+                        background: var(--bg-body);
+                        border: 1px solid var(--border);
+                        border-radius: 12px;
+                        padding: 16px;
+                        margin-bottom: 12px;
+                    }
+
+                    .wt-day-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 12px;
+                    }
+
+                    .wt-badge {
+                        padding: 4px 8px;
+                        border-radius: 6px;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                    }
+
+                    .wt-badge.work {
+                        background: rgba(16, 185, 129, 0.1);
+                        color: #10b981;
+                    }
+
+                    .wt-badge.off {
+                        background: rgba(100, 116, 139, 0.1);
+                        color: #64748b;
+                    }
+
+                    .wt-badge.holiday {
+                        background: rgba(239, 68, 68, 0.1);
+                        color: #ef4444;
+                    }
+
+                    .wt-stats-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                        gap: 16px;
+                    }
+
+                    .wt-stat-card {
+                        background: var(--bg-body);
+                        padding: 20px;
+                        border-radius: 16px;
+                        border: 1px solid var(--border);
+                        text-align: center;
+                    }
+
+                    .wt-stat-val {
+                        font-size: 1.8rem;
+                        font-weight: 700;
+                        color: var(--text-main);
+                        margin: 8px 0;
+                    }
+
+                    .wt-stat-label {
+                        font-size: 0.9rem;
+                        color: var(--text-muted);
+                    }
+                </style>
+
                 <div class="header-section">
-                    <h1>근무 시간 계산기</h1>
-                    <p>정확한 근무 시간 및 급여 계산 (연장/야간/휴일 포함)</p>
+                    <h1>주간 근무 시간 계산기</h1>
+                    <p>주간 근무 스케줄 관리 및 정밀 급여 분석</p>
                 </div>
-                <div class="calc-card">
-                    <div class="calc-inputs" style="display:flex; flex-direction:column; gap:1.5rem;">
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                            <div class="form-group">
-                                <label>출근 시간</label>
-                                <div class="input-wrapper"><input type="time" id="work-start"></div>
-                            </div>
-                            <div class="form-group">
-                                <label>퇴근 시간</label>
-                                <div class="input-wrapper"><input type="time" id="work-end"></div>
-                            </div>
-                        </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                            <div class="form-group">
-                                <label>휴게 시간 (분)</label>
-                                <div class="input-wrapper"><input type="number" id="work-break" value="60" min="0">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>시급 (원)</label>
-                                <div class="input-wrapper"><input type="number" id="work-wage" value="9860" step="10">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>추가 설정</label>
-                            <div style="display:flex; flex-direction:column; gap:8px;">
-                                <label
-                                    style="display:flex; align-items:center; gap:8px; font-weight:normal; cursor:pointer;">
-                                    <input type="checkbox" id="work-holiday"> 휴일 근로 (1.5배)
-                                </label>
-                                <label
-                                    style="display:flex; align-items:center; gap:8px; font-weight:normal; color:var(--text-muted); cursor:not-allowed;">
-                                    <input type="checkbox" id="work-night" disabled checked> 야간 근로 자동 적용 (22:00~06:00,
-                                    0.5배 가산)
-                                </label>
-                            </div>
-                        </div>
-                        <button class="btn-calc" onclick="calcWorkTime()">계산하기</button>
+
+                <div class="wt-dashboard">
+                    <div class="wt-tabs">
+                        <button class="wt-tab active" onclick="switchWorkTab('weekly')">📅 주간 계산</button>
+                        <button class="wt-tab" onclick="switchWorkTab('allowance')">⚡ 가산수당 상세</button>
+                        <button class="wt-tab" onclick="switchWorkTab('analysis')">📈 근무 분석</button>
                     </div>
-                    <div class="result-panel">
-                        <div class="result-row" style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="color:var(--text-muted)">총 근무 (휴게 제외)</span>
-                            <span id="wt-total" style="font-weight:700">0시간 0분</span>
+
+                    <!-- 1. Weekly Input -->
+                    <div id="wt-view-weekly" class="wt-content active">
+                        <div class="calc-card"
+                            style="margin-bottom:20px; border:1px solid var(--border); box-shadow:none;">
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label>시급 (원)</label>
+                                    <div class="input-wrapper">
+                                        <input type="number" id="wt-wage-in" value="9860" step="10">
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label>주간 기준일 (시작일)</label>
+                                    <div class="input-wrapper">
+                                        <input type="date" id="wt-start-date" onchange="renderWeeklyRows()">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="result-row" style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="color:var(--text-muted)">기본 (1.0배)</span>
-                            <span id="wt-basic">0시간 0분</span>
+
+                        <div id="wt-daily-list">
+                            <!-- JS Generated Rows -->
                         </div>
-                        <div class="result-row" style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="color:var(--text-muted)">연장 (1.5배)</span>
-                            <span id="wt-over" style="color:var(--secondary)">0시간 0분</span>
+
+                        <div style="margin-top:20px; display:flex; gap:10px;">
+                            <button class="btn-calc" onclick="calcWeeklyAll()">주간 계산하기</button>
+                            <button class="btn-calc"
+                                style="background:var(--bg-body); color:var(--text-muted); border:1px solid var(--border);"
+                                onclick="resetWeekly()">초기화</button>
                         </div>
-                        <div class="result-row"
-                            style="display:flex; justify-content:space-between; margin-bottom:16px;">
-                            <span style="color:var(--text-muted)">야간 (+0.5배)</span>
-                            <span id="wt-night" style="color:#8b5cf6">0시간 0분</span>
+                    </div>
+
+                    <!-- 2. Allowance Detail -->
+                    <div id="wt-view-allowance" class="wt-content">
+                        <div id="wt-allowance-placeholder"
+                            style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <div style="font-size:3rem; margin-bottom:10px;">🧮</div>
+                            <p>먼저 '주간 계산' 탭에서 근무 시간을 입력하고 계산해주세요.</p>
                         </div>
-                        <div style="border-top:1px dashed var(--border); margin:10px 0;"></div>
-                        <div class="result-value" id="wt-wage" style="font-size:1.8rem; color:var(--primary)">0원</div>
-                        <div class="result-label">예상 일급</div>
+                        <div id="wt-allowance-result" style="display:none;">
+                            <div class="calc-card"
+                                style="margin-bottom:20px; box-shadow:none; border:1px solid var(--border);">
+                                <h3>📊 수당 상세 내역</h3>
+                                <div id="wt-allowance-list" style="margin-top:16px;"></div>
+                            </div>
+                            <div
+                                style="font-size:0.85rem; color:var(--text-muted); background:var(--bg-body); padding:16px; border-radius:12px;">
+                                <strong>💡 수당 계산 기준 (2025 근로기준법)</strong>
+                                <ul style="padding-left:20px; margin-top:8px; line-height:1.6;">
+                                    <li>연장근로: 1일 8시간 초과 또는 주 40시간 초과 시 통상임금의 50% 가산</li>
+                                    <li>야간근로: 22:00 ~ 06:00 사이 근무 시 통상임금의 50% 가산</li>
+                                    <li>휴일근로: 8시간 이내 50%, 8시간 초과 100% 가산</li>
+                                    <li>연장/야간/휴일 가산은 중복 적용됩니다.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Analysis -->
+                    <div id="wt-view-analysis" class="wt-content">
+                        <div id="wt-analysis-placeholder"
+                            style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <div style="font-size:3rem; margin-bottom:10px;">📈</div>
+                            <p>계산 결과가 없습니다.</p>
+                        </div>
+                        <div id="wt-analysis-result" style="display:none;">
+                            <h3 style="margin-bottom:16px;">이번 주 근무 현황</h3>
+                            <div class="wt-stats-grid">
+                                <div class="wt-stat-card">
+                                    <div class="wt-stat-label">총 근무시간</div>
+                                    <div class="wt-stat-val" id="an-total-time">0h</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">휴게시간 제외</div>
+                                </div>
+                                <div class="wt-stat-card">
+                                    <div class="wt-stat-label">연장 근무</div>
+                                    <div class="wt-stat-val" id="an-over-time" style="color:var(--secondary);">0h</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">법정 40h 초과분</div>
+                                </div>
+                                <div class="wt-stat-card">
+                                    <div class="wt-stat-label">잔여 가능 시간</div>
+                                    <div class="wt-stat-val" id="an-remain-time" style="color:#10b981;">12h</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">주 52h 한도</div>
+                                </div>
+                                <div class="wt-stat-card">
+                                    <div class="wt-stat-label">예상 주급</div>
+                                    <div class="wt-stat-val" id="an-wage" style="color:var(--primary);">0원</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">세전 기준</div>
+                                </div>
+                            </div>
+
+                            <div class="calc-card"
+                                style="margin-top:20px; box-shadow:none; border:1px solid var(--border); background:rgba(239, 68, 68, 0.05); border-color:rgba(239, 68, 68, 0.2); display:none;"
+                                id="an-violation-box">
+                                <h4 style="color:#ef4444; display:flex; align-items:center; gap:8px;">⚠️ 주 52시간 초과 주의
+                                </h4>
+                                <p style="font-size:0.9rem; margin-top:4px; color:#ef4444;">이번 주 법정 근로시간 한도를 초과했습니다. 근무
+                                    스케줄 조정이 필요합니다.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1978,6 +2130,219 @@
         window.addEventListener('load', () => {
             // 새로고침 시 데이터 초기화 (자동 복원 기능 제거)
             updateHistoryCount();
+        });
+        // --- Work Time Dashboard Logic (New) ---
+        function switchWorkTab(tab) {
+            document.querySelectorAll('.wt-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.wt-content').forEach(c => c.classList.remove('active'));
+
+            const targetBtn = Array.from(document.querySelectorAll('.wt-tab')).find(b => b.getAttribute('onclick').includes(tab));
+            if (targetBtn) targetBtn.classList.add('active');
+
+            document.getElementById(`wt-view-${tab}`).classList.add('active');
+        }
+
+        function renderWeeklyRows() {
+            const container = document.getElementById('wt-daily-list');
+            if (!container) return; // Guard
+            const startVal = document.getElementById('wt-start-date').value;
+            if (!startVal) {
+                const now = new Date();
+                const day = now.getDay();
+                const diff = now.getDate() - day + (day == 0 ? -6 : 1);
+                const monday = new Date(now.setDate(diff));
+                document.getElementById('wt-start-date').value = monday.toISOString().split('T')[0];
+                return renderWeeklyRows();
+            }
+
+            const startDate = new Date(startVal);
+            let html = '';
+
+            for (let i = 0; i < 7; i++) {
+                const cur = new Date(startDate);
+                cur.setDate(startDate.getDate() + i);
+
+                const yyyy = cur.getFullYear();
+                const mm = String(cur.getMonth() + 1).padStart(2, '0');
+                const dd = String(cur.getDate()).padStart(2, '0');
+                const dateStr = `${yyyy}-${mm}-${dd}`;
+
+                const dayIdx = cur.getDay();
+                const dayName = ['일', '월', '화', '수', '목', '금', '토'][dayIdx];
+                const isWeekend = (dayIdx === 0 || dayIdx === 6);
+
+                html += `
+                <div class="wt-day-card">
+                    <div class="wt-day-header">
+                        <div style="font-weight:600; display:flex; align-items:center; gap:8px;">
+                            ${dayName}요일 <span style="font-size:0.85rem; color:var(--text-muted); font-weight:normal;">(${dateStr})</span>
+                            ${isWeekend ? '<span class="wt-badge off">주말</span>' : '<span class="wt-badge work">평일</span>'}
+                        </div>
+                        <label style="font-size:0.85rem; display:flex; align-items:center; gap:4px; cursor:pointer;">
+                            <input type="checkbox" class="wt-check-holiday" data-idx="${i}" ${dayIdx === 0 ? 'checked' : ''}> 
+                            <span style="color:#ef4444;">휴일근무</span>
+                        </label>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+                        <div>
+                            <label style="font-size:0.8rem; color:var(--text-muted);">출근</label>
+                            <input type="time" class="wt-in" data-idx="${i}" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:8px; background:var(--card-bg); color:var(--text-main);">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:var(--text-muted);">퇴근</label>
+                            <input type="time" class="wt-out" data-idx="${i}" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:8px; background:var(--card-bg); color:var(--text-main);">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; color:var(--text-muted);">휴게(분)</label>
+                            <input type="number" class="wt-break" data-idx="${i}" value="60" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:8px; background:var(--card-bg); color:var(--text-main);">
+                        </div>
+                    </div>
+                </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function calcWeeklyAll() {
+            const wage = parseFloat(document.getElementById('wt-wage-in').value) || 0;
+            const rows = document.querySelectorAll('.wt-day-card');
+
+            let totalWorkMins = 0;
+            let totalHolidayMins = 0;
+            let totalNightMins = 0;
+            let allowanceHtml = '';
+            let dailyResults = [];
+
+            rows.forEach((row, idx) => {
+                const inVal = row.querySelector('.wt-in').value;
+                const outVal = row.querySelector('.wt-out').value;
+                const breakVal = parseFloat(row.querySelector('.wt-break').value) || 0;
+                const isHol = row.querySelector('.wt-check-holiday').checked;
+
+                if (!inVal || !outVal) {
+                    dailyResults.push(null);
+                    return;
+                }
+
+                const [sh, sm] = inVal.split(':').map(Number);
+                const [eh, em] = outVal.split(':').map(Number);
+                let startM = sh * 60 + sm;
+                let endM = eh * 60 + em;
+                if (endM < startM) endM += 1440;
+
+                const span = endM - startM;
+                const workM = Math.max(0, span - breakVal);
+
+                let nightM = 0;
+                [[0, 360], [1320, 1800], [2760, 3240]].forEach(r => {
+                    const s = Math.max(startM, r[0]);
+                    const e = Math.min(endM, r[1]);
+                    nightM += Math.max(0, e - s);
+                });
+                nightM = Math.min(nightM, workM);
+
+                let basic = 0;
+                let over = 0;
+                if (workM > 480) { basic = 480; over = workM - 480; }
+                else { basic = workM; }
+
+                dailyResults.push({ workM, basic, over, nightM, isHol });
+
+                const type = isHol ? '휴일' : '평일';
+                allowanceHtml += `
+                    <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding:8px 0;">
+                        <span>Day ${idx + 1} (${type})</span>
+                        <span>${(workM / 60).toFixed(1)}h ${over > 0 ? `(연장 ${(over / 60).toFixed(1)}h)` : ''}</span>
+                    </div>`;
+            });
+
+            // Weekly Aggregation Logic
+            let weekBasicAcc = 0;
+            let weekOverAcc = 0;
+            let totalPay = 0;
+
+            dailyResults.forEach(d => {
+                if (!d) return;
+
+                totalWorkMins += d.workM;
+                totalNightMins += d.nightM;
+
+                // 1. Base Pay (1.0 for all work time)
+                totalPay += (d.workM / 60) * wage;
+
+                // 2. Night Allowance (+0.5)
+                totalPay += (d.nightM / 60) * wage * 0.5;
+
+                if (d.isHol) {
+                    // Holiday Allowance
+                    // <8h: +0.5 (Total 1.5)
+                    // >8h: +1.0 (Total 2.0)
+                    if (d.workM <= 480) {
+                        totalPay += (d.workM / 60) * wage * 0.5;
+                    } else {
+                        totalPay += (480 / 60) * wage * 0.5;
+                        const excess = d.workM - 480;
+                        totalPay += (excess / 60) * wage * 1.0;
+                    }
+                    totalHolidayMins += d.workM;
+                } else {
+                    // Weekday Overtime (+0.5 for >8h)
+                    weekOverAcc += d.over;
+                    totalPay += (d.over / 60) * wage * 0.5;
+
+                    // Weekly Basic Work (<=40h)
+                    // If accumulated > 40h, excess becomes overtime (+0.5)
+                    if (weekBasicAcc + d.basic > 2400) {
+                        const available = Math.max(0, 2400 - weekBasicAcc);
+                        const overflow = d.basic - available;
+
+                        weekOverAcc += overflow;
+                        totalPay += (overflow / 60) * wage * 0.5;
+
+                        weekBasicAcc = 2400;
+                    } else {
+                        weekBasicAcc += d.basic;
+                    }
+                }
+            });
+
+            document.getElementById('wt-allowance-list').innerHTML = allowanceHtml || '<div style="text-align:center; color:var(--text-muted)">입력된 근무가 없습니다.</div>';
+            document.getElementById('an-total-time').innerText = (totalWorkMins / 60).toFixed(1) + 'h';
+            document.getElementById('an-over-time').innerText = (weekOverAcc / 60).toFixed(1) + 'h';
+
+            const remain52 = (52 * 60) - totalWorkMins;
+            document.getElementById('an-remain-time').innerText = Math.max(0, remain52 / 60).toFixed(1) + 'h';
+
+            if (remain52 < 0) {
+                document.getElementById('an-violation-box').style.display = 'block';
+                document.getElementById('an-remain-time').style.color = '#ef4444';
+                document.getElementById('an-remain-time').innerText = '초과';
+            } else {
+                document.getElementById('an-violation-box').style.display = 'none';
+                document.getElementById('an-remain-time').style.color = '#10b981';
+            }
+
+            document.getElementById('an-wage').innerText = new Intl.NumberFormat('ko-KR').format(Math.floor(totalPay)) + '원';
+
+            switchWorkTab('analysis');
+            document.getElementById('wt-allowance-placeholder').style.display = 'none';
+            document.getElementById('wt-allowance-result').style.display = 'block';
+            document.getElementById('wt-analysis-placeholder').style.display = 'none';
+            document.getElementById('wt-analysis-result').style.display = 'block';
+        }
+
+        function resetWeekly() {
+            renderWeeklyRows();
+            document.getElementById('wt-allowance-result').style.display = 'none';
+            document.getElementById('wt-allowance-placeholder').style.display = 'block';
+            document.getElementById('wt-analysis-result').style.display = 'none';
+            document.getElementById('wt-analysis-placeholder').style.display = 'block';
+        }
+
+        // Init Work Time 
+        window.addEventListener('load', () => {
+            const wtStart = document.getElementById('wt-start-date');
+            if (wtStart && !wtStart.value) renderWeeklyRows();
         });
     </script>
 </body>
