@@ -2414,7 +2414,7 @@
                     </div>
                 </div>
 
-                <button style="width:100%; margin-top:16px; padding:14px; background:#10b981; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="alert('데이터가 저장되었습니다 (로컬 스토리지 연동 예정)')">
+                <button style="width:100%; margin-top:16px; padding:14px; background:#10b981; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="saveWeeklyResult()">
                     💾 주간 계산 결과 저장
                 </button>
             `;
@@ -2463,28 +2463,28 @@
                     </div>
                 </div>
 
-                <div style="background:#1e293b; border-radius:12px; border:1px solid #334155; padding:20px; margin-top:24px;">
-                    <h4 style="margin-bottom:16px; color:#cbd5e1; display:flex; align-items:center; gap:8px;">
+                <div style="background:var(--bg-body); border-radius:12px; border:1px solid var(--border); padding:20px; margin-top:24px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                    <h4 style="margin-bottom:16px; color:var(--text-main); display:flex; align-items:center; gap:8px;">
                         📅 월간 근무 통계 (예상)
-                        <span style="font-size:0.75rem; font-weight:normal; color:#64748b; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">현재 주간 패턴 기준</span>
+                        <span style="font-size:0.75rem; font-weight:normal; color:var(--text-muted); background:rgba(0,0,0,0.05); padding:2px 6px; border-radius:4px;">현재 주간 패턴 기준</span>
                     </h4>
                     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px;">
-                        <div style="text-align:center; padding:16px; background:rgba(255,255,255,0.03); border-radius:8px;">
-                            <div style="font-size:1.5rem; font-weight:700; color:#cbd5e1;">${estMonthDays.toFixed(0)}일</div>
-                            <div style="font-size:0.8rem; color:#94a3b8; margin-top:4px;">총 근무일수</div>
+                        <div style="text-align:center; padding:16px; background:var(--card-bg); border-radius:8px; border:1px solid var(--border);">
+                            <div style="font-size:1.5rem; font-weight:700; color:var(--text-main);">${estMonthDays.toFixed(0)}일</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">총 근무일수</div>
                         </div>
-                        <div style="text-align:center; padding:16px; background:rgba(255,255,255,0.03); border-radius:8px;">
-                            <div style="font-size:1.5rem; font-weight:700; color:#cbd5e1;">${estMonthHours.toFixed(0)}시간</div>
-                            <div style="font-size:0.8rem; color:#94a3b8; margin-top:4px;">총 근무시간</div>
+                        <div style="text-align:center; padding:16px; background:var(--card-bg); border-radius:8px; border:1px solid var(--border);">
+                            <div style="font-size:1.5rem; font-weight:700; color:var(--text-main);">${estMonthHours.toFixed(0)}시간</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">총 근무시간</div>
                         </div>
-                         <div style="text-align:center; padding:16px; background:rgba(255,255,255,0.03); border-radius:8px;">
+                         <div style="text-align:center; padding:16px; background:var(--card-bg); border-radius:8px; border:1px solid var(--border);">
                             <div style="font-size:1.5rem; font-weight:700; color:#10b981;">${formatter.format(Math.floor(estMonthPay))}원</div>
-                            <div style="font-size:0.8rem; color:#94a3b8; margin-top:4px;">예상 월급</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">예상 월급</div>
                         </div>
                     </div>
                 </div>
 
-                <div style="margin-top:20px; border:1px solid #1e3a8a; background:#172554; border-radius:8px; padding:16px; color:#bfdbfe; font-size:0.85rem; line-height:1.6;">
+                <div style="margin-top:20px; border:1px solid #dbeafe; background:#eff6ff; border-radius:8px; padding:16px; color:#1e40af; font-size:0.85rem; line-height:1.6;">
                     <strong>ℹ️ 2025년 근로기준법 기준</strong><br>
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px;">
                         <div>
@@ -2502,6 +2502,75 @@
             `;
         }
 
+        // --- Weekly Result Save Logic ---
+        function saveWeeklyResult() {
+            if (!confirm("현재 계산된 주간 근무 결과를 저장하시겠습니까?")) return;
+
+            const totalTime = document.getElementById('an-total-time')?.innerText || '0h';
+            const pay = document.getElementById('an-wage')?.innerText || '0원';
+            const startDate = document.getElementById('wt-start-date').value;
+
+            const data = {
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                startDate: startDate,
+                totalTime: totalTime,
+                pay: pay
+            };
+
+            let history = JSON.parse(localStorage.getItem('wt_history') || '[]');
+            history.unshift(data);
+            if (history.length > 20) history = history.slice(0, 20);
+
+            localStorage.setItem('wt_history', JSON.stringify(history));
+            renderSavedWeekly();
+            alert("저장되었습니다.");
+        }
+
+        function deleteWeeklyItem(id) {
+            if (!confirm("삭제하시겠습니까?")) return;
+            let history = JSON.parse(localStorage.getItem('wt_history') || '[]');
+            history = history.filter(x => x.id !== id);
+            localStorage.setItem('wt_history', JSON.stringify(history));
+            renderSavedWeekly();
+        }
+
+        function renderSavedWeekly() {
+            const history = JSON.parse(localStorage.getItem('wt_history') || '[]');
+            const container = document.getElementById('wt-saved-list'); // Need to create this container in HTML
+
+            // Create container if not exists (append to weekly view)
+            if (!container) {
+                const parent = document.getElementById('wt-view-weekly');
+                const div = document.createElement('div');
+                div.id = 'wt-saved-list';
+                div.style.marginTop = '40px';
+                div.style.borderTop = '1px dashed var(--border)';
+                div.style.paddingTop = '20px';
+                parent.appendChild(div);
+                return renderSavedWeekly();
+            }
+
+            if (history.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.9rem;">저장된 주간 계산 기록이 없습니다.</p>';
+                return;
+            }
+
+            let html = '<h4 style="margin-bottom:12px;">📑 저장된 기록</h4><div style="display:flex; flex-direction:column; gap:8px;">';
+            history.forEach(item => {
+                html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-body); padding:12px; border-radius:8px; border:1px solid var(--border);">
+                    <div>
+                        <div style="font-weight:600; font-size:0.9rem;">${item.startDate} 주간</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">${item.totalTime} / ${item.pay}</div>
+                    </div>
+                    <button class="btn-mini" style="background:var(--secondary); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="deleteWeeklyItem(${item.id})">삭제</button>
+                </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
         function resetWeekly() {
             renderWeeklyRows();
             document.getElementById('wt-allowance-result').style.display = 'none';
@@ -2514,6 +2583,7 @@
         window.addEventListener('load', () => {
             const wtStart = document.getElementById('wt-start-date');
             if (wtStart && !wtStart.value) renderWeeklyRows();
+            renderSavedWeekly();
         });
     </script>
 </body>
