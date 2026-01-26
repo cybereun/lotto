@@ -1406,16 +1406,16 @@
                                     </div>
                                 </div>
                                 <div class="form-group" style="margin:0;">
-                                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                                        <label style="margin-bottom:8px;">주간 기준일 (시작일)</label>
+                                    <label>주간 기준일 (시작일)</label>
+                                    <div style="display:flex; gap:12px; align-items:stretch;">
+                                        <div class="input-wrapper" style="flex:1;">
+                                            <input type="date" id="wt-start-date" onchange="renderWeeklyRows()">
+                                        </div>
                                         <button id="btn-wt-history-mini" class="btn-mini"
-                                            style="background:var(--secondary); color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer; margin-bottom:8px;"
+                                            style="background:var(--secondary); color:white; border:none; padding:0 14px; border-radius:12px; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; justify-content:center; white-space:nowrap;"
                                             onclick="toggleWorkHistoryModal(true)">
                                             📂 (0)
                                         </button>
-                                    </div>
-                                    <div class="input-wrapper">
-                                        <input type="date" id="wt-start-date" onchange="renderWeeklyRows()">
                                     </div>
                                 </div>
                             </div>
