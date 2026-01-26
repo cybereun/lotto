@@ -4,11 +4,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>올인원 계산기 (All-in-One Calc)</title>
+  <title>로또 번호 생성기 (Lotto Generator)</title>
   <meta name="google-adsense-account" content="ca-pub-5655610048474795">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5655610048474795"
     crossorigin="anonymous"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700&display=swap');
+
     :root {
       --bg-1: #fff5e9;
       --bg-2: #ffe0b2;
@@ -18,10 +20,13 @@
       --card: #fffdf9;
       --shadow: rgba(43, 30, 18, 0.15);
       --navbar-bg: rgba(255, 255, 255, 0.7);
-      --text-muted: #4a3222;
+      --text-muted: #6b4b36;
       --input-bg: #fff4e4;
       --ticket-bg: #fff7ed;
       --btn-text: white;
+      --danger: #ef4444;
+      --success: #10b981;
+      --border: rgba(230, 81, 0, 0.2);
     }
 
     [data-theme='dark'] {
@@ -37,11 +42,27 @@
       --input-bg: #334155;
       --ticket-bg: #0f172a;
       --btn-text: #2b1e12;
+      --border: rgba(255, 255, 255, 0.1);
     }
 
     * {
       box-sizing: border-box;
       scroll-behavior: smooth;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 700px at 15% -10%, var(--bg-1) 0%, transparent 55%),
+        radial-gradient(900px 500px at 110% 20%, var(--bg-2) 0%, transparent 50%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 80px;
     }
 
     /* Navbar Styles */
@@ -59,7 +80,7 @@
       align-items: center;
       padding: 0 2rem;
       z-index: 2000;
-      border-bottom: 1px solid rgba(230, 81, 0, 0.1);
+      border-bottom: 1px solid var(--border);
       transition: background 0.3s;
     }
 
@@ -102,7 +123,7 @@
       padding: 10px;
       border-radius: 12px;
       background: var(--card);
-      border: 1px solid rgba(230, 81, 0, 0.2);
+      border: 1px solid var(--border);
       color: var(--ink);
       display: flex;
       align-items: center;
@@ -141,50 +162,21 @@
       color: var(--accent);
     }
 
-    .navbar-menu a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--accent);
-      transition: width 0.3s ease;
-    }
-
-    .navbar-menu a:hover::after {
-      width: 100%;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Nanum Gothic", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(1200px 700px at 15% -10%, #fff9f2 0%, transparent 55%),
-        radial-gradient(900px 500px at 110% 20%, #ffd59a 0%, transparent 50%),
-        linear-gradient(135deg, var(--bg-1), var(--bg-2));
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 80px 16px 32px;
-      /* Increased top padding for navbar */
-    }
-
     .wrap {
       width: min(960px, 100%);
-      display: grid;
-      gap: 24px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
     }
 
     header {
-      display: grid;
-      gap: 8px;
+      text-align: center;
     }
 
     h1 {
       font-size: clamp(28px, 4vw, 44px);
-      margin: 0;
+      margin: 0 0 12px;
       letter-spacing: -0.02em;
     }
 
@@ -196,166 +188,410 @@
 
     .panel {
       background: var(--card);
-      border-radius: 22px;
-      padding: 24px;
+      border-radius: 24px;
+      padding: 32px;
       box-shadow: 0 18px 50px var(--shadow);
-      border: 1px solid rgba(230, 81, 0, 0.08);
+      border: 1px solid var(--border);
     }
 
-    .controls {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: 1fr auto auto auto;
+    /* Condition Settings */
+    .condition-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .condition-header h3 {
+      font-size: 1.2rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .condition-content {
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 24px;
+      border-top: 1px dashed var(--border);
+      padding-top: 24px;
+      animation: expand 0.3s ease;
+    }
+
+    .condition-content.active {
+      display: flex;
+    }
+
+    @keyframes expand {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
     }
 
-    label {
-      font-weight: 700;
-      font-size: 14px;
+    .section-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: normal;
     }
 
-    select,
-    button {
-      border: none;
-      border-radius: 999px;
-      padding: 12px 18px;
-      font-size: 14px;
-      font-weight: 700;
+    /* Number Grid */
+    .num-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      gap: 8px;
     }
 
-    select {
+    .num-btn {
+      aspect-ratio: 1;
+      border: 1px solid var(--border);
       background: var(--input-bg);
       color: var(--ink);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    button {
+    .num-btn:hover {
+      background: var(--border);
+    }
+
+    .num-btn.excluded {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .num-btn.included {
+      background: var(--success);
+      color: white;
+      border-color: var(--success);
+    }
+
+    /* Ratio Controls */
+    .ratio-control {
+      background: var(--input-bg);
+      padding: 16px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ratio-bar {
+      display: flex;
+      gap: 8px;
+    }
+
+    .preset-btn {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      flex: 1;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      background: var(--border);
+    }
+
+    .preset-btn.active {
+      background: var(--accent);
+      color: var(--btn-text);
+      border-color: var(--accent);
+    }
+
+    .custom-ratio {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .ratio-input {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ratio-input label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .ratio-input input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--ink);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    /* Main Controls */
+    .main-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+    }
+
+    .count-select {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .count-btn {
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .count-btn.active {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
       color: var(--btn-text);
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 10px 24px rgba(230, 81, 0, 0.35);
+      border-color: transparent;
     }
 
-    button:hover {
+    .action-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-main {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: var(--btn-text);
+      border: none;
+      padding: 14px 28px;
+      border-radius: 99px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(230, 81, 0, 0.2);
+      transition: transform 0.2s;
+    }
+
+    .btn-main:hover {
       transform: translateY(-2px);
     }
 
-    button:active {
-      transform: translateY(1px);
-    }
-
-    .toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
+    .btn-sub {
       background: var(--input-bg);
-      font-size: 13px;
-      font-weight: 700;
+      border: 1px solid var(--border);
       color: var(--ink);
-    }
-
-    .toggle input {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--accent);
+      padding: 14px 20px;
+      border-radius: 99px;
+      font-weight: 600;
       cursor: pointer;
+      transition: background 0.2s;
     }
 
-    .grid {
+    .btn-sub:hover {
+      background: var(--border);
+    }
+
+    /* Results */
+    .results-grid {
       display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      margin-top: 18px;
     }
 
     .ticket {
-      border-radius: 18px;
-      padding: 16px;
+      position: relative;
       background: var(--ticket-bg);
-      border: 1px dashed rgba(230, 81, 0, 0.3);
-      display: grid;
-      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: slideUp 0.4s ease forwards;
       opacity: 0;
-      transform: translateY(8px) scale(0.98);
-      animation: ticket-in 0.35s ease forwards;
-      animation-delay: var(--ticket-delay, 0s);
     }
 
-    .numbers {
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ticket-header {
       display: flex;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .ticket-numbers {
+      display: flex;
       gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     .ball {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-weight: 800;
-      color: #2a1c10;
-      background: radial-gradient(circle at 30% 30%, #fff8ed 0%, #ffd180 60%, #ffab40 100%);
-      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.6), 0 6px 12px rgba(0, 0, 0, 0.12);
-      animation: pop 0.45s ease;
-      animation-delay: var(--delay, 0s);
+      font-size: 1.1rem;
+      color: #333;
+      background: white;
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
     }
 
-    .meta {
-      font-size: 12px;
-      color: #6b4b36;
+    /* Ball Colors */
+    .ball[data-n^="0"],
+    .ball[data-n^="1"] {
+      background: #fbc400;
     }
 
-    @keyframes pop {
-      0% {
-        transform: scale(0.6);
-        opacity: 0;
-      }
-
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
+    /* 1-10 Yellow */
+    .ball[data-n^="11"],
+    .ball[data-n="20"] {
+      background: #69c8f2;
     }
 
-    @keyframes ticket-in {
-      0% {
-        opacity: 0;
-        transform: translateY(10px) scale(0.96);
-      }
-
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+    /* 11-20 Blue */
+    .ball[data-n^="21"],
+    .ball[data-n="30"] {
+      background: #ff7272;
     }
 
-    .footer {
+    /* 21-30 Red */
+    .ball[data-n^="31"],
+    .ball[data-n="40"] {
+      background: #aaaaaa;
+    }
+
+    /* 31-40 Gray */
+    .ball[data-n^="41"],
+    .ball[data-n="42"],
+    .ball[data-n="43"],
+    .ball[data-n="44"],
+    .ball[data-n="45"] {
+      background: #b0d840;
+    }
+
+    /* 41-45 Green */
+    /* Correction due to selector logic */
+    .ball[data-range="1-10"] {
+      background: radial-gradient(circle at 30% 30%, #fffbe6 0%, #fbc400 100%);
+    }
+
+    .ball[data-range="11-20"] {
+      background: radial-gradient(circle at 30% 30%, #e0f4ff 0%, #69c8f2 100%);
+    }
+
+    .ball[data-range="21-30"] {
+      background: radial-gradient(circle at 30% 30%, #ffe6e6 0%, #ff7272 100%);
+    }
+
+    .ball[data-range="31-40"] {
+      background: radial-gradient(circle at 30% 30%, #f0f0f0 0%, #aaaaaa 100%);
+    }
+
+    .ball[data-range="41-45"] {
+      background: radial-gradient(circle at 30% 30%, #f0f9db 0%, #b0d840 100%);
+    }
+
+    /* History */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: var(--input-bg);
+      border-radius: 12px;
+      font-size: 0.9rem;
+    }
+
+    .history-nums {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mini-ball {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ddd;
       text-align: center;
-      font-size: 12px;
-      color: #6b4b36;
+      line-height: 24px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      color: #333;
     }
 
-    @media (max-width: 640px) {
-      .controls {
-        grid-template-columns: 1fr;
-      }
+    .btn-del {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+    }
 
-      button,
-      select {
-        width: 100%;
-      }
-
-      .toggle {
-        justify-content: center;
-      }
+    .btn-del:hover {
+      color: var(--danger);
     }
   </style>
 </head>
 
-<body>
+<body data-theme="light">
   <nav class="navbar">
     <div class="nav-left">
       <a href="index.html"
@@ -397,34 +633,148 @@
   </nav>
 
   <main class="wrap">
-    <header id="intro">
-      <h1>간단한 로또 번호 생성기</h1>
-      <p>원하는 매수를 선택하고 버튼을 눌러 1~45 사이의 중복 없는 번호를 뽑아보세요.</p>
+    <header>
+      <h1>로또 번호 생성기</h1>
+      <p>조건을 설정하고 나만의 행운 번호를 만들어보세요.</p>
     </header>
 
-    <section class="panel" id="lotto-app">
-      <div class="controls">
-        <label for="count">생성 매수</label>
-        <select id="count">
-          <option value="1">1장</option>
-          <option value="3">3장</option>
-          <option value="5">5장</option>
-          <option value="10">10장</option>
-        </select>
-        <button id="generate">번호 생성</button>
-        <button id="again" type="button">다시 섞기</button>
-        <label class="toggle" for="sound">
-          <input type="checkbox" id="sound" checked />
-          사운드
-        </label>
+    <!-- Generator Panel -->
+    <section class="panel">
+      <div class="condition-header">
+        <h3>⚙️ 생성 옵션</h3>
+        <button class="btn-sub" onclick="toggleConditions()" style="padding: 8px 16px; font-size: 0.9rem;">
+          조건 설정 열기/닫기
+        </button>
       </div>
-      <div class="grid" id="tickets"></div>
+
+      <div id="conditionPanel" class="condition-content">
+        <!-- 1. Exclude -->
+        <div>
+          <div class="section-title">
+            <span>⛔ 제외할 번호 선택 (최대 10개)</span>
+            <span class="section-desc" id="excludeCount">0/10</span>
+          </div>
+          <div class="num-grid" id="excludeGrid"></div>
+        </div>
+
+        <!-- 2. Include -->
+        <div>
+          <div class="section-title">
+            <span>✅ 포함할 번호 선택 (최대 5개)</span>
+            <span class="section-desc" id="includeCount">0/5</span>
+          </div>
+          <div class="num-grid" id="includeGrid"></div>
+        </div>
+
+        <!-- 3. Odd/Even -->
+        <div>
+          <div class="section-title">⚖️ 홀수/짝수 개수 설정</div>
+          <div class="ratio-control">
+            <div class="ratio-bar">
+              <button class="preset-btn" onclick="setPreset('odd', 'auto')">자동</button>
+              <button class="preset-btn" onclick="setPreset('odd', 3)">3:3</button>
+              <button class="preset-btn" onclick="setPreset('odd', 4)">4:2</button>
+              <button class="preset-btn" onclick="setPreset('odd', 2)">2:4</button>
+              <button class="preset-btn" onclick="setPreset('odd', 5)">5:1</button>
+              <button class="preset-btn" onclick="setPreset('odd', 1)">1:5</button>
+            </div>
+            <div class="custom-ratio">
+              <div class="ratio-input">
+                <label>홀수 개수</label>
+                <input type="number" id="oddCount" min="0" max="6" value="" placeholder="자동"
+                  oninput="updateRatio('odd')">
+              </div>
+              <div class="ratio-input">
+                <label>짝수 개수</label>
+                <input type="number" id="evenCount" min="0" max="6" value="" placeholder="자동" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Low/High -->
+        <div>
+          <div class="section-title">📊 저번호(1~22) / 고번호(23~45) 개수 설정</div>
+          <div class="ratio-control">
+            <div class="ratio-bar">
+              <button class="preset-btn" onclick="setPreset('high', 'auto')">자동</button>
+              <button class="preset-btn" onclick="setPreset('high', 3)">3:3</button>
+              <button class="preset-btn" onclick="setPreset('high', 4)">4:2</button>
+              <button class="preset-btn" onclick="setPreset('high', 2)">2:4</button>
+              <button class="preset-btn" onclick="setPreset('high', 5)">5:1</button>
+              <button class="preset-btn" onclick="setPreset('high', 1)">1:5</button>
+            </div>
+            <div class="custom-ratio">
+              <div class="ratio-input">
+                <label>저번호 (1~22)</label>
+                <input type="number" id="lowCount" min="0" max="6" value="" placeholder="자동"
+                  oninput="updateRatio('low')">
+              </div>
+              <div class="ratio-input">
+                <label>고번호 (23~45)</label>
+                <input type="number" id="highCount" min="0" max="6" value="" placeholder="자동" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align: right;">
+          <button class="btn-sub" onclick="resetConditions()"
+            style="background:var(--input-bg); color: var(--text-muted); border:1px solid var(--border);">🔄 조건
+            초기화</button>
+        </div>
+      </div>
+
+      <div class="main-controls">
+        <div class="count-select">
+          <button class="count-btn active" onclick="setCount(1)">1개</button>
+          <button class="count-btn" onclick="setCount(3)">3개</button>
+          <button class="count-btn" onclick="setCount(5)">5개</button>
+          <button class="count-btn" onclick="setCount(10)">10개</button>
+        </div>
+        <div class="action-group" style="align-items: center;">
+          <label
+            style="font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none;">
+            <input type="checkbox" id="soundToggle" checked
+              style="width: 16px; height: 16px; accent-color: var(--accent);">
+            🔊 사운드
+          </label>
+          <button class="btn-main" onclick="generateLotto()">✨ 번호 생성</button>
+        </div>
+      </div>
     </section>
 
-    <section class="footer">오늘의 행운을 응원합니다!</section>
+    <!-- Results Area -->
+    <div id="resultArea" class="results-grid">
+      <!-- Generated tickets will appear here -->
+    </div>
+
+    <!-- History Area -->
+    <section class="panel" style="margin-top:20px;">
+      <div class="section-title">
+        <span>📜 저장된 기록</span>
+        <button class="btn-sub" onclick="clearHistory()" style="padding: 6px 12px; font-size: 0.8rem;">전체 삭제</button>
+      </div>
+      <div id="historyList" class="history-list">
+        <div style="text-align:center; padding:20px; color:var(--text-muted);">저장된 기록이 없습니다.</div>
+      </div>
+    </section>
+
+    <footer style="text-align: center; color: var(--text-muted); margin-bottom: 40px; font-size: 0.9rem;">
+      Good Luck! 🍀
+    </footer>
   </main>
 
   <script>
+    // --- State Management ---
+    const state = {
+      excluded: new Set(),
+      included: new Set(),
+      genCount: 1,
+      conditionsVisible: false
+    };
+
+    // --- Theme ---
     function toggleTheme() {
       const body = document.body;
       const current = body.getAttribute('data-theme');
@@ -434,90 +784,411 @@
       document.getElementById('moon-icon').style.display = next === 'dark' ? 'block' : 'none';
     }
 
-    const ticketsEl = document.getElementById('tickets');
-    const countEl = document.getElementById('count');
-    const generateBtn = document.getElementById('generate');
-    const againBtn = document.getElementById('again');
-    const soundToggle = document.getElementById('sound');
+    // --- Init ---
+    document.addEventListener('DOMContentLoaded', () => {
+      initGrids();
+      loadHistory();
+    });
+
+    // --- Grid UI ---
+    function initGrids() {
+      const exGrid = document.getElementById('excludeGrid');
+      const inGrid = document.getElementById('includeGrid');
+
+      exGrid.innerHTML = '';
+      inGrid.innerHTML = '';
+
+      for (let i = 1; i <= 45; i++) {
+        // Exclude Btn
+        const btnEx = document.createElement('button');
+        btnEx.className = 'num-btn';
+        btnEx.innerText = i;
+        btnEx.onclick = () => toggleNum(i, 'excluded');
+        btnEx.id = `ex-${i}`;
+        exGrid.appendChild(btnEx);
+
+        // Include Btn
+        const btnIn = document.createElement('button');
+        btnIn.className = 'num-btn';
+        btnIn.innerText = i;
+        btnIn.onclick = () => toggleNum(i, 'included');
+        btnIn.id = `in-${i}`;
+        inGrid.appendChild(btnIn);
+      }
+    }
+
+    function toggleNum(num, type) {
+      if (type === 'excluded') {
+        if (state.excluded.has(num)) {
+          state.excluded.delete(num);
+        } else {
+          if (state.excluded.size >= 10) return alert('제외 번호는 최대 10개까지 선택 가능합니다.');
+          state.excluded.add(num);
+          // Cannot be in both lists
+          if (state.included.has(num)) {
+            state.included.delete(num);
+            updateBtnState(num, 'included', false);
+          }
+        }
+        updateBtnState(num, 'excluded', state.excluded.has(num));
+      } else {
+        if (state.included.has(num)) {
+          state.included.delete(num);
+        } else {
+          if (state.included.size >= 5) return alert('포함 번호는 최대 5개까지 선택 가능합니다.');
+          state.included.add(num);
+          // Cannot be in both lists
+          if (state.excluded.has(num)) {
+            state.excluded.delete(num);
+            updateBtnState(num, 'excluded', false);
+          }
+        }
+        updateBtnState(num, 'included', state.included.has(num));
+      }
+      updateCounts();
+    }
+
+    function updateBtnState(num, type, isActive) {
+      const id = type === 'excluded' ? `ex-${num}` : `in-${num}`;
+      const btn = document.getElementById(id);
+      if (isActive) btn.classList.add(type);
+      else btn.classList.remove(type);
+    }
+
+    function updateCounts() {
+      document.getElementById('excludeCount').innerText = `${state.excluded.size}/10`;
+      document.getElementById('includeCount').innerText = `${state.included.size}/5`;
+    }
+
+    // --- Condition UI ---
+    function toggleConditions() {
+      state.conditionsVisible = !state.conditionsVisible;
+      const panel = document.getElementById('conditionPanel');
+      if (state.conditionsVisible) panel.classList.add('active');
+      else panel.classList.remove('active');
+    }
+
+    function setCount(cnt) {
+      state.genCount = cnt;
+      document.querySelectorAll('.count-btn').forEach(b => {
+        if (parseInt(b.innerText) === cnt) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+    }
+
+    // --- Ratios ---
+    function setPreset(type, val) {
+      if (type === 'odd') {
+        const oddInput = document.getElementById('oddCount');
+        const evenInput = document.getElementById('evenCount');
+        if (val === 'auto') {
+          oddInput.value = '';
+          evenInput.value = '';
+        } else {
+          oddInput.value = val;
+          evenInput.value = 6 - val;
+        }
+      } else {
+        const lowInput = document.getElementById('lowCount');
+        const highInput = document.getElementById('highCount');
+        if (val === 'auto') {
+          lowInput.value = '';
+          highInput.value = '';
+        } else {
+          lowInput.value = val;
+          highInput.value = 6 - val;
+        }
+      }
+    }
+
+    function updateRatio(type) {
+      if (type === 'odd') {
+        const val = parseInt(document.getElementById('oddCount').value);
+        if (!isNaN(val) && val >= 0 && val <= 6) {
+          document.getElementById('evenCount').value = 6 - val;
+        } else {
+          document.getElementById('evenCount').value = '';
+        }
+      } else if (type === 'low') {
+        const val = parseInt(document.getElementById('lowCount').value);
+        if (!isNaN(val) && val >= 0 && val <= 6) {
+          document.getElementById('highCount').value = 6 - val;
+        } else {
+          document.getElementById('highCount').value = '';
+        }
+      }
+    }
+
+    function resetConditions() {
+      state.excluded.clear();
+      state.included.clear();
+      // Reset grids
+      document.querySelectorAll('.num-btn').forEach(b => {
+        b.classList.remove('excluded');
+        b.classList.remove('included');
+      });
+      updateCounts();
+      setPreset('odd', 'auto');
+      setPreset('high', 'auto');
+    }
+
+    // --- Generator Logic ---
+    // --- Generator Logic ---
+    function generateLotto() {
+      initAudio(); // Initialize audio context
+      const resultArea = document.getElementById('resultArea');
+      resultArea.innerHTML = '';
+
+      const count = state.genCount;
+      const targetOdd = document.getElementById('oddCount').value; // '' or number
+      const targetLow = document.getElementById('lowCount').value; // '' or number
+
+      let successCount = 0;
+      const generatedSets = [];
+
+      // Protection loop
+      let attempts = 0;
+      const maxTotalAttempts = count * 200;
+
+      while (successCount < count && attempts < maxTotalAttempts) {
+        attempts++;
+        const nums = generateSingleSet(targetOdd, targetLow);
+        if (nums) {
+          generatedSets.push(nums);
+          successCount++;
+        }
+      }
+
+      if (successCount < count) {
+        alert(`조건이 너무 까다로워 ${successCount}개만 생성되었습니다.`);
+      }
+
+      // Render & Save
+      generatedSets.forEach((set, idx) => {
+        renderTicket(set, idx);
+      });
+
+      if (generatedSets.length > 0) {
+        saveHistory(generatedSets);
+      }
+
+      // Scroll to result
+      resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function generateSingleSet(targetOdd, targetLow) {
+      // Pool construction
+      let pool = [];
+      for (let i = 1; i <= 45; i++) {
+        if (!state.excluded.has(i) && !state.included.has(i)) {
+          pool.push(i);
+        }
+      }
+
+      // Safety check
+      if (pool.length + state.included.size < 6) return null;
+
+      // Base set
+      let currentSet = Array.from(state.included);
+
+      // Fill remainder
+      // Simple Shuffle & Pick method (fast enough)
+      // Try up to 50 times to fit criteria for this single ticket
+      for (let tryIdx = 0; tryIdx < 50; tryIdx++) {
+        // Shuffle pool
+        for (let i = pool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+
+        const needed = 6 - currentSet.length;
+        const picked = pool.slice(0, needed);
+        const candidate = currentSet.concat(picked).sort((a, b) => a - b);
+
+        // Check criteria
+        if (checkConditions(candidate, targetOdd, targetLow)) {
+          return candidate;
+        }
+      }
+      return null; // Failed to matching conditions
+    }
+
+    function checkConditions(nums, targetOdd, targetLow) {
+      // Odd Check
+      if (targetOdd !== '') {
+        const oddCnt = nums.filter(n => n % 2 !== 0).length;
+        if (oddCnt !== parseInt(targetOdd)) return false;
+      }
+      // Low Check (1-22)
+      if (targetLow !== '') {
+        const lowCnt = nums.filter(n => n <= 22).length;
+        if (lowCnt !== parseInt(targetLow)) return false;
+      }
+      return true;
+    }
+
+    // --- Rendering ---
+    function renderTicket(nums, idx) {
+      const div = document.createElement('div');
+      div.className = 'ticket';
+      div.style.animationDelay = `${idx * 0.1}s`;
+
+      let html = `
+            <div class="ticket-header">
+                <span>자동생성 #${idx + 1}</span>
+                <span>${getMetaInfo(nums)}</span>
+            </div>
+            <div class="ticket-numbers">
+        `;
+      nums.forEach((n, i) => {
+        html += `<div class="ball" data-n="${n}" data-range="${getRange(n)}">${n}</div>`;
+
+        // Sound Effect
+        // Ticket appearance delay (idx*100) + Ball sequence (i*60)
+        setTimeout(() => playPopSound(i), (idx * 100) + (i * 60));
+      });
+      html += `</div>`;
+      div.innerHTML = html;
+      document.getElementById('resultArea').appendChild(div);
+    }
+
+    function getRange(n) {
+      if (n <= 10) return '1-10';
+      if (n <= 20) return '11-20';
+      if (n <= 30) return '21-30';
+      if (n <= 40) return '31-40';
+      return '41-45';
+    }
+
+    function getMetaInfo(nums) {
+      const sum = nums.reduce((a, b) => a + b, 0);
+      const odd = nums.filter(n => n % 2 !== 0).length;
+      const high = nums.filter(n => n > 22).length;
+      return `합계: ${sum} | 홀짝: ${odd}:${6 - odd} | 고저: ${high}:${6 - high}`;
+    }
+
+    // --- Local Storage ---
+    const STORAGE_KEY = 'lotto_history';
+
+    function saveHistory(sets) {
+      const now = new Date().toLocaleString('ko-KR');
+      const newItem = {
+        date: now,
+        sets: sets
+      };
+
+      let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      history.unshift(newItem); // Add to top
+      if (history.length > 20) history = history.slice(0, 20); // Keep max 20
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+
+      renderHistory();
+    }
+
+    function loadHistory() {
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const listEl = document.getElementById('historyList');
+      const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+      if (history.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">저장된 기록이 없습니다.</div>';
+        return;
+      }
+
+      listEl.innerHTML = '';
+      history.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'history-item';
+
+        let numsHtml = '';
+        // Show first set only + count
+        const firstSet = item.sets[0];
+        firstSet.forEach(n => {
+          numsHtml += `<div class="mini-ball" style="background:${getColor(n)}">${n}</div>`;
+        });
+
+        const extraText = item.sets.length > 1 ? ` 외 ${item.sets.length - 1}조합` : '';
+
+        row.innerHTML = `
+                <div>
+                   <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">${item.date}</div>
+                   <div class="history-nums">${numsHtml} <span style="align-self:center; font-size:0.8rem; margin-left:4px;">${extraText}</span></div>
+                </div>
+                <button class="btn-del" onclick="deleteHistory(${idx})">🗑️</button>
+            `;
+        listEl.appendChild(row);
+      });
+    }
+
+    function deleteHistory(idx) {
+      let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      history.splice(idx, 1);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+      renderHistory();
+    }
+
+    function clearHistory() {
+      if (confirm('모든 기록을 삭제하시겠습니까?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderHistory();
+      }
+    }
+
+    function getColor(n) {
+      if (n <= 10) return '#fbc400';
+      if (n <= 20) return '#69c8f2';
+      if (n <= 30) return '#ff7272';
+      if (n <= 40) return '#cccccc';
+      return '#b0d840';
+    }
+
+    // --- Audio ---
     let audioCtx;
 
-    function getAudioContext() {
+    function initAudio() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       }
-      return audioCtx;
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
     }
 
     function playPopSound(index) {
-      if (!soundToggle.checked) return;
-      const ctx = getAudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const base = 540;
-      osc.frequency.value = base + index * 35;
-      osc.type = 'triangle';
-      gain.gain.value = 0.0001;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      const now = ctx.currentTime;
-      gain.gain.exponentialRampToValueAtTime(0.08, now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
-      osc.start(now);
-      osc.stop(now + 0.2);
-    }
+      const toggle = document.getElementById('soundToggle');
+      if (!toggle || !toggle.checked) return;
 
-    function drawNumbers() {
-      const pool = Array.from({ length: 45 }, (_, i) => i + 1);
-      for (let i = pool.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
-      return pool.slice(0, 6).sort((a, b) => a - b);
-    }
+      // Safety check for context
+      if (!audioCtx) initAudio();
 
-    function buildTicket(numbers, index) {
-      const ticket = document.createElement('article');
-      ticket.className = 'ticket';
-      ticket.style.setProperty('--ticket-delay', `${index * 0.08}s`);
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      const now = new Date();
-      meta.textContent = `${index + 1}번째 티켓 · ${now.toLocaleString('ko-KR')}`;
-      const numbersWrap = document.createElement('div');
-      numbersWrap.className = 'numbers';
-      numbers.forEach((n, i) => {
-        const ball = document.createElement('div');
-        ball.className = 'ball';
-        ball.textContent = n;
-        ball.style.setProperty('--delay', `${i * 0.08}s`);
-        numbersWrap.appendChild(ball);
-        setTimeout(() => playPopSound(i), i * 80);
-      });
-      ticket.appendChild(meta);
-      ticket.appendChild(numbersWrap);
-      return ticket;
-    }
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
 
-    function renderTickets() {
-      ticketsEl.innerHTML = '';
-      const count = Number(countEl.value);
-      for (let i = 0; i < count; i += 1) {
-        const numbers = drawNumbers();
-        ticketsEl.appendChild(buildTicket(numbers, i));
+        const baseFreq = 520;
+        const freq = baseFreq + (index * 40);
+
+        osc.type = 'triangle'; // Softer than square, punchier than sine
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        // Envelope
+        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.15, audioCtx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+      } catch (e) {
+        console.error("Audio play error", e);
       }
     }
 
-    function handleGenerate() {
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      renderTickets();
-    }
-
-    generateBtn.addEventListener('click', handleGenerate);
-    againBtn.addEventListener('click', handleGenerate);
-
-    renderTickets();
   </script>
 </body>
 
