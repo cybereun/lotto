@@ -1684,38 +1684,48 @@
         // --- Caffeine Calculator Logic ---
         const caffeineDB = {
             franchise: [
+                { name: "에스프레소 (기본)", sizes: [{ name: "Solo (30ml)", caf: 63 }, { name: "Doppio (60ml)", caf: 126 }] },
+                { name: "아메리카노 (표준)", sizes: [{ name: "Tall (355ml)", caf: 150 }, { name: "Grande (473ml)", caf: 225 }, { name: "Venti (591ml)", caf: 300 }] },
+                { name: "드립커피", sizes: [{ name: "240ml", caf: 95 }] },
+                { name: "콜드브루", sizes: [{ name: "Tall (355ml)", caf: 200 }] },
+                { name: "카페라떼 / 카푸치노", sizes: [{ name: "Tall (355ml)", caf: 75 }] },
+                { name: "카페모카", sizes: [{ name: "Tall (355ml)", caf: 95 }] },
+                { name: "인스턴트 커피 (믹스)", sizes: [{ name: "1봉 (물 100~240ml)", caf: 62 }, { name: "2봉", caf: 124 }] },
+                { name: "디카페인 커피", sizes: [{ name: "240ml", caf: 5 }] },
                 { name: "스타벅스 아메리카노", sizes: [{ name: "Tall (355ml)", caf: 150 }, { name: "Grande (473ml)", caf: 225 }, { name: "Venti (591ml)", caf: 300 }] },
-                { name: "스타벅스 콜드브루", sizes: [{ name: "Tall (355ml)", caf: 155 }, { name: "Grande (473ml)", caf: 205 }] },
                 { name: "메가커피 아메리카노", sizes: [{ name: "HOT (24oz)", caf: 200 }, { name: "ICE (24oz)", caf: 205 }] },
-                { name: "메가커피 큐브라떼", sizes: [{ name: "One Size", caf: 300 }] },
-                { name: "컴포즈 아메리카노", sizes: [{ name: "One Size (2샷)", caf: 156 }] },
                 { name: "빽다방 앗!메리카노", sizes: [{ name: "ICED (625ml)", caf: 237 }] },
-                { name: "빽다방 원조커피", sizes: [{ name: "ICED (믹스)", caf: 371 }] },
                 { name: "투썸 아메리카노", sizes: [{ name: "Max (591ml)", caf: 285 }] },
                 { name: "이디야 아메리카노", sizes: [{ name: "Large", caf: 132 }, { name: "Extra", caf: 264 }] }
             ],
             rtd: [
+                { name: "몬스터 에너지", sizes: [{ name: "355ml", caf: 160 }] },
+                { name: "레드불", sizes: [{ name: "250ml", caf: 80 }] },
+                { name: "핫식스", sizes: [{ name: "250ml", caf: 60 }, { name: "더킹 (330ml)", caf: 100 }] },
                 { name: "스누피 더진한 커피우유", sizes: [{ name: "500ml", caf: 237 }] },
-                { name: "몬스터 에너지", sizes: [{ name: "355ml", caf: 100 }] },
-                { name: "핫식스", sizes: [{ name: "250ml", caf: 60 }] },
-                { name: "핫식스 더킹", sizes: [{ name: "330ml", caf: 100 }] },
-                { name: "레드불", sizes: [{ name: "250ml", caf: 62.5 }] },
-                { name: "빙그레 커피맛우유", sizes: [{ name: "240ml", caf: 45 }] },
-                { name: "칸타타 프리미엄 라떼", sizes: [{ name: "275ml", caf: 116 }] },
-                { name: "T.O.P 마스터 블렌드", sizes: [{ name: "275ml", caf: 108 }] },
-                { name: "조지아 크래프트", sizes: [{ name: "470ml", caf: 190 }] },
-                { name: "박카스 F", sizes: [{ name: "120ml", caf: 30 }] }
+                { name: "박카스", sizes: [{ name: "D (120ml, 약국)", caf: 30 }, { name: "F (120ml, 편의점)", caf: 30 }] },
+                { name: "코카콜라", sizes: [{ name: "355ml", caf: 34 }] },
+                { name: "펩시", sizes: [{ name: "355ml", caf: 38 }] },
+                { name: "다이어트 콜라", sizes: [{ name: "355ml", caf: 46 }] },
+                { name: "마운틴듀", sizes: [{ name: "355ml", caf: 54 }] },
+                { name: "스프라이트/환타", sizes: [{ name: "355ml", caf: 0 }] },
+                { name: "비타500/파워에이드", sizes: [{ name: "1병", caf: 0 }] },
+                { name: "칸타타/TOP/조지아", sizes: [{ name: "275~470ml", caf: 100 }] }
             ],
             etc: [
-                { name: "홍차/얼그레이", sizes: [{ name: "1잔 (250ml)", caf: 50 }] },
-                { name: "녹차 (티백)", sizes: [{ name: "1개", caf: 20 }] },
-                { name: "말차 라떼", sizes: [{ name: "Tall", caf: 60 }] },
-                { name: "공차 블랙밀크티", sizes: [{ name: "Large", caf: 60 }] },
-                { name: "다크 초콜릿 (72%)", sizes: [{ name: "100g", caf: 80 }] },
-                { name: "밀크 초콜릿", sizes: [{ name: "100g", caf: 25 }] },
-                { name: "게보린/펜잘 (약)", sizes: [{ name: "1정", caf: 50 }] },
-                { name: "판피린/판콜 (감기약)", sizes: [{ name: "1병", caf: 30 }] },
-                { name: "콜라/사이다", sizes: [{ name: "250ml", caf: 23 }] }
+                { name: "녹차", sizes: [{ name: "티백 1개/240ml", caf: 28 }] },
+                { name: "말차", sizes: [{ name: "1스푼 (240ml)", caf: 70 }] },
+                { name: "홍차", sizes: [{ name: "1잔 (240ml)", caf: 47 }] },
+                { name: "우롱차", sizes: [{ name: "1잔 (240ml)", caf: 37 }] },
+                { name: "백차", sizes: [{ name: "1잔 (240ml)", caf: 15 }] },
+                { name: "차이티", sizes: [{ name: "1잔 (240ml)", caf: 50 }] },
+                { name: "콤부차", sizes: [{ name: "240ml", caf: 15 }] },
+                { name: "허브티 (캐모마일 등)", sizes: [{ name: "1잔", caf: 0 }] },
+                { name: "다크 초콜릿", sizes: [{ name: "30g", caf: 23 }] },
+                { name: "밀크 초콜릿", sizes: [{ name: "30g", caf: 9 }] },
+                { name: "화이트 초콜릿", sizes: [{ name: "30g", caf: 0 }] },
+                { name: "핫초코 / 초코우유", sizes: [{ name: "200~240ml", caf: 5 }] },
+                { name: "진통제/감기약 (게보린 등)", sizes: [{ name: "1정/1병", caf: 30 }] }
             ]
         };
 
