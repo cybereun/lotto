@@ -581,6 +581,17 @@
                     </svg>
                     근무 시간 계산기
                 </a>
+                <a href="#caffeine" class="menu-link" onclick="showCalc('caffeine', event)">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2">
+                        <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                        <line x1="6" y1="1" x2="6" y2="4"></line>
+                        <line x1="10" y1="1" x2="10" y2="4"></line>
+                        <line x1="14" y1="1" x2="14" y2="4"></line>
+                    </svg>
+                    카페인 계산기
+                </a>
             </div>
         </aside>
 
@@ -1503,9 +1514,404 @@
                     </div>
                 </div>
             </div>
+            <!-- Caffeine Calculator -->
+            <div id="caffeine" class="calculator-view">
+                <div class="header-section">
+                    <h1>카페인 계산기</h1>
+                    <p>건강한 수면을 위한 스마트한 카페인 섭취 관리</p>
+                </div>
+
+                <style>
+                    .cf-section {
+                        margin-bottom: 24px;
+                        padding: 20px;
+                        background: var(--card-bg);
+                        border-radius: 12px;
+                        border: 1px solid var(--border);
+                    }
+
+                    .cf-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 16px;
+                    }
+
+                    .cf-input-wrapper {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        margin-bottom: 12px;
+                    }
+
+                    .cf-label {
+                        font-size: 0.9rem;
+                        font-weight: 600;
+                        color: var(--text-main);
+                    }
+
+                    .cf-select,
+                    .cf-input {
+                        width: 100%;
+                        padding: 10px;
+                        border-radius: 8px;
+                        border: 1px solid var(--border);
+                        background: var(--bg-body);
+                        color: var(--text-main);
+                    }
+
+                    .cf-result-box {
+                        margin-top: 20px;
+                        padding: 20px;
+                        background: var(--bg-body);
+                        border-radius: 12px;
+                        border: 1px solid var(--border);
+                    }
+
+                    .cf-badge {
+                        padding: 4px 8px;
+                        border-radius: 6px;
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                        display: inline-block;
+                    }
+
+                    .cf-badge-safe {
+                        background: rgba(16, 185, 129, 0.1);
+                        color: #10b981;
+                    }
+
+                    .cf-badge-warn {
+                        background: rgba(245, 158, 11, 0.1);
+                        color: #f59e0b;
+                    }
+
+                    .cf-badge-danger {
+                        background: rgba(239, 68, 68, 0.1);
+                        color: #ef4444;
+                    }
+                </style>
+
+                <!-- 1. User Profile -->
+                <div class="cf-section">
+                    <h3 style="margin-bottom:12px; color:var(--text-main);">👤 사용자 프로필</h3>
+                    <div class="cf-grid">
+                        <div class="cf-input-wrapper">
+                            <label class="cf-label">체중 (kg)</label>
+                            <input type="number" id="cf-weight" class="cf-input" value="60" placeholder="kg">
+                        </div>
+                        <div class="cf-input-wrapper">
+                            <label class="cf-label">상태 (반감기)</label>
+                            <select id="cf-condition" class="cf-select">
+                                <option value="adult">건강한 성인 (5h)</option>
+                                <option value="smoker">흡연자 (3h)</option>
+                                <option value="pregnant">임산부/피임약 (9h)</option>
+                                <option value="youth">청소년/어린이</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Drink Selection -->
+                <div class="cf-section">
+                    <h3 style="margin-bottom:12px; color:var(--text-main);">☕ 음료 선택</h3>
+                    <div class="cf-grid" style="grid-template-columns: 1fr 1.5fr;">
+                        <div class="cf-input-wrapper">
+                            <label class="cf-label">카테고리</label>
+                            <select id="cf-category" class="cf-select" onchange="updateCaffeineMenu()">
+                                <option value="franchise">프랜차이즈 커피</option>
+                                <option value="rtd">편의점/마트 음료</option>
+                                <option value="etc">차/기타/약국</option>
+                            </select>
+                        </div>
+                        <div class="cf-input-wrapper">
+                            <label class="cf-label">메뉴</label>
+                            <select id="cf-menu" class="cf-select" onchange="updateCaffeineSize()">
+                                <!-- JS Populated -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="cf-grid">
+                        <div class="cf-input-wrapper">
+                            <label class="cf-label">사이즈/옵션</label>
+                            <select id="cf-size" class="cf-select">
+                                <!-- JS Populated -->
+                            </select>
+                        </div>
+                        <div class="cf-input-wrapper">
+                            <label class="cf-label">섭취 시간</label>
+                            <input type="time" id="cf-time" class="cf-input" onwheel="event.preventDefault()">
+                        </div>
+                    </div>
+                    <button class="btn-calc" onclick="addCaffeineItem()">섭취 추가하기</button>
+                </div>
+
+                <!-- 3. Intake List & Result -->
+                <div class="cf-section" id="cf-result-area" style="display:none;">
+                    <h3 style="margin-bottom:12px; color:var(--text-main);">📊 분석 결과</h3>
+
+                    <div id="cf-intake-list"
+                        style="margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:16px;">
+                        <!-- List -->
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
+                        <div
+                            style="text-align:center; padding:16px; background:var(--bg-body); border-radius:12px; border:1px solid var(--border);">
+                            <div style="font-size:0.9rem; color:var(--text-muted);">총 섭취량</div>
+                            <div style="font-size:1.5rem; font-weight:700; color:var(--text-main);"
+                                id="cf-total-amount">0mg</div>
+                            <div id="cf-limit-badge" style="font-size:0.8rem; margin-top:4px;">권고량 대비 안전</div>
+                        </div>
+                        <div
+                            style="text-align:center; padding:16px; background:var(--bg-body); border-radius:12px; border:1px solid var(--border);">
+                            <div style="font-size:0.9rem; color:var(--text-muted);">수면 예상 시간</div>
+                            <div style="font-size:1.5rem; font-weight:700; color:var(--primary);" id="cf-sleep-time">
+                                00:00</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">체내 50mg 미만 도달</div>
+                        </div>
+                    </div>
+
+                    <div style="background:#1e293b; padding:16px; border-radius:12px; color:#cbd5e1; font-size:0.9rem;">
+                        <div id="cf-advice-text" style="line-height:1.6;">
+                            분석 결과가 여기에 표시됩니다.
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
 
     <script>
+        // --- Caffeine Calculator Logic ---
+        const caffeineDB = {
+            franchise: [
+                { name: "스타벅스 아메리카노", sizes: [{ name: "Tall (355ml)", caf: 150 }, { name: "Grande (473ml)", caf: 225 }, { name: "Venti (591ml)", caf: 300 }] },
+                { name: "스타벅스 콜드브루", sizes: [{ name: "Tall (355ml)", caf: 155 }, { name: "Grande (473ml)", caf: 205 }] },
+                { name: "메가커피 아메리카노", sizes: [{ name: "HOT (24oz)", caf: 200 }, { name: "ICE (24oz)", caf: 205 }] },
+                { name: "메가커피 큐브라떼", sizes: [{ name: "One Size", caf: 300 }] },
+                { name: "컴포즈 아메리카노", sizes: [{ name: "One Size (2샷)", caf: 156 }] },
+                { name: "빽다방 앗!메리카노", sizes: [{ name: "ICED (625ml)", caf: 237 }] },
+                { name: "빽다방 원조커피", sizes: [{ name: "ICED (믹스)", caf: 371 }] },
+                { name: "투썸 아메리카노", sizes: [{ name: "Max (591ml)", caf: 285 }] },
+                { name: "이디야 아메리카노", sizes: [{ name: "Large", caf: 132 }, { name: "Extra", caf: 264 }] }
+            ],
+            rtd: [
+                { name: "스누피 더진한 커피우유", sizes: [{ name: "500ml", caf: 237 }] },
+                { name: "몬스터 에너지", sizes: [{ name: "355ml", caf: 100 }] },
+                { name: "핫식스", sizes: [{ name: "250ml", caf: 60 }] },
+                { name: "핫식스 더킹", sizes: [{ name: "330ml", caf: 100 }] },
+                { name: "레드불", sizes: [{ name: "250ml", caf: 62.5 }] },
+                { name: "빙그레 커피맛우유", sizes: [{ name: "240ml", caf: 45 }] },
+                { name: "칸타타 프리미엄 라떼", sizes: [{ name: "275ml", caf: 116 }] },
+                { name: "T.O.P 마스터 블렌드", sizes: [{ name: "275ml", caf: 108 }] },
+                { name: "조지아 크래프트", sizes: [{ name: "470ml", caf: 190 }] },
+                { name: "박카스 F", sizes: [{ name: "120ml", caf: 30 }] }
+            ],
+            etc: [
+                { name: "홍차/얼그레이", sizes: [{ name: "1잔 (250ml)", caf: 50 }] },
+                { name: "녹차 (티백)", sizes: [{ name: "1개", caf: 20 }] },
+                { name: "말차 라떼", sizes: [{ name: "Tall", caf: 60 }] },
+                { name: "공차 블랙밀크티", sizes: [{ name: "Large", caf: 60 }] },
+                { name: "다크 초콜릿 (72%)", sizes: [{ name: "100g", caf: 80 }] },
+                { name: "밀크 초콜릿", sizes: [{ name: "100g", caf: 25 }] },
+                { name: "게보린/펜잘 (약)", sizes: [{ name: "1정", caf: 50 }] },
+                { name: "판피린/판콜 (감기약)", sizes: [{ name: "1병", caf: 30 }] },
+                { name: "콜라/사이다", sizes: [{ name: "250ml", caf: 23 }] }
+            ]
+        };
+
+        let currentIntake = [];
+
+        function initCaffeine() {
+            updateCaffeineMenu();
+            // Set default time to now
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('cf-time').value = `${hh}:${mm}`;
+        }
+
+        function updateCaffeineMenu() {
+            const cat = document.getElementById('cf-category').value;
+            const menuSel = document.getElementById('cf-menu');
+            menuSel.innerHTML = '';
+
+            caffeineDB[cat].forEach((item, idx) => {
+                menuSel.add(new Option(item.name, idx));
+            });
+            updateCaffeineSize();
+        }
+
+        function updateCaffeineSize() {
+            const cat = document.getElementById('cf-category').value;
+            const menuIdx = document.getElementById('cf-menu').value;
+            const sizeSel = document.getElementById('cf-size');
+            sizeSel.innerHTML = '';
+
+            const item = caffeineDB[cat][menuIdx];
+            item.sizes.forEach((size, idx) => {
+                sizeSel.add(new Option(`${size.name} (${size.caf}mg)`, size.caf));
+            });
+        }
+
+        function addCaffeineItem() {
+            const cat = document.getElementById('cf-category').value;
+            const menuIdx = document.getElementById('cf-menu').value;
+            const item = caffeineDB[cat][menuIdx];
+            const sizeCaf = parseFloat(document.getElementById('cf-size').value);
+            const timeVal = document.getElementById('cf-time').value;
+
+            if (!timeVal) return alert("섭취 시간을 입력해주세요.");
+
+            currentIntake.push({
+                name: item.name,
+                caf: sizeCaf,
+                time: timeVal,
+                id: Date.now()
+            });
+
+            renderCaffeineList();
+            calcCaffeine();
+        }
+
+        function removeCaffeineItem(id) {
+            currentIntake = currentIntake.filter(x => x.id !== id);
+            renderCaffeineList();
+            calcCaffeine();
+        }
+
+        function renderCaffeineList() {
+            const list = document.getElementById('cf-intake-list');
+            list.innerHTML = '';
+
+            if (currentIntake.length === 0) {
+                document.getElementById('cf-result-area').style.display = 'none';
+                return;
+            }
+            document.getElementById('cf-result-area').style.display = 'block';
+
+            currentIntake.forEach(item => {
+                const div = document.createElement('div');
+                div.style.cssText = "display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:var(--bg-body); padding:10px; border-radius:8px;";
+                div.innerHTML = `
+                    <div>
+                        <span style="font-weight:600; color:var(--text-main);">${item.name}</span>
+                        <span style="font-size:0.85rem; color:var(--text-muted); margin-left:8px;">${item.caf}mg / ${item.time}</span>
+                    </div>
+                    <button style="border:none; background:none; color:var(--text-muted); cursor:pointer;" onclick="removeCaffeineItem(${item.id})">x</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function calcCaffeine() {
+            const weight = parseFloat(document.getElementById('cf-weight').value) || 60;
+            const condition = document.getElementById('cf-condition').value;
+
+            // 1. Calc Limit
+            let limit = 400; // Adult default
+            if (condition === 'pregnant') limit = 300;
+            if (condition === 'youth') limit = weight * 2.5;
+
+            // 2. Calc Half-life
+            let halfLife = 5;
+            if (condition === 'smoker') halfLife = 3;
+            if (condition === 'pregnant') halfLife = 9;
+            // Youth varies but use conservative 5 or weight factor? Text says adult 5. Let's start with 5 for youth too or slightly higher? 
+            // We will stick to prompt's logic: Smoker 3h, Pregnant 8-10h. Default 5h.
+
+            // 3. Total & Sleep Simulation
+            let totalCaf = 0;
+            let maxFinishTime = 0; // The time when caf drops below 50mg
+
+            // We need a reference "current" time? Or just calculate absolute finish time?
+            // User wants "When can I sleep?".
+            // We calculate each drink's decay individually relative to proper time.
+
+            // Find the latest intake time to start simple logic? 
+            // Better: Simulation.
+            // Check level at every hour from "Now" until level < 50mg.
+
+            // First, sum total initial
+            currentIntake.forEach(i => totalCaf += i.caf);
+            document.getElementById('cf-total-amount').innerText = `${totalCaf}mg`;
+
+            // Limit Badge
+            const badge = document.getElementById('cf-limit-badge');
+            if (totalCaf <= limit * 0.5) {
+                badge.innerText = "안전 (여유)"; badge.className = "cf-badge cf-badge-safe";
+            } else if (totalCaf <= limit) {
+                badge.innerText = "적정 (주의)"; badge.className = "cf-badge cf-badge-warn";
+            } else {
+                badge.innerText = "초과 (위험)"; badge.className = "cf-badge cf-badge-danger";
+            }
+
+            // Sleep Time Prediction
+            // Logic: Total remaining amount at time T < 50mg.
+            // Sum(Drink_i * (0.5)^(Elapsed_i / HalfLife)) < 50
+
+            // We simulate from the earliest intake time until 48 hours later.
+            // Find earliest time
+            let sorted = [...currentIntake].sort((a, b) => a.time.localeCompare(b.time));
+            if (sorted.length === 0) return;
+
+            let baseH = parseInt(sorted[0].time.split(':')[0]);
+
+            // Iterate hours from baseH onwards
+            let safeTimeStr = "계산 불가";
+
+            for (let h = 0; h < 48; h++) {
+                let checkTime = baseH + h;
+                let currentTotal = 0;
+
+                // Calculate remaining for each drink at (baseH + h)
+                sorted.forEach(d => {
+                    const dh = parseInt(d.time.split(':')[0]) + parseInt(d.time.split(':')[1]) / 60;
+                    const elapsed = checkTime - dh;
+                    if (elapsed > 0) {
+                        currentTotal += d.caf * Math.pow(0.5, elapsed / halfLife);
+                    } else if (elapsed > -1) { // Same hour or just before
+                        currentTotal += d.caf;
+                    }
+                });
+
+                if (currentTotal < 50) {
+                    // Found safe time
+                    // Convert checkTime (which could be > 24) to HH:00
+                    let finishH = Math.floor(checkTime) % 24;
+                    let finishD = Math.floor(checkTime / 24); // 0 = today, 1 = tomorrow
+
+                    let dayLabel = finishD === 0 ? "오늘" : (finishD === 1 ? "내일" : "모레");
+                    safeTimeStr = `${dayLabel} ${String(finishH).padStart(2, '0')}:00`;
+                    break;
+                }
+            }
+
+            document.getElementById('cf-sleep-time').innerText = safeTimeStr;
+
+            // Advice Text
+            const adviceBox = document.getElementById('cf-advice-text');
+            let advice = "";
+            if (totalCaf > limit) {
+                advice += `⚠️ <strong>일일 권장량(${limit}mg)을 초과했습니다.</strong> 심장 두근거림, 불면증 발생 가능성이 높습니다.<br>`;
+            }
+            if (safeTimeStr.includes("내일") || safeTimeStr.includes("모레")) {
+                advice += `💤 카페인 분해에 오랜 시간이 걸립니다. 오늘 밤 깊은 잠을 자기 어려울 수 있습니다.<br>`;
+            } else {
+                advice += `✅ 취침 전까지 카페인이 충분히 분해될 것으로 예상됩니다.<br>`;
+            }
+
+            if (condition === 'smoker') advice += `<span style='font-size:0.8rem; color:#94a3b8;'>(*흡연자는 카페인 분해 속도가 빠르지만, 건강을 위해 흡연과 카페인 모두 줄이는 것이 좋습니다.)</span>`;
+            if (condition === 'pregnant') advice += `<span style='font-size:0.8rem; color:#f472b6;'>(*임산부는 태아를 위해 300mg 이하 섭취를 엄격히 권장합니다.)</span>`;
+
+            adviceBox.innerHTML = advice;
+        }
+
+        // Init Hook
+        window.addEventListener('load', () => {
+            initCaffeine();
+        });
+
+
         function toggleTheme() {
             const body = document.body;
             const current = body.getAttribute('data-theme');
