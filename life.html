@@ -864,7 +864,7 @@
         function calcP1() { // A의 B%는?
             const total = parseFloat(document.getElementById('p1-total').value) || 0;
             const rate = parseFloat(document.getElementById('p1-rate').value) || 0;
-            document.getElementById('p1-result').innerText = formatNum(total * (rate / 100)) + '%';
+            document.getElementById('p1-result').innerText = formatNum(total * (rate / 100));
         }
 
         function calcP2() { // A는 B의 몇 %?
