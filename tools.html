@@ -573,6 +573,14 @@
                     </svg>
                     연차 계산기
                 </a>
+                <a href="#worktime" class="menu-link" onclick="showCalc('worktime', event)">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    근무 시간 계산기
+                </a>
             </div>
         </aside>
 
@@ -1264,6 +1272,77 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Work Time Calculator -->
+            <div id="worktime" class="calculator-view">
+                <div class="header-section">
+                    <h1>근무 시간 계산기</h1>
+                    <p>정확한 근무 시간 및 급여 계산 (연장/야간/휴일 포함)</p>
+                </div>
+                <div class="calc-card">
+                    <div class="calc-inputs" style="display:flex; flex-direction:column; gap:1.5rem;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                            <div class="form-group">
+                                <label>출근 시간</label>
+                                <div class="input-wrapper"><input type="time" id="work-start"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>퇴근 시간</label>
+                                <div class="input-wrapper"><input type="time" id="work-end"></div>
+                            </div>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                            <div class="form-group">
+                                <label>휴게 시간 (분)</label>
+                                <div class="input-wrapper"><input type="number" id="work-break" value="60" min="0">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>시급 (원)</label>
+                                <div class="input-wrapper"><input type="number" id="work-wage" value="9860" step="10">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>추가 설정</label>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <label
+                                    style="display:flex; align-items:center; gap:8px; font-weight:normal; cursor:pointer;">
+                                    <input type="checkbox" id="work-holiday"> 휴일 근로 (1.5배)
+                                </label>
+                                <label
+                                    style="display:flex; align-items:center; gap:8px; font-weight:normal; color:var(--text-muted); cursor:not-allowed;">
+                                    <input type="checkbox" id="work-night" disabled checked> 야간 근로 자동 적용 (22:00~06:00,
+                                    0.5배 가산)
+                                </label>
+                            </div>
+                        </div>
+                        <button class="btn-calc" onclick="calcWorkTime()">계산하기</button>
+                    </div>
+                    <div class="result-panel">
+                        <div class="result-row" style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span style="color:var(--text-muted)">총 근무 (휴게 제외)</span>
+                            <span id="wt-total" style="font-weight:700">0시간 0분</span>
+                        </div>
+                        <div class="result-row" style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span style="color:var(--text-muted)">기본 (1.0배)</span>
+                            <span id="wt-basic">0시간 0분</span>
+                        </div>
+                        <div class="result-row" style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <span style="color:var(--text-muted)">연장 (1.5배)</span>
+                            <span id="wt-over" style="color:var(--secondary)">0시간 0분</span>
+                        </div>
+                        <div class="result-row"
+                            style="display:flex; justify-content:space-between; margin-bottom:16px;">
+                            <span style="color:var(--text-muted)">야간 (+0.5배)</span>
+                            <span id="wt-night" style="color:#8b5cf6">0시간 0분</span>
+                        </div>
+                        <div style="border-top:1px dashed var(--border); margin:10px 0;"></div>
+                        <div class="result-value" id="wt-wage" style="font-size:1.8rem; color:var(--primary)">0원</div>
+                        <div class="result-label">예상 일급</div>
+                    </div>
+                </div>
+            </div>
     </div>
 
     <script>
@@ -1825,6 +1904,74 @@
             localStorage.setItem('vac_history', JSON.stringify(history));
             renderSavedHistory();
             updateHistoryCount();
+        }
+
+        // --- Work Time Calculator Logic ---
+        function calcWorkTime() {
+            const startStr = document.getElementById('work-start').value;
+            const endStr = document.getElementById('work-end').value;
+            const breakMins = parseFloat(document.getElementById('work-break').value) || 0;
+            const wage = parseFloat(document.getElementById('work-wage').value) || 9860;
+            const isHoliday = document.getElementById('work-holiday').checked;
+
+            if (!startStr || !endStr) return alert("출퇴근 시간을 입력해주세요.");
+
+            const [sh, sm] = startStr.split(':').map(Number);
+            const [eh, em] = endStr.split(':').map(Number);
+
+            let startMin = sh * 60 + sm;
+            let endMin = eh * 60 + em;
+            if (endMin < startMin) endMin += 24 * 60; // Next day
+
+            const totalSpan = endMin - startMin;
+            const workMin = Math.max(0, totalSpan - breakMins);
+
+            // Basic / Overtime
+            let basicMin = Math.min(workMin, 480);
+            let overtimeMin = Math.max(0, workMin - 480);
+
+            // Night Logic (22:00 ~ 06:00)
+            let nightMin = 0;
+            const nightRanges = [
+                [0, 360],      // 00:00 - 06:00
+                [1320, 1800],  // 22:00 - 30:00
+                [2760, 3240]   // 46:00 ...
+            ];
+
+            // Intersection Helper
+            function getOverlap(r1, r2) {
+                const start = Math.max(r1[0], r2[0]);
+                const end = Math.min(r1[1], r2[1]);
+                return Math.max(0, end - start);
+            }
+
+            nightRanges.forEach(range => {
+                nightMin += getOverlap([startMin, endMin], range);
+            });
+            nightMin = Math.min(nightMin, workMin);
+
+            // Wage Calc
+            const basicFactor = isHoliday ? 1.5 : 1.0;
+            const overFactor = isHoliday ? 2.0 : 1.5;
+            const nightFactor = 0.5;
+
+            const basicPay = (basicMin / 60) * wage * basicFactor;
+            const overPay = (overtimeMin / 60) * wage * overFactor;
+            const nightPay = (nightMin / 60) * wage * nightFactor;
+            const totalPay = basicPay + overPay + nightPay;
+
+            // Render
+            function m2t(m) {
+                const h = Math.floor(m / 60);
+                const mm = Math.floor(m % 60);
+                return `${h}시간 ${mm}분`;
+            }
+
+            document.getElementById('wt-total').innerText = m2t(workMin);
+            document.getElementById('wt-basic').innerText = m2t(basicMin);
+            document.getElementById('wt-over').innerText = m2t(overtimeMin);
+            document.getElementById('wt-night').innerText = m2t(nightMin);
+            document.getElementById('wt-wage').innerText = new Intl.NumberFormat('ko-KR').format(Math.floor(totalPay)) + "원";
         }
 
         // Load on Init
