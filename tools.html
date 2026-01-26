@@ -555,6 +555,25 @@
                     단위 변환기
                 </a>
             </div>
+            <h2>직장·생활</h2>
+            <div class="menu-list">
+                <a href="#vacation" class="menu-link" onclick="showCalc('vacation', event)">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                        <path d="M8 14h.01"></path>
+                        <path d="M12 14h.01"></path>
+                        <path d="M16 14h.01"></path>
+                        <path d="M8 18h.01"></path>
+                        <path d="M12 18h.01"></path>
+                        <path d="M16 18h.01"></path>
+                    </svg>
+                    연차 계산기
+                </a>
+            </div>
         </aside>
 
         <main class="main-content">
@@ -705,7 +724,546 @@
                     </div>
                 </div>
             </div>
-        </main>
+
+            <!-- Vacation Calculator (Redesigned) -->
+            <div id="vacation" class="calculator-view">
+                <style>
+                    /* Dashboard Theme - Light Mode Default */
+                    .vac-dashboard {
+                        background: #ffffff;
+                        border-radius: 20px;
+                        padding: 2px;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+                        border: 1px solid #e2e8f0;
+                        color: #1e293b;
+                        font-family: 'Pretendard', sans-serif;
+                    }
+
+                    /* Top Tabs */
+                    .vac-tabs {
+                        display: flex;
+                        background: #f8fafc;
+                        border-radius: 18px 18px 0 0;
+                        padding: 0 10px;
+                        overflow: hidden;
+                        border-bottom: 1px solid #e2e8f0;
+                    }
+
+                    .vac-tab {
+                        flex: 1;
+                        padding: 16px;
+                        background: transparent;
+                        border: none;
+                        color: #64748b;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        border-bottom: 3px solid transparent;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                    }
+
+                    .vac-tab:hover {
+                        color: #334155;
+                        background: rgba(0, 0, 0, 0.02);
+                    }
+
+                    .vac-tab.active {
+                        color: var(--primary);
+                        border-bottom-color: var(--primary);
+                        background: rgba(139, 92, 246, 0.05);
+                    }
+
+                    /* Input Section */
+                    .vac-inputs-card {
+                        background: #f1f5f9;
+                        margin: 20px;
+                        padding: 24px;
+                        border-radius: 16px;
+                        border: 1px solid #cbd5e1;
+                    }
+
+                    .vac-input-row {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 20px;
+                        margin-bottom: 15px;
+                    }
+
+                    @media (max-width: 768px) {
+                        .vac-input-row {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+
+                    .vac-input-group label {
+                        display: block;
+                        margin-bottom: 8px;
+                        font-size: 0.85rem;
+                        color: #475569;
+                        font-weight: 500;
+                    }
+
+                    .vac-input-control {
+                        width: 100%;
+                        background: #ffffff;
+                        border: 1px solid #cbd5e1;
+                        color: #1e293b;
+                        padding: 12px;
+                        border-radius: 8px;
+                        font-size: 0.95rem;
+                        outline: none;
+                        transition: border-color 0.2s;
+                    }
+
+                    .vac-input-control:focus {
+                        border-color: var(--primary);
+                    }
+
+                    /* Buttons */
+                    .vac-actions {
+                        display: flex;
+                        gap: 10px;
+                        margin-top: 20px;
+                    }
+
+                    .vac-btn {
+                        padding: 14px 20px;
+                        border-radius: 8px;
+                        font-weight: 700;
+                        border: none;
+                        cursor: pointer;
+                        flex: 1;
+                        transition: transform 0.1s;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6px;
+                    }
+
+                    .vac-btn:active {
+                        transform: scale(0.98);
+                    }
+
+                    .vac-btn-primary {
+                        background: linear-gradient(135deg, #3b82f6, #2563eb);
+                        color: white;
+                        flex: 2;
+                    }
+
+                    .vac-btn-success {
+                        background: #10b981;
+                        color: white;
+                    }
+
+                    .vac-btn-secondary {
+                        background: #e2e8f0;
+                        color: #475569;
+                    }
+
+                    .vac-btn-secondary:hover {
+                        background: #cbd5e1;
+                    }
+
+                    /* Content Areas */
+                    .vac-content-area {
+                        display: none;
+                        padding: 0 20px 20px 20px;
+                        animation: fadeIn 0.3s;
+                    }
+
+                    .vac-content-area.active {
+                        display: block;
+                    }
+
+                    /* Plan Dashboard */
+                    .vac-plan-dash {
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 15px;
+                        margin-bottom: 25px;
+                    }
+
+                    @media (max-width: 600px) {
+                        .vac-plan-dash {
+                            grid-template-columns: 1fr 1fr;
+                        }
+                    }
+
+                    .dash-item {
+                        background: #ffffff;
+                        padding: 15px;
+                        border-radius: 12px;
+                        border-left: 4px solid #94a3b8;
+                        border: 1px solid #e2e8f0;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+                    }
+
+                    .dash-item .l {
+                        font-size: 0.8rem;
+                        color: #64748b;
+                        display: block;
+                        margin-bottom: 5px;
+                    }
+
+                    .dash-item .v {
+                        font-size: 1.5rem;
+                        font-weight: 800;
+                        color: #0f172a;
+                    }
+
+                    .dash-item.blue .v {
+                        color: #60a5fa;
+                    }
+
+                    .dash-item.red .v {
+                        color: #f87171;
+                    }
+
+                    .dash-item.purple .v {
+                        color: #c084fc;
+                    }
+
+                    .dash-item.green .v {
+                        color: #34d399;
+                    }
+
+                    /* Plan Grid */
+                    .vac-plan-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                        gap: 15px;
+                    }
+
+                    .plan-card {
+                        background: #ffffff;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 12px;
+                        padding: 15px;
+                    }
+
+                    .plan-card-head {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 10px;
+                        border-bottom: 1px solid #cbd5e1;
+                        padding-bottom: 8px;
+                    }
+
+                    .plan-card-head span {
+                        font-weight: 700;
+                        color: #1e293b;
+                    }
+
+                    .plan-input-mini {
+                        background: #ffffff;
+                        border: 1px solid #cbd5e1;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        color: #1e293b;
+                        width: 60px;
+                        text-align: right;
+                    }
+
+                    /* Risk Dashboard */
+                    .vac-risk-container {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                        gap: 15px;
+                        margin-bottom: 20px;
+                    }
+
+                    .vac-risk-card {
+                        background: #ffffff;
+                        border: 1px solid #e2e8f0;
+                        padding: 20px;
+                        border-radius: 12px;
+                        text-align: center;
+                    }
+
+                    .vac-risk-card .l {
+                        font-size: 0.85rem;
+                        color: #64748b;
+                        margin-bottom: 8px;
+                    }
+
+                    .vac-risk-card .v {
+                        font-size: 1.4rem;
+                        font-weight: 700;
+                        color: #1e293b;
+                    }
+
+                    .risk-badge {
+                        padding: 4px 12px;
+                        border-radius: 20px;
+                        font-size: 0.9rem;
+                        display: inline-block;
+                    }
+
+                    .risk-badge.danger {
+                        background: rgba(248, 113, 113, 0.2);
+                        color: #f87171;
+                        border: 1px solid #f87171;
+                    }
+
+                    .risk-badge.warning {
+                        background: rgba(251, 146, 60, 0.2);
+                        color: #fb923c;
+                        border: 1px solid #fb923c;
+                    }
+
+                    .risk-badge.safe {
+                        background: rgba(52, 211, 153, 0.2);
+                        color: #34d399;
+                        border: 1px solid #34d399;
+                    }
+
+                    .vac-strategy-box {
+                        background: rgba(59, 130, 246, 0.05);
+                        border: 1px solid rgba(59, 130, 246, 0.2);
+                        padding: 20px;
+                        border-radius: 12px;
+                        margin-bottom: 25px;
+                    }
+
+                    .vac-sim-grid {
+                        display: flex;
+                        gap: 5px;
+                        margin-top: 10px;
+                        overflow-x: auto;
+                        padding-bottom: 5px;
+                    }
+
+                    .vac-sim-bar {
+                        flex: 1;
+                        min-width: 50px;
+                        text-align: center;
+                        background: #1e293b;
+                        padding: 10px 5px;
+                        border-radius: 8px;
+                        border: 1px solid #334155;
+                    }
+
+                    /* History Grid */
+                    .history-grid {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                        margin-top: 15px;
+                    }
+
+                    .history-item {
+                        flex: 0 0 auto;
+                        min-width: 100px;
+                        background: #ffffff;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 12px;
+                        padding: 12px;
+                        text-align: center;
+                        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+                    }
+
+                    .history-month {
+                        font-size: 0.85rem;
+                        color: #64748b;
+                        margin-bottom: 4px;
+                    }
+
+                    .history-val {
+                        font-size: 1.2rem;
+                        font-weight: 800;
+                        color: var(--primary);
+                    }
+
+                    .history-acc {
+                        font-size: 0.75rem;
+                        color: #94a3b8;
+                        margin-top: 4px;
+                    }
+                </style>
+
+                <div class="header-section" style="margin-bottom:2rem; text-align: left;">
+                    <h1 style="color:#1e293b; margin: 0 0 0.5rem 0; font-size: 2.8rem; font-weight: 800;">연차 계산기</h1>
+                    <p style="color:#64748b; font-size: 1.1rem; margin: 0;">복잡한 연차 계산부터 소멸 관리까지 한번에 해결하세요.</p>
+                </div>
+
+                <div class="vac-dashboard">
+                    <!-- Tab Navigation -->
+                    <div class="vac-tabs">
+                        <button class="vac-tab active" onclick="switchVacTab('basic')">📋 기본 계산</button>
+                        <button class="vac-tab" onclick="switchVacTab('plan')">📅 연차 계획</button>
+                        <button class="vac-tab" onclick="switchVacTab('expire')">⏳ 소멸 관리</button>
+                    </div>
+
+                    <!-- Common Inputs (Always Visible) -->
+                    <div class="vac-inputs-card">
+                        <div class="vac-input-row">
+                            <div class="vac-input-group">
+                                <label>📅 입사일</label>
+                                <input type="date" id="vac-start" class="vac-input-control">
+                            </div>
+                            <div class="vac-input-group">
+                                <label>⏱️ 계산 기준일</label>
+                                <div style="display:flex; gap:8px;">
+                                    <input type="date" id="vac-end" class="vac-input-control">
+                                    <button class="vac-btn vac-btn-secondary" style="flex:0 0 60px;"
+                                        onclick="setToday('vac-end')">오늘</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="vac-input-row">
+                            <div class="vac-input-group">
+                                <label>🎒 기사용 연차</label>
+                                <input type="number" id="vac-used" placeholder="0" min="0" step="0.5"
+                                    class="vac-input-control">
+                            </div>
+                            <div class="vac-input-group">
+                                <label>📈 출근율 계산 방식</label>
+                                <select id="vac-method" class="vac-input-control" onchange="toggleVacMethod()">
+                                    <option value="auto">자동 계산 (100% 만근 가정)</option>
+                                    <option value="manual">직접 입력 (80% 미만 체크)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Manual Input Box -->
+                        <div id="vac-manual-box"
+                            style="display:none; margin-bottom:15px; border-top:1px dashed #475569; padding-top:15px;">
+                            <div class="vac-input-row">
+                                <div class="vac-input-group">
+                                    <label>총 소정 근로일수</label>
+                                    <input type="number" id="att-total" class="vac-input-control" placeholder="예: 250">
+                                </div>
+                                <div class="vac-input-group">
+                                    <label>실제 출근일수</label>
+                                    <input type="number" id="att-actual" class="vac-input-control" placeholder="예: 240">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="vac-actions">
+                            <button class="vac-btn vac-btn-primary" onclick="calcVacationBasic()">🧮 연차개수 계산하기</button>
+                            <button class="vac-btn vac-btn-success" onclick="saveVacationData()">💾 저장</button>
+                            <button class="vac-btn vac-btn-secondary" id="btn-history"
+                                onclick="toggleHistoryModal(true)">🔄 기록</button>
+                        </div>
+                    </div>
+
+                    <!-- Content: Basic -->
+                    <div id="vac-content-basic" class="vac-content-area active">
+                        <div id="basic-placeholder" style="text-align:center; padding:50px; color:#64748b;">
+                            <div style="font-size:3rem; margin-bottom:10px;">👋</div>
+                            <p>입사일을 입력하고 '계산하기'를 눌러주세요.</p>
+                        </div>
+                        <div id="basic-result-area" style="display:none;">
+                            <h3 style="margin-bottom:15px; color:#e2e8f0;">📊 계산 결과</h3>
+                            <div class="vac-plan-dash">
+                                <div class="dash-item blue">
+                                    <span class="l">근속 기간</span>
+                                    <span class="v" id="res-period" style="font-size:1.1rem;">-</span>
+                                </div>
+                                <div class="dash-item red">
+                                    <span class="l">법정 발생 연차</span>
+                                    <span class="v" id="res-total">0개</span>
+                                </div>
+                                <div class="dash-item green">
+                                    <span class="l">현재 잔여 연차</span>
+                                    <span class="v" id="res-remain">0개</span>
+                                </div>
+                                <div class="dash-item purple">
+                                    <span class="l">사용률</span>
+                                    <span class="v" id="res-usage-rate">0%</span>
+                                </div>
+                            </div>
+                            <h4 style="margin:20px 0 10px; color:#cbd5e1;">🗓️ 상세 발생 내역</h4>
+                            <div id="history-grid" class="history-grid"></div>
+                        </div>
+                    </div>
+
+                    <!-- Content: Plan -->
+                    <div id="vac-content-plan" class="vac-content-area">
+                        <h3 style="margin-bottom:15px;">💳 연차 사용 계획 현황</h3>
+                        <div class="vac-plan-dash">
+                            <div class="dash-item blue">
+                                <span class="l">총 연차</span>
+                                <span class="v" id="plan-total">0</span>
+                            </div>
+                            <div class="dash-item red">
+                                <span class="l">이미 사용</span>
+                                <span class="v" id="plan-used">0</span>
+                            </div>
+                            <div class="dash-item purple">
+                                <span class="l">계획된 사용</span>
+                                <span class="v" id="plan-planned">0</span>
+                            </div>
+                            <div class="dash-item green">
+                                <span class="l">남은 연차 (계획 반영)</span>
+                                <span class="v" id="plan-remain">0</span>
+                            </div>
+                        </div>
+
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h4>🗓️ 월별 상세 계획</h4>
+                            <span style="font-size:0.8rem; color:#94a3b8;">* 각 월의 카드를 수정하면 자동 저장됩니다</span>
+                        </div>
+                        <div id="plan-grid" class="vac-plan-grid"></div>
+                    </div>
+
+                    <!-- Content: Expire -->
+                    <div id="vac-content-expire" class="vac-content-area">
+                        <h3 style="margin-bottom:15px;">⏱️ 연차 소멸 위험도 분석</h3>
+                        <div class="vac-risk-container">
+                            <div class="vac-risk-card">
+                                <div class="l">현재 실질 잔여</div>
+                                <div class="v" style="color:#60a5fa;" id="exp-remain">-</div>
+                            </div>
+                            <div class="vac-risk-card">
+                                <div class="l">연말까지 남은 기간</div>
+                                <div class="v" style="color:#fb923c;"><span id="exp-months">0</span>개월</div>
+                            </div>
+                            <div class="vac-risk-card">
+                                <div class="l">월 권장 사용량</div>
+                                <div class="v" style="color:#c084fc;"><span id="exp-rec">0</span>개</div>
+                            </div>
+                            <div class="vac-risk-card">
+                                <div class="l">위험도 진단</div>
+                                <div id="exp-badge" class="risk-badge safe">안전</div>
+                            </div>
+                        </div>
+
+                        <div class="vac-strategy-box">
+                            <h4 style="color:#60a5fa; margin-bottom:10px;">💡 소멸 방지 전략</h4>
+                            <ul style="padding-left:20px; color:#64748b; line-height:1.6;">
+                                <li>연차 사용 촉진 제도가 시행되면, 미사용 연차에 대한 수당을 받지 못할 수 있습니다.</li>
+                                <li><strong>월 1회 이상</strong> 의무적으로 사용하는 습관을 들이세요.</li>
+                                <li>잔여 연차가 많다면 징검다리 휴일이나 명절 전후를 공략하세요.</li>
+                            </ul>
+                        </div>
+
+                        <h4 style="margin-top:30px; margin-bottom:10px;">📊 월별 권장 사용량 시뮬레이션</h4>
+                        <div id="exp-simulation" class="vac-sim-grid"></div>
+                    </div>
+
+                    <!-- History Modal (Reused) -->
+                    <div id="history-modal"
+                        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+                        <div
+                            style="background:#ffffff; width:90%; max-width:500px; max-height:80vh; border-radius:16px; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.15); border:1px solid #cbd5e1;">
+                            <div
+                                style="padding:20px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                                <h3 style="margin:0; color:#1e293b;">🗂️ 저장된 기록</h3>
+                                <button onclick="toggleHistoryModal(false)"
+                                    style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#94a3b8;">&times;</button>
+                            </div>
+                            <div id="saved-list" style="flex:1; overflow-y:auto; padding:0;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
 
     <script>
@@ -721,41 +1279,59 @@
         function showCalc(id, e) {
             if (e) e.preventDefault();
             document.querySelectorAll('.calculator-view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            const target = document.getElementById(id);
+            if (target) target.classList.add('active');
             document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
-            document.querySelector(`[href="#${id}"]`).classList.add('active');
+            const activeLink = document.querySelector(`[href="#${id}"]`);
+            if (activeLink) activeLink.classList.add('active');
             if (window.innerWidth <= 768) {
-                document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
             }
         }
 
+        // --- Input Helper ---
         function setToday(id) {
-            document.getElementById(id).value = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            document.getElementById(id).value = `${y}-${m}-${d}`;
         }
 
-        // D-day
+        // --- D-day Logic ---
         function calcDday() {
-            const startStr = document.getElementById('dday-start').value;
-            const targetStr = document.getElementById('dday-target').value;
-            if (!startStr || !targetStr) return;
-            const start = new Date(startStr);
-            const target = new Date(targetStr);
+            const startVal = document.getElementById('dday-start').value;
+            const targetVal = document.getElementById('dday-target').value;
+            if (!startVal || !targetVal) return alert("날짜를 입력해주세요.");
+
+            const start = new Date(startVal);
+            const target = new Date(targetVal);
             const diff = target - start;
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const valEl = document.getElementById('dday-val');
-            if (days === 0) valEl.innerText = "D-Day";
-            else if (days > 0) valEl.innerText = `D-${days}`;
-            else valEl.innerText = `D+${Math.abs(days)}`;
-            document.getElementById('dday-label').innerText = `${startStr} 기준 ${targetStr}까지`;
+            const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+            const resBox = document.getElementById('dday-val');
+            const labelBox = document.getElementById('dday-label');
+
+            if (days === 0) {
+                resBox.innerText = "D-Day";
+                labelBox.innerText = "오늘입니다!";
+            } else if (days > 0) {
+                resBox.innerText = `D-${days}`;
+                labelBox.innerText = `${days}일 남았습니다.`;
+            } else {
+                resBox.innerText = `D+${Math.abs(days)}`;
+                labelBox.innerText = `${Math.abs(days)}일 지났습니다.`;
+            }
         }
 
-        // Age
+        // --- Age Logic ---
         function calcAge() {
-            const birthStr = document.getElementById('age-birth').value;
-            const baseStr = document.getElementById('age-base').value || new Date().toISOString().split('T')[0];
-            if (!birthStr) return;
-            const birth = new Date(birthStr);
-            const base = new Date(baseStr);
+            const birthVal = document.getElementById('age-birth').value;
+            const baseVal = document.getElementById('age-base').value;
+            if (!birthVal || !baseVal) return alert("날짜를 입력해주세요.");
+
+            const birth = new Date(birthVal);
+            const base = new Date(baseVal);
 
             let age = base.getFullYear() - birth.getFullYear();
             const m = base.getMonth() - birth.getMonth();
@@ -763,11 +1339,12 @@
                 age--;
             }
 
-            const zodiacs = ["원숭이", "닭", "개", "돼지", "쥐", "소", "호랑이", "토끼", "용", "뱀", "말", "양"];
-            const zodiac = zodiacs[birth.getFullYear() % 12];
+            // Zodiac
+            const zodiacs = ['원숭이', '닭', '개', '돼지', '쥐', '소', '호랑이', '토끼', '용', '뱀', '말', '양'];
+            const z = zodiacs[birth.getFullYear() % 12];
 
             document.getElementById('age-val').innerText = `만 ${age}세`;
-            document.getElementById('age-label').innerText = `${birthStr}생 (${zodiac}띠)`;
+            document.getElementById('age-label').innerText = `${birth.getFullYear()}년생 (${z}띠)`;
         }
 
         // Lunar/Solar Conversion (Fixed API)
@@ -821,12 +1398,14 @@
 
         // Word Count
         const wordInput = document.getElementById('word-input');
-        wordInput.addEventListener('input', () => {
-            const text = wordInput.value;
-            document.getElementById('count-with').innerText = text.length;
-            document.getElementById('count-without').innerText = text.replace(/\s/g, '').length;
-            document.getElementById('count-lines').innerText = text ? text.split('\n').length : 0;
-        });
+        if (wordInput) {
+            wordInput.addEventListener('input', () => {
+                const text = wordInput.value;
+                document.getElementById('count-with').innerText = text.length;
+                document.getElementById('count-without').innerText = text.replace(/\s/g, '').length;
+                document.getElementById('count-lines').innerText = text ? text.split('\n').length : 0;
+            });
+        }
 
         // Unit Converter
         const units = {
@@ -889,6 +1468,370 @@
         setToday('dday-start');
         setToday('age-base');
         updateUnits();
+        // --- Vacation Calculator Logic ---
+        let vacState = {
+            total: 0,
+            used: 0,
+            planned: 0,
+            monthlyPlans: Array(12).fill(0).map(() => ({ count: 0, reason: '', memo: '' })) // 0-11 for Month 1-12
+        };
+
+        function switchVacTab(tab) {
+            document.querySelectorAll('.vac-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.vac-content-area').forEach(c => c.classList.remove('active'));
+
+            // Find active tab button by onclick attribute match or Index? 
+            // Simple approach: Iterate buttons and check if they contain the call
+            // But efficient way: Just map tab name to index
+            const tabMap = { 'basic': 0, 'plan': 1, 'expire': 2 };
+            const btns = document.querySelectorAll('.vac-tab');
+            if (btns[tabMap[tab]]) btns[tabMap[tab]].classList.add('active');
+
+            const content = document.getElementById(`vac-content-${tab}`);
+            if (content) content.classList.add('active');
+
+            if (tab === 'plan') renderPlanGrid();
+            if (tab === 'expire') renderExpire();
+        }
+
+        // Bridge for old onclicks if any remain, though we updated HTML
+        function switchTab(tab) { switchVacTab(tab); }
+
+        function toggleVacMethod() {
+            const method = document.getElementById('vac-method').value;
+            const box = document.getElementById('vac-manual-box');
+            if (box) box.style.display = method === 'manual' ? 'block' : 'none';
+        }
+        // Bridge
+        function toggleMethod() { toggleVacMethod(); }
+
+        function calcVacationBasic() {
+            const startStr = document.getElementById('vac-start').value;
+            const endStr = document.getElementById('vac-end').value;
+            let used = parseFloat(document.getElementById('vac-used').value) || 0;
+            const method = document.getElementById('vac-method').value;
+
+            if (!startStr || !endStr) return alert("입사일과 기준일을 입력해주세요.");
+
+            const start = new Date(startStr);
+            const end = new Date(endStr);
+            if (end < start) return alert("기준일이 입사일보다 빠를 수 없습니다.");
+
+            // Tenure Calculation
+            let years = end.getFullYear() - start.getFullYear();
+            let months = end.getMonth() - start.getMonth();
+            let days = end.getDate() - start.getDate();
+            if (days < 0) { months--; days += 30; }
+            if (months < 0) { years--; months += 12; }
+
+            document.getElementById('res-period').innerText = `${years}년 ${months}개월 ${days}일`;
+
+            // Rate (Manual/Auto)
+            let rate = 100;
+            if (method === 'manual') {
+                const tot = parseFloat(document.getElementById('att-total').value) || 1;
+                const act = parseFloat(document.getElementById('att-actual').value) || 0;
+                rate = (act / tot) * 100;
+            }
+            if (document.getElementById('res-rate')) document.getElementById('res-rate').innerText = `${rate.toFixed(1)}%`;
+            if (document.getElementById('res-usage-rate')) {
+                // To be updated later
+            }
+
+            // Annual Leave Calculation
+            let totalVac = 0;
+            let historyHtml = '';
+
+            // Logic: less than 1 year vs more
+            if (years < 1) {
+                // Monthly accrual: 1 per month worked
+                // Calculate total months difference
+                const monthDiffTotal = ((end.getFullYear() - start.getFullYear()) * 12) + (end.getMonth() - start.getMonth());
+                // If rate < 80% (manual check), 0?
+                const safeMonths = (method === 'manual' && rate < 80) ? 0 : monthDiffTotal;
+                totalVac = Math.min(11, safeMonths);
+
+                for (let i = 1; i <= totalVac; i++) {
+                    historyHtml += createHistoryItem(`${i}개월차`, 1, i);
+                }
+            } else {
+                // Annual Arrcual
+                let base = 15;
+                if (years >= 3) {
+                    base += Math.floor((years - 1) / 2);
+                }
+                if (base > 25) base = 25;
+
+                if (method === 'manual' && rate < 80) base = 0;
+
+                totalVac = base;
+                historyHtml += createHistoryItem(`${years}년차`, base, base);
+            }
+
+            vacState.total = totalVac;
+            vacState.used = used;
+
+            // Update UI
+            document.getElementById('res-total').innerText = `${totalVac}개`;
+            document.getElementById('history-grid').innerHTML = historyHtml;
+
+            // Show Results
+            document.getElementById('basic-placeholder').style.display = 'none';
+            document.getElementById('basic-result-area').style.display = 'block';
+
+            updateResults();
+            renderPlanGrid();
+            renderExpire();
+        }
+
+        // Helper for history
+        function createHistoryItem(label, count, acc) {
+            return `
+                <div class="history-item">
+                    <div class="history-month">${label}</div>
+                    <div class="history-val">+${count}</div>
+                    <div class="history-acc">누적 ${acc}</div>
+                </div>
+            `;
+        }
+
+        function updateResults() {
+            const remain = vacState.total - vacState.used - vacState.planned;
+
+            // Update Basic View
+            if (document.getElementById('res-remain')) document.getElementById('res-remain').innerText = `${remain}개`;
+            const usageRate = vacState.total > 0 ? ((vacState.used / vacState.total) * 100).toFixed(1) : 0;
+            if (document.getElementById('res-usage-rate')) document.getElementById('res-usage-rate').innerText = `${usageRate}%`;
+
+            // Update Plan View Dashboard
+            if (document.getElementById('plan-total')) document.getElementById('plan-total').innerText = vacState.total;
+            if (document.getElementById('plan-used')) document.getElementById('plan-used').innerText = vacState.used;
+            if (document.getElementById('plan-planned')) document.getElementById('plan-planned').innerText = vacState.planned;
+            if (document.getElementById('plan-remain')) document.getElementById('plan-remain').innerText = remain;
+        }
+
+        function renderPlanGrid() {
+            const grid = document.getElementById('plan-grid');
+            grid.innerHTML = '';
+            const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+
+            months.forEach((m, idx) => {
+                const data = vacState.monthlyPlans[idx];
+                const card = document.createElement('div');
+                card.className = 'plan-card';
+                card.innerHTML = `
+                    <div class="plan-card-head">
+                        <span>${m}</span>
+                         <div style="display:flex; align-items:center; gap:5px;">
+                            <span style="font-size:0.8rem; color:#94a3b8;">사용</span>
+                            <input type="number" class="plan-input-mini" 
+                                min="0" max="20" step="0.5" value="${data.count > 0 ? data.count : ''}" 
+                                placeholder="0" oninput="updatePlan(${idx}, this.value)">
+                        </div>
+                    </div>
+                    <select class="vac-input-control" style="margin-bottom:8px; padding:8px; font-size:0.85rem;" 
+                        onchange="updatePlanMeta(${idx}, 'reason', this.value)">
+                        <option value="">목적 선택...</option>
+                        <option value="휴식" ${data.reason === '휴식' ? 'selected' : ''}>휴식</option>
+                        <option value="여행" ${data.reason === '여행' ? 'selected' : ''}>여행</option>
+                        <option value="병원" ${data.reason === '병원' ? 'selected' : ''}>병원/건강</option>
+                        <option value="경조사" ${data.reason === '경조사' ? 'selected' : ''}>경조사</option>
+                        <option value="기타" ${data.reason === '기타' ? 'selected' : ''}>기타</option>
+                    </select>
+                    <input type="text" class="vac-input-control" style="padding:8px; font-size:0.85rem;" 
+                        placeholder="메모를 입력하세요" value="${data.memo}" onchange="updatePlanMeta(${idx}, 'memo', this.value)">
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function updatePlan(idx, val) {
+            const num = parseFloat(val) || 0;
+            vacState.monthlyPlans[idx].count = num;
+
+            // Recalc total planned
+            vacState.planned = vacState.monthlyPlans.reduce((acc, cur) => acc + (parseFloat(cur.count) || 0), 0);
+
+            // Refresh results
+            updateResults();
+            renderExpire(); // also update expire analysis
+        }
+
+        function renderExpire() {
+            const today = new Date();
+            const monthsLeft = 12 - today.getMonth(); // roughly remaining months in year
+            const remain = vacState.total - vacState.used - vacState.planned; // Actual remaining
+
+            // Risk Calc
+            const rec = monthsLeft > 0 ? (remain / monthsLeft).toFixed(1) : remain;
+
+            if (document.getElementById('exp-remain')) document.getElementById('exp-remain').innerText = `${remain}개`;
+            if (document.getElementById('exp-months')) document.getElementById('exp-months').innerText = monthsLeft;
+            if (document.getElementById('exp-rec')) document.getElementById('exp-rec').innerText = rec;
+
+            // Logic for Badge
+            const badge = document.getElementById('exp-badge');
+            if (rec > 2.5) {
+                badge.innerText = "위험 (촉박)";
+                badge.className = "risk-badge danger";
+            } else if (rec > 1.5) {
+                badge.innerText = "주의";
+                badge.className = "risk-badge warning";
+            } else {
+                badge.innerText = "안전 (여유)";
+                badge.className = "risk-badge safe";
+            }
+
+            // Simulation
+            const simBox = document.getElementById('exp-simulation');
+            if (simBox) {
+                simBox.innerHTML = '';
+                for (let i = 0; i < monthsLeft; i++) {
+                    const mLabel = (today.getMonth() + i + 1) + '월';
+                    const bar = document.createElement('div');
+                    bar.className = 'vac-sim-bar';
+                    bar.innerHTML = `
+                        <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">${mLabel}</div>
+                        <div style="font-weight:700; color:#cbd5e1;">-${rec}</div>
+                    `;
+                    simBox.appendChild(bar);
+                }
+            }
+        }
+
+        // --- History Management ---
+        function toggleHistoryModal(show) {
+            const modal = document.getElementById('history-modal');
+            if (show) {
+                renderSavedHistory();
+                modal.style.display = 'flex';
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        function saveVacationData() {
+            if (!confirm("⚠️ [보안 안내]\n\n저장되는 모든 데이터는 서버로 전송되지 않고,\n현재 사용 중인 기기의 브라우저(Local Storage)에만 저장됩니다.\n\n공용 PC를 사용 중이라면 타인이 데이터를 볼 수 있으므로 주의해주세요.\n\n계속해서 저장하시겠습니까?")) {
+                return;
+            }
+
+            const currentData = {
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                inputs: {
+                    start: document.getElementById('vac-start').value,
+                    end: document.getElementById('vac-end').value,
+                    used: document.getElementById('vac-used').value,
+                    method: document.getElementById('vac-method').value,
+                    attTotal: document.getElementById('att-total').value,
+                    attActual: document.getElementById('att-actual').value
+                },
+                state: vacState
+            };
+
+            // Save recent state as default
+            localStorage.setItem('vac_data', JSON.stringify(vacState));
+            localStorage.setItem('vac_inputs', JSON.stringify(currentData.inputs));
+
+            // Add to history
+            let history = JSON.parse(localStorage.getItem('vac_history') || '[]');
+            history.unshift(currentData);
+            if (history.length > 10) history = history.slice(0, 10); // keep max 10
+            localStorage.setItem('vac_history', JSON.stringify(history));
+
+            alert("성공적으로 저장되었습니다.");
+            updateHistoryCount();
+        }
+
+        function updateHistoryCount() {
+            const history = JSON.parse(localStorage.getItem('vac_history') || '[]');
+            const btn = document.getElementById('btn-history');
+            if (btn) btn.innerText = `🔄 저장된 기록 (${history.length})`;
+        }
+
+        function renderSavedHistory() {
+            const list = document.getElementById('saved-list');
+            const history = JSON.parse(localStorage.getItem('vac_history') || '[]');
+
+            list.innerHTML = '';
+
+            if (history.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">저장된 기록이 없습니다.</div>';
+                return;
+            }
+
+            history.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'history-row';
+                row.style.cssText = `
+                    display: flex; justify-content: space-between; align-items: center;
+                    padding: 12px; border-bottom: 1px solid var(--border);
+                `;
+
+                const summary = `${item.inputs.start} 입사자 (잔여 ${item.state.total - item.state.used - item.state.planned}개)`;
+
+                row.innerHTML = `
+                    <div>
+                        <div style="font-weight:600; font-size:0.95rem;">${summary}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">${item.date} 저장됨</div>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-mini" style="background:var(--primary); color:white; border:none;" onclick="loadHistoryItem(${item.id})">불러오기</button>
+                        <button class="btn-mini" style="background:var(--secondary); color:white; border:none;" onclick="deleteHistoryItem(${item.id})">삭제</button>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function loadHistoryItem(id) {
+            const history = JSON.parse(localStorage.getItem('vac_history') || '[]');
+            const item = history.find(x => x.id === id);
+            if (!item) return;
+
+            if (!confirm("선택한 기록을 불러오시겠습니까?\n현재 입력된 내용은 덮어씌워집니다.")) return;
+
+            // Restore Inputs
+            document.getElementById('vac-start').value = item.inputs.start;
+            document.getElementById('vac-end').value = item.inputs.end;
+            document.getElementById('vac-used').value = item.inputs.used;
+            document.getElementById('vac-method').value = item.inputs.method || 'auto';
+            document.getElementById('att-total').value = item.inputs.attTotal || '';
+            document.getElementById('att-actual').value = item.inputs.attActual || '';
+
+            toggleMethod();
+
+            // Restore State
+            vacState = item.state;
+
+            // Re-render
+            calcVacationBasic(); // recalculate basics
+            // Ensure plan state is preserved/restored
+            vacState.monthlyPlans = item.state.monthlyPlans;
+            vacState.planned = item.state.planned;
+
+            updateResults();
+            renderPlanGrid();
+            renderExpire();
+
+            toggleHistoryModal(false);
+            alert("불러오기가 완료되었습니다.");
+        }
+
+        function deleteHistoryItem(id) {
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+            let history = JSON.parse(localStorage.getItem('vac_history') || '[]');
+            history = history.filter(x => x.id !== id);
+            localStorage.setItem('vac_history', JSON.stringify(history));
+            renderSavedHistory();
+            updateHistoryCount();
+        }
+
+        // Load on Init
+        window.addEventListener('load', () => {
+            // 새로고침 시 데이터 초기화 (자동 복원 기능 제거)
+            updateHistoryCount();
+        });
     </script>
 </body>
 
