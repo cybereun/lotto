@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>근무 시간 계산기 - All-in-One Calculator</title>
+    <meta name="description" content="정확한 근무 시간 및 급여 계산기. 연장, 야간, 휴일 근로 수당을 손쉽게 계산하세요.">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --radius: 16px;
+        }
+
+        [data-theme="dark"] {
+            --primary: #818cf8;
+            --primary-dark: #6366f1;
+            --secondary: #f472b6;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0.75rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 1.5rem;
+            list-style: none;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .nav-menu::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            white-space: nowrap;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header-section h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        input[type="time"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(236, 72, 153, 0.05));
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] .result-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .result-value {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        .total-wage {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>ProWork</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Intro</a></li>
+                <li><a href="calc.html" class="nav-link">계산기</a></li>
+                <li><a href="lotto.html" class="nav-link">Lotto</a></li>
+                <li><a href="money.html" class="nav-link">주식-코인물타기</a></li>
+                <li><a href="changemoney.html" class="nav-link">실시간 환전기</a></li>
+                <li><a href="health.html" class="nav-link">건강 계산기</a></li>
+                <li><a href="life.html" class="nav-link">생활 계산기</a></li>
+                <li><a href="finance.html" class="nav-link">금융계산기</a></li>
+                <li><a href="tools.html" class="nav-link">도구함</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1>근무 시간 계산기</h1>
+            <p style="color:var(--text-muted);">근로 기준법에 따른 정확한 근무 시간과 예상 급여를 계산합니다.</p>
+        </div>
+
+        <div class="card">
+            <div class="input-row">
+                <div class="input-group">
+                    <label>출근 시간</label>
+                    <input type="time" id="startTime">
+                </div>
+                <div class="input-group">
+                    <label>퇴근 시간</label>
+                    <input type="time" id="endTime">
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label>휴게 시간 (분)</label>
+                    <input type="number" id="breakTime" value="60" min="0">
+                </div>
+                <div class="input-group">
+                    <label>시급 (원)</label>
+                    <input type="number" id="hourlyWage" value="9860" step="10">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="isHoliday" style="width:auto;">
+                    <label for="isHoliday" style="margin:0; font-weight:400;">휴일 근로 (1.5배)</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="isNight" disabled checked style="width:auto; opacity: 0.6;">
+                    <label for="isNight" style="margin:0; font-weight:400;">야간 근로 자동 적용 (22:00 ~ 06:00, 0.5배 가산)</label>
+                </div>
+            </div>
+
+            <button class="btn" onclick="calculate()">계산하기</button>
+        </div>
+
+        <div id="resultArea" style="display:none;">
+            <div class="card result-box">
+                <div class="result-row">
+                    <span class="result-label">총 근무 시간 (휴게 제외)</span>
+                    <span class="result-value" id="res-total-time">0시간 0분</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">기본 근로 (8시간 이내)</span>
+                    <span class="result-value" id="res-basic-time">0시간 0분</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">연장 근로 (>8시간, 1.5배)</span>
+                    <span class="result-value" style="color:var(--secondary);" id="res-over-time">0시간 0분</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">야간 근로 (22~06시, 0.5배 가산)</span>
+                    <span class="result-value" style="color:#8b5cf6;" id="res-night-time">0시간 0분</span>
+                </div>
+                <div style="margin: 1rem 0; border-top: 1px dashed var(--border);"></div>
+                <div class="result-row">
+                    <span class="result-label">예상 일급</span>
+                    <span class="result-value total-wage" id="res-wage">0원</span>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-top:1rem;">
+                    * 5인 이상 사업장 기준 계산입니다.<br>
+                    * 주휴수당은 포함되지 않았습니다.<br>
+                    * 야간 근로와 연장 근로는 중복 가산됩니다.
+                </p>
+            </div>
+
+            <div style="margin-top:2rem; overflow:auto;">
+                <h3 style="margin-bottom:10px; font-size:1.1rem;">JSON 데이터 구조 예시</h3>
+                <pre style="background:#1e293b; color:#cbd5e1; padding:1rem; border-radius:8px; font-size:0.85rem; overflow-x:auto;"
+                    id="json-preview"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatMoney(num) {
+            return new Intl.NumberFormat('ko-KR').format(Math.floor(num));
+        }
+
+        function minToTime(min) {
+            const h = Math.floor(min / 60);
+            const m = Math.floor(min % 60);
+            return `${h}시간 ${m}분`;
+        }
+
+        function calculate() {
+            const startStr = document.getElementById('startTime').value;
+            const endStr = document.getElementById('endTime').value;
+            const breakMins = parseFloat(document.getElementById('breakTime').value) || 0;
+            const wage = parseFloat(document.getElementById('hourlyWage').value) || 9860;
+            const isHoliday = document.getElementById('isHoliday').checked;
+
+            if (!startStr || !endStr) {
+                alert("출퇴근 시간을 입력해주세요.");
+                return;
+            }
+
+            // Time components
+            const [sh, sm] = startStr.split(':').map(Number);
+            const [eh, em] = endStr.split(':').map(Number);
+
+            // Convert to minutes from midnight
+            let startMin = sh * 60 + sm;
+            let endMin = eh * 60 + em;
+
+            // Handle next day
+            if (endMin < startMin) {
+                endMin += 24 * 60; // Add 24 hours
+            }
+
+            const totalSpan = endMin - startMin;
+            const workMin = Math.max(0, totalSpan - breakMins);
+
+            // 1. Basic & Overtime Logic
+            // Standard: 8 hours (480 mins)
+            let basicMin = Math.min(workMin, 480);
+            let overtimeMin = Math.max(0, workMin - 480);
+
+            // 2. Night Time Logic (22:00 - 06:00)
+            // Night intervals relative to day start: 
+            // 22:00 (1320) to 06:00 Day2 (1800)
+            // 22:00 Day2 (2760) to 06:00 Day3 (3240) ... 
+            // Simplified check: iterate minutes? No, use intersection.
+
+            let nightMin = 0;
+            const nightRanges = [
+                [0, 360],      // 00:00 - 06:00
+                [1320, 1800],  // 22:00 - 30:00 (06:00 Next Day)
+                [2760, 3240]   // 46:00 (22:00 Next Day) ...
+            ];
+
+            // Helper to get overlap
+            function getOverlap(r1, r2) {
+                const start = Math.max(r1[0], r2[0]);
+                const end = Math.min(r1[1], r2[1]);
+                return Math.max(0, end - start);
+            }
+
+            // We need to approximate where the "Work" happened. 
+            // Issue: Break time is just a chunk subtracted. It doesn't have a specific timestamp.
+            // Assumption: Break assumes to be during non-night time or proportional? 
+            // Standard practice: Deduct break from total time. Night time is calculated based on clock time.
+            // If break is during night, night hours reduce.
+            // To be safe/simple: Calculate raw night duration within start-end span.
+            // Then if actual work < total span, we usually subtract break from the "middle" or "non-night" if possible preferably?
+            // Korean Law: Break time must be provided during work. 
+            // Let's assume Break is taken OUTSIDE of night shift if possible, or proportionally. 
+            // PRO APPROACH: Just calculate raw night time overlap. 
+            // But if Break > 0, we subtract it. from where? 
+            // Let's assume Break reduces the "Base" hours first, not specific logic defined without inputting break start/end.
+            // Let's calculate Gross Night Time (Time present during night).
+            // Then assuming break is uniformly distributed or user takes it during day.
+            // For simplicity in this tool: Gross Night Time. (User warning: Break assumed not during night or ignored for night calc).
+            // Better: Gross Night - (Break * (GrossNight / TotalSpan)) ?
+            // Let's stick to: Night Work = Overlap(Start~End, 22~06). 
+            // Warning: If Break matches Night duration this might be wrong.
+            // Let's just use raw overlap for now as "Night Hours present".
+
+            nightRanges.forEach(range => {
+                nightMin += getOverlap([startMin, endMin], range);
+            });
+
+            // Cap nightMin to workMin (in case break takes all time)
+            nightMin = Math.min(nightMin, workMin);
+
+
+            // 3. Wage Calc
+            // Factors
+            const basicFactor = isHoliday ? 1.5 : 1.0;
+            const overFactor = isHoliday ? 2.0 : 1.5; // Holiday Overtime is 2.0, Normal Overtime is 1.5
+            const nightFactor = 0.5; // Added on top
+
+            const basicPay = (basicMin / 60) * wage * basicFactor;
+            const overPay = (overtimeMin / 60) * wage * overFactor;
+            const nightPay = (nightMin / 60) * wage * nightFactor;
+
+            const totalPay = basicPay + overPay + nightPay;
+
+            // Render
+            document.getElementById('res-total-time').innerText = minToTime(workMin);
+            document.getElementById('res-basic-time').innerText = minToTime(basicMin);
+            document.getElementById('res-over-time').innerText = minToTime(overtimeMin);
+            document.getElementById('res-night-time').innerText = minToTime(nightMin);
+            document.getElementById('res-wage').innerText = formatMoney(totalPay) + "원";
+
+            // JSON Preview
+            const dataStructure = {
+                inputs: {
+                    start: startStr,
+                    end: endStr,
+                    breakMinutes: breakMins,
+                    wage: wage,
+                    isHoliday: isHoliday
+                },
+                results: {
+                    totalMinutes: workMin,
+                    breakdown: {
+                        basic: basicMin,
+                        overtime: overtimeMin,
+                        night: nightMin
+                    },
+                    pay: {
+                        base: Math.floor(basicPay),
+                        overtime: Math.floor(overPay),
+                        night: Math.floor(nightPay),
+                        total: Math.floor(totalPay)
+                    }
+                }
+            };
+            document.getElementById('json-preview').innerText = JSON.stringify(dataStructure, null, 2);
+
+            document.getElementById('resultArea').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
