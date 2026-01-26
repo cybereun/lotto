@@ -1406,7 +1406,14 @@
                                     </div>
                                 </div>
                                 <div class="form-group" style="margin:0;">
-                                    <label>주간 기준일 (시작일)</label>
+                                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                                        <label style="margin-bottom:8px;">주간 기준일 (시작일)</label>
+                                        <button id="btn-wt-history-mini" class="btn-mini"
+                                            style="background:var(--secondary); color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer; margin-bottom:8px;"
+                                            onclick="toggleWorkHistoryModal(true)">
+                                            📂 (0)
+                                        </button>
+                                    </div>
                                     <div class="input-wrapper">
                                         <input type="date" id="wt-start-date" onchange="renderWeeklyRows()">
                                     </div>
@@ -2558,8 +2565,15 @@
 
         function updateWorkHistoryCount() {
             const history = JSON.parse(localStorage.getItem('wt_history') || '[]');
-            const btn = document.getElementById('btn-wt-history');
-            if (btn) btn.innerText = `🔄 저장된 기록 (${history.length})`;
+            const count = history.length;
+
+            // Footer Button
+            const btnMain = document.getElementById('btn-wt-history');
+            if (btnMain) btnMain.innerText = `🔄 저장된 기록 (${count})`;
+
+            // Header/Input Button (Mini)
+            const btnMini = document.getElementById('btn-wt-history-mini');
+            if (btnMini) btnMini.innerHTML = `📂 (${count})`;
         }
 
         function renderSavedWorkHistory() {
