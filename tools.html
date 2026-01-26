@@ -1384,10 +1384,13 @@
                 <div class="header-section">
                     <h1>주간 근무 시간 계산기</h1>
                     <p>주간 근무 스케줄 관리 및 정밀 급여 분석</p>
+                    <button id="btn-wt-history" class="btn-history-toggle" onclick="toggleWorkHistoryModal(true)">🔄 저장된
+                        기록 (0)</button>
                 </div>
 
                 <div class="wt-dashboard">
                     <div class="wt-tabs">
+                        <!-- ... tabs ... -->
                         <button class="wt-tab active" onclick="switchWorkTab('weekly')">📅 주간 계산</button>
                         <button class="wt-tab" onclick="switchWorkTab('allowance')">⚡ 가산수당 상세</button>
                         <button class="wt-tab" onclick="switchWorkTab('analysis')">📈 근무 분석</button>
@@ -2502,7 +2505,17 @@
             `;
         }
 
-        // --- Weekly Result Save Logic ---
+        // --- Work Time History Management (Modal) ---
+        function toggleWorkHistoryModal(show) {
+            const modal = document.getElementById('wt-history-modal'); // Need to create HTML for this
+            if (show) {
+                renderSavedWorkHistory();
+                modal.style.display = 'flex';
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
         function saveWeeklyResult() {
             if (!confirm("현재 계산된 주간 근무 결과를 저장하시겠습니까?")) return;
 
@@ -2510,12 +2523,25 @@
             const pay = document.getElementById('an-wage')?.innerText || '0원';
             const startDate = document.getElementById('wt-start-date').value;
 
+            // Capture Inputs State (for restoration)
+            const inputs = [];
+            document.querySelectorAll('.wt-day-card').forEach(row => {
+                inputs.push({
+                    in: row.querySelector('.wt-in').value,
+                    out: row.querySelector('.wt-out').value,
+                    break: row.querySelector('.wt-break').value,
+                    isHol: row.querySelector('.wt-check-holiday').checked
+                });
+            });
+
             const data = {
                 id: Date.now(),
                 date: new Date().toLocaleString(),
                 startDate: startDate,
+                wage: document.getElementById('wt-wage-in').value,
                 totalTime: totalTime,
-                pay: pay
+                pay: pay,
+                inputs: inputs
             };
 
             let history = JSON.parse(localStorage.getItem('wt_history') || '[]');
@@ -2523,52 +2549,85 @@
             if (history.length > 20) history = history.slice(0, 20);
 
             localStorage.setItem('wt_history', JSON.stringify(history));
-            renderSavedWeekly();
+            updateWorkHistoryCount();
             alert("저장되었습니다.");
         }
 
-        function deleteWeeklyItem(id) {
-            if (!confirm("삭제하시겠습니까?")) return;
-            let history = JSON.parse(localStorage.getItem('wt_history') || '[]');
-            history = history.filter(x => x.id !== id);
-            localStorage.setItem('wt_history', JSON.stringify(history));
-            renderSavedWeekly();
+        function updateWorkHistoryCount() {
+            const history = JSON.parse(localStorage.getItem('wt_history') || '[]');
+            const btn = document.getElementById('btn-wt-history');
+            if (btn) btn.innerText = `🔄 저장된 기록 (${history.length})`;
         }
 
-        function renderSavedWeekly() {
+        function renderSavedWorkHistory() {
+            const list = document.getElementById('wt-saved-list-modal'); // Inside Modal
             const history = JSON.parse(localStorage.getItem('wt_history') || '[]');
-            const container = document.getElementById('wt-saved-list'); // Need to create this container in HTML
 
-            // Create container if not exists (append to weekly view)
-            if (!container) {
-                const parent = document.getElementById('wt-view-weekly');
-                const div = document.createElement('div');
-                div.id = 'wt-saved-list';
-                div.style.marginTop = '40px';
-                div.style.borderTop = '1px dashed var(--border)';
-                div.style.paddingTop = '20px';
-                parent.appendChild(div);
-                return renderSavedWeekly();
-            }
+            list.innerHTML = '';
 
             if (history.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.9rem;">저장된 주간 계산 기록이 없습니다.</p>';
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">저장된 기록이 없습니다.</div>';
                 return;
             }
 
-            let html = '<h4 style="margin-bottom:12px;">📑 저장된 기록</h4><div style="display:flex; flex-direction:column; gap:8px;">';
             history.forEach(item => {
-                html += `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-body); padding:12px; border-radius:8px; border:1px solid var(--border);">
+                const row = document.createElement('div');
+                row.className = 'history-row';
+                row.style.cssText = `
+                    display: flex; justify-content: space-between; align-items: center;
+                    padding: 12px; border-bottom: 1px solid var(--border);
+                `;
+
+                row.innerHTML = `
                     <div>
-                        <div style="font-weight:600; font-size:0.9rem;">${item.startDate} 주간</div>
-                        <div style="font-size:0.8rem; color:var(--text-muted);">${item.totalTime} / ${item.pay}</div>
+                        <div style="font-weight:600; font-size:0.95rem;">${item.startDate} 주간 (${item.totalTime})</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">${item.date} 저장 | ${item.pay}</div>
                     </div>
-                    <button class="btn-mini" style="background:var(--secondary); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;" onclick="deleteWeeklyItem(${item.id})">삭제</button>
-                </div>`;
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-mini" style="background:var(--primary); color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="loadWorkHistoryItem(${item.id})">불러오기</button>
+                        <button class="btn-mini" style="background:var(--secondary); color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="deleteWorkHistoryItem(${item.id})">삭제</button>
+                    </div>
+                `;
+                list.appendChild(row);
             });
-            html += '</div>';
-            container.innerHTML = html;
+        }
+
+        function loadWorkHistoryItem(id) {
+            const history = JSON.parse(localStorage.getItem('wt_history') || '[]');
+            const item = history.find(x => x.id === id);
+            if (!item) return;
+
+            if (!confirm("선택한 기록을 불러오시겠습니까?\n현재 입력된 내용은 덮어씌워집니다.")) return;
+
+            // Restore
+            document.getElementById('wt-start-date').value = item.startDate;
+            document.getElementById('wt-wage-in').value = item.wage || 10320;
+
+            renderWeeklyRows(); // Re-build DOM first
+
+            // Restore Row Inputs
+            const rows = document.querySelectorAll('.wt-day-card');
+            item.inputs.forEach((inp, idx) => {
+                if (rows[idx]) {
+                    rows[idx].querySelector('.wt-in').value = inp.in;
+                    rows[idx].querySelector('.wt-out').value = inp.out;
+                    rows[idx].querySelector('.wt-break').value = inp.break;
+                    rows[idx].querySelector('.wt-check-holiday').checked = inp.isHol;
+                }
+            });
+
+            calcWeeklyAll(); // Re-calculate
+            toggleWorkHistoryModal(false);
+            alert("불러오기가 완료되었습니다.");
+        }
+
+        function deleteWorkHistoryItem(id) {
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+            let history = JSON.parse(localStorage.getItem('wt_history') || '[]');
+            history = history.filter(x => x.id !== id);
+            localStorage.setItem('wt_history', JSON.stringify(history));
+            renderSavedWorkHistory();
+            updateWorkHistoryCount();
         }
 
         function resetWeekly() {
@@ -2583,9 +2642,22 @@
         window.addEventListener('load', () => {
             const wtStart = document.getElementById('wt-start-date');
             if (wtStart && !wtStart.value) renderWeeklyRows();
-            renderSavedWeekly();
+            updateWorkHistoryCount(); // Init count btn
         });
     </script>
+    <!-- Work Time History Modal -->
+    <div id="wt-history-modal" class="modal-overlay" style="display:none;"
+        onclick="if(event.target === this) toggleWorkHistoryModal(false)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💾 저장된 주간 리포트</h3>
+                <button class="modal-close" onclick="toggleWorkHistoryModal(false)">×</button>
+            </div>
+            <div id="wt-saved-list-modal" class="modal-body">
+                <!-- JS Generated -->
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
